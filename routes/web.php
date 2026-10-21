@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\FirstRunController;
 use App\Http\Controllers\Auth\ChangePasswordController;
 use App\Http\Controllers\ControlStudioController;
 use App\Http\Controllers\PluginStateController;
+use App\Http\Controllers\PluginInstallController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -16,6 +17,8 @@ Route::middleware('guest')->group(function (): void {
 });
 Route::middleware(['auth','auth.session'])->group(function (): void {
     Route::get('/dashboard', ControlStudioController::class)->middleware('can:core.view-dashboard')->name('dashboard');
+    Route::post('/dashboard/plugins/install', PluginInstallController::class)
+        ->middleware(['can:core.manage-plugins','throttle:5,1'])->name('plugins.install');
     Route::post('/dashboard/plugins/{slug}/state', PluginStateController::class)
         ->middleware(['can:core.manage-plugins','throttle:20,1'])->name('plugins.state');
     Route::get('/account/security', [ChangePasswordController::class, 'edit'])->middleware('can:core.manage-security')->name('password.edit');
