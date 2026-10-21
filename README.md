@@ -1,6 +1,8 @@
 # 84PAD Core
 
-**Status:** Early development / scaffold not yet runnable.
+**Status:** Early development. Tracking set up; Laravel scaffold not yet verified runnable.
+
+**Resume here:** [Progress checkpoint](docs/PROGRESS.md) · [Development workflow](docs/WORKFLOW.md) · [Core task board (15 issues)](https://github.com/manbir6-ux/84pad-core/issues).
 
 84PAD is a lightweight, plugin-first PHP CMS and application platform maintained by ParmTech.
 
