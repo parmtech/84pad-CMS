@@ -2,10 +2,10 @@
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-21 (Australia/Sydney).
-> **Current phase:** Core 0.1 — foundation.
+> **Current phase:** Core 0.1 — foundation verified on earlier CI commit; installer/auth/plugin preview code added and now requires its own verification.
 > **Next issue:** [#3 C03 — Installation prerequisite checks](https://github.com/manbir6-ux/84pad-core/issues/3).
-> **Runnable:** CI verified on PHP 8.3 and 8.4; not deployed to hosting or approved for production.
-> **Environment test status:** GitHub Actions [run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743): PHP 8.3 and PHP 8.4 jobs passed Composer install, artisan bootstrap/routes, SQLite migrations, PHPUnit and PHP syntax checks. Local container still lacks Composer and required PHP extensions.
+> **Runnable:** Earlier foundation passed CI on PHP 8.3 and 8.4. LATER code commits must pass NEW CI before their functionality can be claimed runnable. Not approved for production.
+> **Environment test status:** Earlier run [39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743) passed foundation tests. Latest post-feature CI [39605970221](https://github.com/manbir6-ux/84pad-core/actions/runs/39605970221) was **PENDING at verification**. Local container lacks Composer and required PHP extensions; DO NOT claim later features tested until a completed green run is checked.
 
 ## Work checklist
 
@@ -16,18 +16,31 @@
 | [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | **In progress** | Host-preflight command committed; acceptance/safety tests pending |
 | [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | **Implementation preview** | CLI owner install code exists; comprehensive recovery/race testing pending |
 | [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | **Implementation preview** | Owner login/logout guarded routes and feature tests; security review pending |
-| [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | Not started | none |
+| [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | Partial | Owner-only controls; full RBAC not implemented |
 | [C07](https://github.com/manbir6-ux/84pad-core/issues/7) | Control Studio dashboard | **Implementation preview** | Initial owner dashboard view; gaming UI polish and browser testing pending |
-| [C08](https://github.com/manbir6-ux/84pad-core/issues/8) | Plugin manifest | Not started | none |
-| [C09](https://github.com/manbir6-ux/84pad-core/issues/9) | Plugin discovery | Not started | none |
-| [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | Not started | none |
-| [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | Not started | none |
-| [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | Not started | none |
-| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | Not started | none |
+| [C08](https://github.com/manbir6-ux/84pad-core/issues/8) | Plugin manifest | Partial source added | JSON manifest scanner; no signatures |
+| [C09](https://github.com/manbir6-ux/84pad-core/issues/9) | Plugin discovery | Partial source added | Metadata-only discovery; unverified |
+| [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | Partial source added | DB activation **markers only**; no untrusted plugin PHP execution |
+| [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | Draft code added | HookBus; not connected to plugin execution |
+| [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | Manifest only | Demo is not executable |
+| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | Partial schema | Users/cache/jobs/install/plugin tables; rollback strategy pending |
 | [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | Not started | none |
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
 
 ## Work log
+
+### Latest development checkpoint
+- Feature branch: [core/C01-laravel-foundation](https://github.com/manbir6-ux/84pad-core/tree/core/C01-laravel-foundation) (DO NOT merge as production ready).
+- Committed Laravel config and standard migration structure: [c2f52fc](https://github.com/manbir6-ux/84pad-core/commit/c2f52fc626e1dacecc6f860259449c004b5c4d8e).
+- Added CLI installer, owner login and Control Studio development previews: [b660356](https://github.com/manbir6-ux/84pad-core/commit/b660356a15c6212fd16cbbfd4edeaed4158fc4a8).
+- Fixed atomic installation sentinel (nullable foreign key) and wired auth routes: [6b99982](https://github.com/manbir6-ux/84pad-core/commit/6b9998246fe8bff20b116925ec7ff1e5eed1fe94).
+- Added metadata-only plugin discovery, registry and hooks: [f6d51b3](https://github.com/manbir6-ux/84pad-core/commit/f6d51b35ef84ecd17695adc0239fa0748dd37672).
+- Added installation preflight command: [ccbf991](https://github.com/manbir6-ux/84pad-core/commit/ccbf99170d55621fc7a3fa0e6ffeba58a4dcb5c0).
+- Added owner-only plugin state UI and feature tests: [219ce12](https://github.com/manbir6-ux/84pad-core/commit/219ce128d075866f956281fd65561531c1acca4f).
+- CI on latest feature code was **pending** when inspected; no permission to declare C03–C15 complete. Core 0.1 is **unfinished**.
+- **Next action:** check most recent CI logs, fix any red tests, validate `84pad:doctor`, CLI installation once-only, login security and plugin status tests. Then assess issue completion individually.
+
+## Archived work log
 
 ### 2026-10-22
 - Completed C02 initial credential hygiene: strengthened `.gitignore`, added `scripts/check_tracked_secrets.py`, and enforced it in Core CI. [Run 39605702869](https://github.com/manbir6-ux/84pad-core/actions/runs/39605702869) passed on PHP 8.3 and PHP 8.4. Issue #2 closed; path-name scanning is not comprehensive secret-content scanning.
