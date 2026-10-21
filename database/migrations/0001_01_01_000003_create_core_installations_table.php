@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('core_installations', function (Blueprint $table): void {
+            $table->unsignedTinyInteger('id')->primary();
+            // Nullable until the first owner is created in the same transaction.
+            $table->foreignId('owner_user_id')->nullable()->constrained('users')->restrictOnDelete();
+            $table->timestamp('created_at');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('core_installations');
+    }
+};

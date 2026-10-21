@@ -1,10 +1,36 @@
 # 84PAD Core
 
-**Status:** Early development. Tracking set up; Laravel scaffold not yet verified runnable.
+**Status:** Core 0.1 development preview. Laravel foundation and included automated tests pass GitHub CI on PHP 8.3/8.4. **Not production ready or deployed.**
 
-**Resume here:** [Progress checkpoint](docs/PROGRESS.md) · [Development workflow](docs/WORKFLOW.md) · [Core task board (15 issues)](https://github.com/manbir6-ux/84pad-core/issues).
+**Resume here:** [Progress checkpoint](docs/PROGRESS.md) · [Development workflow](docs/WORKFLOW.md) · [Core task board](https://github.com/manbir6-ux/84pad-core/issues).
 
 84PAD is a lightweight, plugin-first PHP CMS and application platform maintained by ParmTech.
+
+## What is implemented so far
+
+- Laravel 12 bootstrap, database migrations, project configuration, PHP 8.3/8.4 and MySQL CI.
+- CI-tested first-owner CLI installer plus a **staging no-SSH browser bootstrap**: cPanel user uploads the vendor-bundled staging ZIP, creates a private one-time token, connects a **new empty MySQL database**, then the bootstrap creates `.env`/APP_KEY and opens the Owner wizard ([instructions](docs/WEB-INSTALL.md)). Live cPanel compatibility remains unverified.
+- Guarded login/logout, session protection, Owner password rotation and trusted server-side CLI recovery.
+- Role permissions: Owner controls plugins/security; Administrator can view Control Studio, other roles remain denied by default.
+- Fully redesigned responsive futuristic Control Studio with real status and local plugin management.
+- **Core Settings:** central encrypted cPanel API token vault, optional global access toggle, independent feature switches, deny-by-default plugin capabilities and a fixed read-only UAPI gateway contract. No live cPanel connection verification yet.
+- **First-login Guided Tour:** arrows/spotlight explain dashboard features and navigate into Settings, with Next/Back/Skip/Finish and per-Owner completion/replay.
+- **128 MiB signed plugin ZIP upload:** 512 MiB extraction ceiling, 5000-member maximum and compression-ratio protections; underlying hosting PHP upload limits must allow it.
+- JSON plugin manifest discovery, owner-controlled activation/deactivation, HookBus integration and first-party executable demo widget.
+- Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
+- Core update Ed25519 verification/dry-run plus a **private code-only snapshot** command (`84pad:core-snapshot`) with corruption checks. It does not back up databases, uploads, plugin data, vendor or `.env`; automatic updater and full rollback remain unbuilt.
+
+**Latest verified staging code CI:** [PHP 8.3/8.4 #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418), [MySQL 8 #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395), and [staging ZIP artifact #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) all succeeded. This is not a production security audit or a live shared-hosting deployment.
+
+## Important gaps before Core release
+
+- **Live cPanel acceptance** of the staging no-SSH bootstrap, including PHP extensions, reverse-proxy HTTPS, web document root and permissions. A private token/file-manager step is still required.
+- Automatic signed plugin updates, dependency resolution, arbitrary plugin data transformations and automated database rollback. Signed-uploaded plugins can be quarantined and restored disabled; safe explicit plugin-owned **create-only schema** is available from CLI ([contract](docs/PLUGIN-SCHEMA.md)).
+- Full unattended signed Core updater, maintenance mode, integrated database backup and rollback, **reproducible committed composer.lock**, signed release packaging, and security audit.
+- Clean cPanel shared-host installation and browser/mobile visual acceptance testing.
+- Review/merge the [draft development PR](https://github.com/manbir6-ux/84pad-core/pull/17) only after all acceptance checks pass. **No production release is claimed.**
+
+See [docs/PROGRESS.md](docs/PROGRESS.md) for verified and remaining tasks.
 
 ## Core 0.1 scope
 
@@ -44,4 +70,4 @@ SSL God (certificate detection and safe renewal), domain email management, file 
 6. Build independent SSL, Email, File Manager and Backup plugins.
 7. Build a separate signed central release service after Core architecture stabilizes.
 
-This README defines the starting contract only; it is not a claim that any listed feature is implemented.
+This source tree is an in-development Core preview, not a production release. Use staging only until the remaining acceptance tasks pass.

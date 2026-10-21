@@ -1,0 +1,72 @@
+name: Core CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'core/**'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php-tests:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up PHP extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: sodium, zip, mbstring, pdo_sqlite, sqlite3, dom, xml, curl, fileinfo, openssl, tokenizer
+          coverage: none
+          tools: composer:v2
+
+      - name: Reject accidentally tracked credentials
+        run: python3 scripts/check_tracked_secrets.py
+
+      - name: Validate Composer metadata
+        run: composer validate --no-check-publish
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Configure application for tests
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate --no-interaction
+
+      - name: Verify application bootstrap
+        run: |
+          php artisan --version
+          php artisan route:list
+
+      - name: Verify database migrations
+        run: php artisan migrate --force --no-interaction
+
+      - name: Run PHPUnit feature and unit tests
+        run: php artisan test --no-ansi
+
+      - name: Check guided tour JavaScript syntax
+        run: node --check public/js/84pad-tour.js
+
+      - name: Check PHP syntax
+        run: |
+          find app bootstrap config database routes tests public -type f -name '*.php' -print0 \
+            | xargs -0 -r -n 1 php -l

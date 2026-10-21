@@ -1,0 +1,127 @@
+name: MySQL Compatibility
+
+on:
+  push:
+    branches:
+      - 'core/**'
+    paths:
+      - '.github/workflows/mysql-compat.yml'
+      - 'app/**'
+      - 'config/database.php'
+      - 'database/**'
+      - 'tests/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/mysql-compat.yml'
+      - 'app/**'
+      - 'config/database.php'
+      - 'database/**'
+      - 'tests/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mysql-compat-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mysql-tests:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: pad_ci
+          MYSQL_USER: padtester
+          MYSQL_PASSWORD: test_only_password
+          MYSQL_ROOT_PASSWORD: test_only_root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -ptest_only_root"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_DATABASE: pad_ci
+      DB_USERNAME: padtester
+      DB_PASSWORD: test_only_password
+      # Explicitly throwaway password for disposable CI service only.
+      CI_BOOTSTRAP_ROOT_PASSWORD: test_only_root
+      SESSION_DRIVER: array
+      CACHE_STORE: array
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PHP with MySQL extension
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: sodium, zip, mbstring, pdo_mysql, mysqli, dom, xml, fileinfo, openssl
+          coverage: none
+          tools: composer:v2
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Configure test application
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+      - name: Test MySQL migration compatibility
+        run: php artisan migrate --force --no-interaction
+      - name: Run Core tests against MySQL
+        run: php artisan test --no-ansi
+      - name: Reject concurrent duplicate owners on ephemeral MySQL
+        run: |
+          # Destructive reset is allowed ONLY against the temporary CI MySQL service.
+          test "$GITHUB_ACTIONS" = "true"
+          test "$APP_ENV" = "testing"
+          test "$DB_DATABASE" = "pad_ci"
+          php artisan migrate:fresh --force --no-interaction
+
+          set +e
+          (printf '%s\n' 'CI-first-owner-test-password-123' | php artisan 84pad:install --name="Owner One" --email="one@example.test" --password-stdin >/tmp/owner-one.log 2>&1) &
+          one_pid=$!
+          (printf '%s\n' 'CI-second-owner-test-password-123' | php artisan 84pad:install --name="Owner Two" --email="two@example.test" --password-stdin >/tmp/owner-two.log 2>&1) &
+          two_pid=$!
+
+          wait "$one_pid"
+          first_exit=$?
+          wait "$two_pid"
+          second_exit=$?
+          set -e
+
+          if { [ "$first_exit" -eq 0 ] && [ "$second_exit" -ne 0 ]; } || { [ "$second_exit" -eq 0 ] && [ "$first_exit" -ne 0 ]; }; then
+            echo "Exactly one installation succeeded (as required)."
+          else
+            echo "Unexpected concurrent installer results: $first_exit, $second_exit"
+            cat /tmp/owner-one.log /tmp/owner-two.log
+            exit 1
+          fi
+
+          php -r '
+          $db = new PDO(
+              "mysql:host=".getenv("DB_HOST").";port=".getenv("DB_PORT").";dbname=".getenv("DB_DATABASE"),
+              getenv("DB_USERNAME"),
+              getenv("DB_PASSWORD"),
+              [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+          );
+          $ownerStmt = $db->prepare("SELECT COUNT(*) FROM users WHERE role = ?");
+          $ownerStmt->execute(["owner"]);
+          $owners = (int) $ownerStmt->fetchColumn();
+          $markers = (int) $db->query("SELECT COUNT(*) FROM core_installations WHERE id = 1")->fetchColumn();
+          $linkedStmt = $db->prepare("SELECT COUNT(*) FROM core_installations c JOIN users u ON c.owner_user_id = u.id WHERE u.role = ?");
+          $linkedStmt->execute(["owner"]);
+          $linked = (int) $linkedStmt->fetchColumn();
+          if ($owners !== 1 || $markers !== 1 || $linked !== 1) {
+              fwrite(STDERR, "ERROR: invalid owner/installation marker state\\n");
+              exit(1);
+          }
+          echo "PASS: exactly one owner and one valid marker\\n";
+          '
