@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 use Tests\TestCase;
 
 class AuthenticationFlowTest extends TestCase
@@ -14,6 +16,18 @@ class AuthenticationFlowTest extends TestCase
     public function test_uninstalled_login_is_unavailable(): void
     {
         $this->get('/login')->assertStatus(503);
+    }
+
+    public function test_database_error_on_login_returns_generic_unavailable_response(): void
+    {
+        Schema::shouldReceive('hasTable')
+            ->once()
+            ->with('core_installations')
+            ->andThrow(new RuntimeException('sensitive database diagnostic'));
+
+        $this->get('/login')
+            ->assertStatus(503)
+            ->assertDontSee('sensitive database diagnostic');
     }
 
     public function test_guest_cannot_see_dashboard(): void
