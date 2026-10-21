@@ -16,7 +16,7 @@ article{background:linear-gradient(135deg,#182b45,#101b2e);border:1px solid #315
 article b{font-size:22px}.pending{color:#e7b873;font-size:13px}
 .notice{border-left:4px solid #64d8be;padding:12px 16px;background:#1d3038}.error{border-color:#eca083}
 </style></head><body>
-<header><div class="brand">84PAD<span>.</span></div><div style="display:flex;gap:12px;align-items:center"><a href="{{ route('password.edit') }}" style="color:#95e9ff">Security</a><form method="post" action="{{ route('logout') }}">@csrf<button>Sign out</button></form></div></header>
+<header><div class="brand">84PAD<span>.</span></div><div style="display:flex;gap:12px;align-items:center">@can('core.manage-security')<a href="{{ route('password.edit') }}" style="color:#95e9ff">Security</a>@endcan<form method="post" action="{{ route('logout') }}">@csrf<button>Sign out</button></form></div></header>
 <main><small>PARMTECH / DEVELOPMENT PREVIEW</small><h1>Control Studio</h1>
 <p>Welcome, {{ $user->name }}. This Core is not yet approved for production.</p>
 @if(session('notice'))<p class="notice">{{ session('notice') }}</p>@endif
@@ -33,10 +33,11 @@ article b{font-size:22px}.pending{color:#e7b873;font-size:13px}
 @forelse($plugins as $plugin)
 <article><b>{{ $plugin['name'] }}</b><p>{{ $plugin['id'] }} · v{{ $plugin['version'] }}</p>
 <p class="pending">{{ $plugin['compatible'] ? 'Compatible' : 'Requires newer Core' }} · {{ $plugin['enabled'] ? 'Marked enabled' : 'Disabled' }}</p>
+@can('core.manage-plugins')
 <form method="post" action="{{ route('plugins.state', ['slug'=>$plugin['id']]) }}">@csrf
 <input type="hidden" name="action" value="{{ $plugin['enabled'] ? 'deactivate' : 'activate' }}">
 <button type="submit" @disabled(!$plugin['compatible'])>{{ $plugin['enabled'] ? 'Remove marker' : 'Mark enabled' }}</button>
-</form></article>
+</form>@endcan</article>
 @empty<article><b>No plugins</b><p>Add a validated JSON manifest to discover plugins.</p></article>
 @endforelse
 </div></main></body></html>
