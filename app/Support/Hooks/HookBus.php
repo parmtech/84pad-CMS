@@ -22,6 +22,12 @@ final class HookBus
         return $value;
     }
 
+    public function clear(): void
+    {
+        $this->callbacks = [];
+        $this->sequence = 0;
+    }
+
     public function dispatch(string $name, mixed $payload = null): void
     {
         $this->filter($name,$payload);
