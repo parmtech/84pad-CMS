@@ -11,7 +11,7 @@ use Throwable;
 
 class InstallCore extends Command
 {
-    protected $signature = '84pad:install {--name= : First owner name} {--email= : First owner email}';
+    protected $signature = '84pad:install {--name= : First owner name} {--email= : First owner email} {--password-stdin : Read password from standard input for headless setups}';
     protected $description = 'Create the first 84PAD owner once (local CLI only)';
 
     public function handle(): int
@@ -46,7 +46,15 @@ class InstallCore extends Command
 
         $name = trim((string) ($this->option('name') ?: $this->ask('Owner display name')));
         $email = strtolower(trim((string) ($this->option('email') ?: $this->ask('Owner email'))));
-        $password = $this->secret('Owner password (12 or more characters)');
+        // The optional headless path never accepts a password on the command line.
+        // Read at most 2048 bytes to avoid unbounded input; normal validation
+        // still limits usable passwords to 12-1024 bytes.
+        $password = $this->option('password-stdin')
+            ? (defined('STDIN') ? fgets(STDIN, 2049) : false)
+            : $this->secret('Owner password (12 or more characters)');
+        if ($this->option('password-stdin') && is_string($password)) {
+            $password = rtrim($password, "\r\n");
+        }
 
         if (mb_strlen($name) < 2 || mb_strlen($name) > 120
             || ! filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255
