@@ -17,6 +17,6 @@ class PluginStateController extends Controller
         } catch (\InvalidArgumentException $e) {
             return back()->withErrors(['plugin' => 'Plugin not found or incompatible.']);
         }
-        return back()->with('notice', 'Plugin marker saved. This development version does not execute plugin PHP.');
+        return back()->with('notice', 'Plugin status saved. Active local plugins can execute PHP on the dashboard. Use trusted plugins only.');
     }
 }
