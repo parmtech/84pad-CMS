@@ -53,6 +53,28 @@ class PluginStateTest extends TestCase
         $this->assertDatabaseMissing('core_plugins',['slug'=>'not-installed']);
     }
 
+    public function test_active_demo_plugin_renders_widget_and_deactivation_hides_it(): void
+    {
+        $owner=User::query()->create([
+            'name'=>'Owner','email'=>'owner@example.test',
+            'password'=>'long-test-password','role'=>'owner',
+        ]);
+        DB::table('core_installations')->insert([
+            'id'=>1,'owner_user_id'=>$owner->id,'created_at'=>now(),
+        ]);
+
+        $this->actingAs($owner)->get('/dashboard')
+            ->assertOk()->assertDontSee('Demo plugin running');
+        $this->post('/dashboard/plugins/demo-widget/state', ['action'=>'activate'])
+            ->assertRedirect();
+        $this->get('/dashboard')->assertOk()->assertSee('Demo plugin running');
+
+        $this->post('/dashboard/plugins/demo-widget/state', ['action'=>'deactivate'])
+            ->assertRedirect();
+        $this->get('/dashboard')
+            ->assertOk()->assertDontSee('Demo plugin running');
+    }
+
     public function test_viewer_cannot_change_plugin_state(): void
     {
         $viewer=User::query()->create(['name'=>'Viewer','email'=>'viewer@example.test','password'=>'long-test-password','role'=>'viewer']);
