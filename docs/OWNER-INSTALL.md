@@ -1,14 +1,14 @@
-# First-owner installation (development preview)
+# Owner installation — unverified development code
 
-Owner setup is a **CLI-only** command. No public web registration route exists.
+This is a **CLI-only** first-owner installer. There is deliberately no public signup flow.
 
-1. Install PHP extensions, Composer dependencies and create untracked `.env`.
-2. Set `APP_KEY` via `php artisan key:generate`.
-3. Configure database and ensure it is empty or its migration history is compatible.
+1. Install Composer, Laravel PHP extensions and configure the untracked `.env`.
+2. Set APP_KEY with `php artisan key:generate`.
+3. Configure a **new empty** database. Production deployment is not approved.
 4. Run `php artisan 84pad:install --name="Site Owner" --email="owner@example.com"`.
-5. Enter a unique strong password in the hidden prompt (minimum 12 characters).
-6. Visit `/login` over HTTPS in a properly configured web server.
+5. Enter password in the hidden prompt (minimum 12 characters).
+6. Sign in at `/login` using HTTPS when in a secured environment.
 
-The command migrates the database and records a one-time Core installation row. It never accepts a password command-line flag. Reinstall attempts fail; do **not** manually clear the marker to bypass this protection.
+The setup transaction inserts a unique installation marker and then the owner. Repeated installer attempts fail without adding another owner.
 
-**LIMITATION:** This implementation has not been exercised against a live Laravel runtime yet. For the initial release, setup only on a **new empty database**, never an existing production site. Restoration and full authorization/policy testing are pending. Do not deploy to public production until tests pass.
+**Known limitation:** Composer install, integration tests, rollback and fresh installation have not been executed in this session. Treat the entire build as development-only, not production-ready.

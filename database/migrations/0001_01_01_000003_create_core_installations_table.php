@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('core_installations', function (Blueprint $table): void {
             $table->unsignedTinyInteger('id')->primary();
-            $table->foreignId('owner_user_id')->constrained('users')->restrictOnDelete();
+            // Nullable until the first owner is created in the same transaction.
+            $table->foreignId('owner_user_id')->nullable()->constrained('users')->restrictOnDelete();
             $table->timestamp('created_at');
         });
     }

@@ -11,21 +11,20 @@ use Throwable;
 
 class InstallCore extends Command
 {
-    protected $signature = '84pad:install {--name= : The first owner name} {--email= : The first owner email}';
-    protected $description = 'Securely install 84PAD with a single owner (CLI only)';
+    protected $signature = '84pad:install {--name= : First owner name} {--email= : First owner email}';
+    protected $description = 'Create the first 84PAD owner once (local CLI only)';
 
     public function handle(): int
     {
         if (! config('app.key')) {
-            $this->error('APP_KEY is missing. Run php artisan key:generate first.');
+            $this->error('Set APP_KEY with php artisan key:generate before installing.');
             return self::FAILURE;
         }
 
-        // Migrations are idempotent; the owner and installation marker are created atomically.
         try {
             $this->call('migrate', ['--force' => true]);
         } catch (Throwable $e) {
-            $this->error('Database migrations failed. Check your server log.');
+            $this->error('Migrations failed. Check server-side logs.');
             return self::FAILURE;
         }
 
@@ -35,52 +34,45 @@ class InstallCore extends Command
         }
 
         if (DB::table('core_installations')->exists() || User::query()->where('role', 'owner')->exists()) {
-            $this->warn('Installation is already completed or an owner already exists. No changes made.');
+            $this->warn('Already installed or owner exists; no changes made.');
             return self::FAILURE;
         }
 
         $name = trim((string) ($this->option('name') ?: $this->ask('Owner display name')));
         $email = strtolower(trim((string) ($this->option('email') ?: $this->ask('Owner email'))));
-        $password = $this->secret('Create owner password (not saved to terminal history)');
+        $password = $this->secret('Owner password (12 or more characters)');
 
         if (mb_strlen($name) < 2 || mb_strlen($name) > 120
             || ! filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255
             || ! is_string($password) || strlen($password) < 12 || strlen($password) > 1024) {
-            $this->error('Invalid owner name/email or password. Password must be 12-1024 characters.');
+            $this->error('Invalid owner details; password must be 12-1024 characters.');
             return self::FAILURE;
         }
 
         try {
             DB::transaction(function () use ($name, $email, $password): void {
-                // Lock a single known row; competing installers cannot both become owners.
-                $won = DB::table('core_installations')->insertOrIgnore([
-                    'id' => 1,
-                    // owner_user_id must exist: create owner in same transaction, then insert marker.
-                    // User row is locked by unique email and marker prevents duplicate install.
-                    'owner_user_id' => 0,
-                    'created_at' => now(),
+                // Atomic sentinel protects against two simultaneous installers.
+                $inserted = DB::table('core_installations')->insertOrIgnore([
+                    'id' => 1, 'owner_user_id' => null, 'created_at' => now(),
                 ]);
-                if ($won !== 1) {
-                    throw new \RuntimeException('Core already installed');
+                if ($inserted !== 1 || User::query()->where('role', 'owner')->exists()) {
+                    throw new \RuntimeException('Already installed');
                 }
-                if (User::query()->where('role', 'owner')->exists()) {
-                    throw new \RuntimeException('Owner already exists');
-                }
+
                 $owner = User::query()->create([
-                    'name' => $name, 'email' => $email,
-                    'password' => Hash::make($password), 'role' => 'owner',
+                    'name' => $name, 'email' => $email, 'role' => 'owner',
+                    'password' => Hash::make($password),
                 ]);
                 DB::table('core_installations')->where('id', 1)->update(['owner_user_id' => $owner->id]);
             }, 3);
         } catch (Throwable $e) {
-            // Error message kept generic to avoid leaking database or credentials.
-            $this->error('Owner setup was not completed. No additional owner was installed.');
+            $this->error('Owner setup failed. No new owner was installed.');
             return self::FAILURE;
         } finally {
             unset($password);
         }
 
-        $this->info('84PAD owner installed. Use /login to sign in.');
+        $this->info('84PAD installed. Use /login to sign in.');
         return self::SUCCESS;
     }
 }
