@@ -4,8 +4,8 @@
 > Last updated: 2026-10-22 (Australia/Sydney).
 > **Current phase:** Core 0.1 development preview — authenticated owner/admin shell, token-gated browser setup, live demo plugin and signed local plugin ZIP install are coded/tested; major release tasks remain.
 > **Next issue:** [#13 C13 — Plugin migration recovery](https://github.com/manbir6-ux/84pad-core/issues/13): finish migration-failure safeguards and rollback approach; then [#14 C14 — Core updater/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Browser installer/cPanel QA remain release gates.
-> **Runnable:** Plugin restore and additive schema implementation pass PHP 8.3/8.4 CI. Latest MySQL 8 job steps passed; run-level completion was pending at last check. Not deployed to cPanel or approved for production.
-> **Environment test status:** [Core CI #39625847746](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847746) PASSED PHP 8.3/8.4 with plugin restore and plugin schema tests. [MySQL CI #39625847866](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847866) had all job steps successful, though full workflow state was still pending. Live cPanel, security audit, full database rollback remain outstanding.
+> **Runnable:** Latest Core 0.1 development code passes hosted PHP 8.3/8.4 and MySQL 8 automated tests, including restore, additive schema and signed update inspection. Not deployed to cPanel or approved for production.
+> **Environment test status:** [Core CI #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977) completed **SUCCESS** on PHP 8.3/8.4; [MySQL CI #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968) completed **SUCCESS** with database migrations, plugin schema/restore tests, signed update inspector tests and concurrent Owner install. Live cPanel, security audit, full schema/Core rollback still outstanding.
 
 ## Work checklist
 
@@ -23,12 +23,19 @@
 | [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | **Executable trusted local PHP on dashboard; uninstall/migrations pending** | Activation, hook, deactivation and signed install tests [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | **HookBus connected to demo plugin; versioning/error boundaries incomplete** | Priority/order, dispatch, active widget and fault fallback [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | **CI verified; issue closed** | First-party PHP widget appears only after activation and disappears after deactivation [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
-| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Plugin-owned schema migration and quarantine | **Create-only schema/history + quarantine restore CI tested; automatic DDL rollback pending** | PHP 8.3/8.4 [CI #39625847746](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847746) passed. MySQL job [#39625847866](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847866) steps green; production recovery pending |
-| [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | **Pinned-key Ed25519 verifier + owner CLI recovery; updater/rollback not built** | Verifier tests [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600); central release manager deferred |
+| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Plugin-owned schema migration and quarantine | **Additive schema/history + quarantine restore CI verified; automatic DDL rollback pending** | [PHP CI #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977) and [MySQL #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968) passed |
+| [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update and emergency recovery | **Signed ZIP offline inspection verified; updater/rollback not built** | [PHP CI #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977), [MySQL #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968); see [docs/CORE-UPDATES.md](CORE-UPDATES.md) |
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
 | [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **Token-gated Owner wizard CI tested; zero-config host bootstrap pending** | [docs/WEB-INSTALL.md](WEB-INSTALL.md), [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 
 ## Work log
+
+### 2026-10-22 — C14 signed update inspection checkpoint
+- Added `UpdateInspector` with signature verification before parsing ZIP, version/PHP compatibility, path/symlink/duplicate and uncompressed-size checks, and non-installing `84pad:update-inspect` CLI.
+- Tests cover trusted signed ZIP, missing publisher key, path traversal, and downgrade refusal. New manager only verifies; **it never installs or modifies Core files**.
+- [PHP CI #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977) and [MySQL CI #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968) completed **SUCCESS** including C13 new schema/restore and C14 inspector tests.
+- [docs/CORE-UPDATES.md](CORE-UPDATES.md) records signature scheme and nonimplemented updater/rollback. C14 stays open; no release readiness claim.
+
 
 ### 2026-10-22 — C13 schema and restore checkpoint
 - Extended `PluginQuarantine` with snapshot listing and exact-snapshot restoration. Owner-only restore route/UI requires typed plugin ID; restores as disabled, protects occupied destination and rejects invalid snapshots.
