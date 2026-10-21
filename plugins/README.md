@@ -24,9 +24,15 @@ UTF8("84PAD_PLUGIN_ZIP_V1\n") || SHA256(zip_file_binary_bytes)
 
 `PAD_PLUGIN_PUBLIC_KEYS` is a comma-separated list of base64-encoded Ed25519 publisher **public** keys configured only in the host's untracked `.env` / environment. Without a pinned key, uploaded packages are rejected. Publisher **private** keys must never be uploaded to the CMS, included in a plugin or committed to GitHub.
 
+## Safe uninstall (quarantine)
+
+Only ZIPs installed through the trusted signed installer can be uninstalled in the UI. The Owner must type the exact plugin slug. Uninstall first disables the plugin and then moves its directory into private `storage/app/private/plugin-quarantine/` instead of immediately deleting files. Database tables and user data are deliberately **retained**. Bundled Core/demo plugins cannot be removed by this upload-uninstall flow.
+
+This is a reversible staging mechanism, not a fully tested automated rollback. Restoration from quarantine currently requires trusted host-file access; automatic migration rollback remains future work. Quarantine storage should be considered sensitive and included in the site's recovery plan.
+
 ## Current limits
 
-- No central marketplace, auto-update, dependency resolution or safe uninstall/migration lifecycle yet.
+- No central marketplace, auto-update, dependency resolution or automatic migration rollback yet. Basic signed-upload quarantine uninstall is implemented.
 - Plugin execution currently integrates with Control Studio dashboard hooks, not arbitrary public-facing pages.
 - A first-party demo lives in `plugins/demo-widget/` and is covered by automated activation/deactivation tests.
 - Safe migration/uninstall and signed central distribution are separate pending Core milestones. See `docs/PROGRESS.md`.
