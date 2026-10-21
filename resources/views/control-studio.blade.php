@@ -27,16 +27,28 @@ article b{font-size:22px}.pending{color:#e7b873;font-size:13px}
 <article><b>Domain Email</b><p>Mail accounts and inbox</p><span class="pending">Future optional plugin</span></article>
 <article><b>File Manager</b><p>Site files</p><span class="pending">Future optional plugin</span></article>
 <article><b>Backup & Restore</b><p>Scheduled backups and rollback</p><span class="pending">Future optional plugin</span></article>
-</div><h2>Plugin manifests</h2>
-<p>Only metadata activation markers can be changed now; third-party plugin code is not run.</p>
+</div>
+@if(count($widgets))
+<h2>Active plugin widgets</h2>
+<div class="grid">
+@foreach($widgets as $widget)
+@if(is_array($widget) && is_string($widget['title'] ?? null) && is_string($widget['description'] ?? null))
+<article><b>{{ $widget['title'] }}</b><p>{{ $widget['description'] }}</p></article>
+@endif
+@endforeach
+</div>
+@endif
+<h2>Installed plugins</h2>
+<p class="pending">Activation can execute third-party PHP with hosting account privileges. Enable only plugins you trust.</p>
+<p>Active local plugins with a valid bootstrap may register hooks. Install only trusted code.</p>
 <div class="grid">
 @forelse($plugins as $plugin)
 <article><b>{{ $plugin['name'] }}</b><p>{{ $plugin['id'] }} · v{{ $plugin['version'] }}</p>
-<p class="pending">{{ $plugin['compatible'] ? 'Compatible' : 'Requires newer Core' }} · {{ $plugin['enabled'] ? 'Marked enabled' : 'Disabled' }}</p>
+<p class="pending">{{ $plugin['compatible'] ? 'Compatible' : 'Requires newer Core' }} · {{ $plugin['enabled'] ? 'Active' : 'Disabled' }}</p>
 @can('core.manage-plugins')
 <form method="post" action="{{ route('plugins.state', ['slug'=>$plugin['id']]) }}">@csrf
 <input type="hidden" name="action" value="{{ $plugin['enabled'] ? 'deactivate' : 'activate' }}">
-<button type="submit" @disabled(!$plugin['compatible'])>{{ $plugin['enabled'] ? 'Remove marker' : 'Mark enabled' }}</button>
+<button type="submit" @disabled(!$plugin['compatible'])>{{ $plugin['enabled'] ? 'Deactivate' : 'Activate' }}</button>
 </form>@endcan</article>
 @empty<article><b>No plugins</b><p>Add a validated JSON manifest to discover plugins.</p></article>
 @endforelse
