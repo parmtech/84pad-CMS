@@ -1,0 +1,72 @@
+name: Stage Distribution
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'core/**'
+    paths:
+      - '.github/workflows/stage-distribution.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  stage-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: sodium, zip, mbstring, pdo_mysql, pdo_sqlite, dom, xml, fileinfo, curl
+          coverage: none
+          tools: composer:v2
+      - name: Inspect source hygiene
+        run: |
+          python3 scripts/check_tracked_secrets.py
+          composer validate --no-check-publish
+      - name: Resolve dependencies and install runtime-only vendor
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader
+      - name: Prepare private staging bundle
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/84pad-dist
+          # rsync avoids accidentally packaging .env, .git, private keys,
+          # runtime sessions, vendor test assets or host storage.
+          rsync -a \
+            --exclude='/.git/' --exclude='/.github/' \
+            --exclude='/.env' --exclude='/.env.*' \
+            --exclude='/tests/' --exclude='/node_modules/' \
+            --exclude='/storage/app/' --exclude='/storage/logs/' \
+            --exclude='/storage/framework/cache/data/' \
+            --exclude='/storage/framework/sessions/' \
+            --exclude='/storage/framework/views/' \
+            --exclude='/public/storage' \
+            --exclude='*.pem' --exclude='*.p12' --exclude='*.pfx' \
+            --exclude='auth.json' \
+            ./ /tmp/84pad-dist/
+          cp .env.example /tmp/84pad-dist/.env.example
+          printf 'STAGING PREVIEW ONLY. Configure .env/APP_KEY/database manually; serve public/ as the web root. No production approval.\n' > /tmp/84pad-dist/STAGING-NOTICE.txt
+          (cd /tmp/84pad-dist && zip -qr /tmp/84pad-core-staging.zip .)
+      - name: Assert bundle does not include environment secrets
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          z=zipfile.ZipFile('/tmp/84pad-core-staging.zip')
+          names=z.namelist()
+          assert 'vendor/autoload.php' in names, "Runtime dependencies missing"
+          assert 'public/index.php' in names, "Web entry point missing"
+          assert '.env.example' in names, "Expected config template missing"
+          blocked=[x for x in names if x=='.env' or x.startswith('.git/') or x.startswith('storage/app/') or x.startswith('storage/logs/') or x.endswith(('.pem','.key','.p12','.pfx'))]
+          assert not blocked, "Sensitive files included: "+str(blocked[:10])
+          print('Staging ZIP verified:',len(names),'entries')
+          PY
+      - name: Upload private CI staging artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 84pad-core-staging-preview
+          path: /tmp/84pad-core-staging.zip
+          if-no-files-found: error
+          retention-days: 7
