@@ -8,6 +8,8 @@ use RuntimeException;
 
 final class PluginQuarantine
 {
+    public function __construct(private readonly PluginCatalog $catalog) {}
+
     public function uninstall(string $slug): void
     {
         if (! preg_match('/^[a-z][a-z0-9-]{1,63}$/D', $slug)) {
@@ -31,9 +33,13 @@ final class PluginQuarantine
 
         // Disable first; if filesystem move fails the plugin stays installed,
         // but its executable code is no longer loaded. No plugin data deleted.
+        $manifest = $this->catalog->all()[$slug] ?? null;
+        if (! $manifest) {
+            throw new RuntimeException('Plugin manifest no longer valid.');
+        }
         DB::table('core_plugins')->updateOrInsert(
             ['slug' => $slug],
-            ['version' => '0.1.0','enabled' => false,'updated_at' => now()]
+            ['version' => $manifest['version'],'enabled' => false,'updated_at' => now()]
         );
 
         if (! rename($plugin, $destination)) {
