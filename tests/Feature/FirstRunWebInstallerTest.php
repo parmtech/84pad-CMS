@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -20,9 +21,9 @@ final class FirstRunWebInstallerTest extends TestCase
 
     public function test_migration_failure_exit_code_never_creates_first_owner(): void
     {
-        \Illuminate\\Support\\Facades\\Artisan::shouldReceive('call')
+        Artisan::shouldReceive('call')
             ->once()->with('84pad:doctor')->andReturn(0);
-        \Illuminate\\Support\\Facades\\Artisan::shouldReceive('call')
+        Artisan::shouldReceive('call')
             ->once()->with('migrate', [
                 '--force' => true, '--no-interaction' => true,
             ])->andReturn(1);
