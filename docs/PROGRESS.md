@@ -3,7 +3,7 @@
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-21 (Australia/Sydney).
 > **Current phase:** Core 0.1 — foundation.
-> **Next issue:** [#2 C02 — Configuration and secret hygiene](https://github.com/manbir6-ux/84pad-core/issues/2).
+> **Next issue:** [#3 C03 — Installation prerequisite checks](https://github.com/manbir6-ux/84pad-core/issues/3).
 > **Runnable:** CI verified on PHP 8.3 and 8.4; not deployed to hosting or approved for production.
 > **Environment test status:** GitHub Actions [run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743): PHP 8.3 and PHP 8.4 jobs passed Composer install, artisan bootstrap/routes, SQLite migrations, PHPUnit and PHP syntax checks. Local container still lacks Composer and required PHP extensions.
 
@@ -12,12 +12,12 @@
 | ID | Task | State | Proof |
 |---|---|---|---|
 | [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | **CI verified (PHP 8.3 & 8.4)** | [Run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743); still unmerged and not production approved |
-| [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | Not started | none |
-| [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | Not started | none |
-| [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | Not started | none |
-| [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | Not started | none |
+| [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | **CI verified; issue closed** | [Run 39605702869](https://github.com/manbir6-ux/84pad-core/actions/runs/39605702869); nested secret ignores + filename guard |
+| [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | **In progress** | Host-preflight command committed; acceptance/safety tests pending |
+| [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | **Implementation preview** | CLI owner install code exists; comprehensive recovery/race testing pending |
+| [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | **Implementation preview** | Owner login/logout guarded routes and feature tests; security review pending |
 | [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | Not started | none |
-| [C07](https://github.com/manbir6-ux/84pad-core/issues/7) | Control Studio dashboard | Not started | none |
+| [C07](https://github.com/manbir6-ux/84pad-core/issues/7) | Control Studio dashboard | **Implementation preview** | Initial owner dashboard view; gaming UI polish and browser testing pending |
 | [C08](https://github.com/manbir6-ux/84pad-core/issues/8) | Plugin manifest | Not started | none |
 | [C09](https://github.com/manbir6-ux/84pad-core/issues/9) | Plugin discovery | Not started | none |
 | [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | Not started | none |
@@ -30,6 +30,8 @@
 ## Work log
 
 ### 2026-10-22
+- Completed C02 initial credential hygiene: strengthened `.gitignore`, added `scripts/check_tracked_secrets.py`, and enforced it in Core CI. [Run 39605702869](https://github.com/manbir6-ux/84pad-core/actions/runs/39605702869) passed on PHP 8.3 and PHP 8.4. Issue #2 closed; path-name scanning is not comprehensive secret-content scanning.
+- C03 read-only preflight command has landed in a parallel Core commit but still needs its own acceptance tests. C04/C05/C07 have initial previews, not production releases.
 - Added `.github/workflows/core-ci.yml` on `core/C01-laravel-foundation` ([commit 632df90](https://github.com/manbir6-ux/84pad-core/commit/632df90b5cf87fef53ff9ca103a6f4cdfde4c895)).
 - [GitHub Actions run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743) **PASSED** on PHP 8.3 and 8.4: Composer validation/install, environment setup, Laravel bootstrap/routes, SQLite migrations, PHPUnit tests, and PHP lint.
 - Foundation now has model/config/migration/owner CLI/auth/control-studio **development previews**; installed on CI runners only. No cPanel production or UI browser acceptance tests done.
