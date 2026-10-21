@@ -136,6 +136,14 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <input type="hidden" name="action" value="{{ $plugin['enabled'] ? 'deactivate' : 'activate' }}">
 <button type="submit" @disabled(!$plugin['compatible'])>{{ $plugin['enabled'] ? 'Deactivate' : 'Activate' }}</button>
 </form>
+@if($plugin['removable'] ?? false)
+<form method="post" action="{{ route('plugins.uninstall', ['slug'=>$plugin['id']]) }}" style="margin-top:16px">@csrf
+<label style="display:block;font-size:11px;color:#d5aeb8">Type <strong>{{ $plugin['id'] }}</strong> to uninstall safely:</label>
+<input type="text" name="confirm_slug" required autocomplete="off" maxlength="64"
+ style="width:100%;padding:9px;background:#11192b;border:1px solid #7e5770;border-radius:9px;color:white;margin:7px 0">
+<button type="submit" style="background:#4f2438;color:#ffd5df;border:1px solid #9d4566">Move to quarantine</button>
+</form>
+@endif
 @endcan
 </article>
 @empty
