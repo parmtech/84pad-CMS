@@ -4,14 +4,14 @@
 > Last updated: 2026-10-21 (Australia/Sydney).
 > **Current phase:** Core 0.1 — foundation.
 > **Next issue:** [#1 C01 — Bootstrap Laravel 12 foundation](https://github.com/manbir6-ux/84pad-core/issues/1).
-> **Runnable:** NO. Only scope documentation and tracking issues are confirmed.
-> **Environment test status:** NOT RUN (Laravel/Composer dependencies not installed or verified in this repository).
+> **Runnable:** NOT VERIFIED. C01 partial Laravel source scaffold is now committed on a feature branch; dependencies have not been installed or executed.
+> **Environment test status:** NOT RUN on GitHub scaffold. The working container has PHP 8.4.24, but Composer, mbstring and a SQLite driver were not available in the checked runtime. No Laravel app/test command succeeded.
 
 ## Work checklist
 
 | ID | Task | State | Proof |
 |---|---|---|---|
-| [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | Not started | none |
+| [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | **In progress — source committed, runtime unverified** | [Feature branch](https://github.com/manbir6-ux/84pad-core/tree/core/C01-laravel-foundation): 23 changed files; not yet merged to main |
 | [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | Not started | none |
 | [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | Not started | none |
 | [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | Not started | none |
@@ -34,7 +34,11 @@
 - Previous commit created initial `README.md` with agreed Core 0.1 scope.
 - Opened C01–C15 as individually testable GitHub issues.
 - Added this persistent checkpoint and companion workflow.
-- **No production-ready code, Laravel runtime or successful app tests recorded yet.**
+- Added initial Laravel 12 source scaffold to `core/C01-laravel-foundation` (23 changed files): Composer manifest, bootstrapping, routing, basic page, test stubs, safe example environment and runtime directory stubs.
+- Compared feature branch with `main`: 1 commit ahead, 23 changed files; the foundation is **not merged**.
+- PHP 8.4.24 is present locally; Composer, mbstring and SQLite driver are missing in this runtime, so Laravel install and app tests remain **unverified**.
+- Initial scaffold remains incomplete for full Laravel conventions (e.g. config and user model/migrations); expand foundation and verify before closing C01.
+- **No production-ready Core, installer, login, plugin manager or successful Laravel runtime tests recorded yet.**
 
 ## Session resume instructions
 
