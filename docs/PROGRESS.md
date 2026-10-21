@@ -3,9 +3,9 @@
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-22 (Australia/Sydney).
 > **Current phase:** Core 0.1 development preview — authenticated owner/admin shell, token-gated browser setup, live demo plugin and signed local plugin ZIP install are coded/tested; major release tasks remain.
-> **Next issue:** [#13 C13 — Plugin migration/uninstall boundaries](https://github.com/manbir6-ux/84pad-core/issues/13), followed by [#14 C14 — Safe update/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Finish security/visual/web installer sign-off before C15 release.
-> **Runnable:** Latest functional implementation (including safe plugin quarantine) passed PHP 8.3/8.4 and MySQL 8 CI. Not deployed to cPanel or approved for production.
-> **Environment test status:** [Core CI #39618022600](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022600) **PASSED** PHP 8.3/8.4 and [MySQL CI #39618022701](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022701) **PASSED** MySQL 8, including the non-destructive uninstall test. Live cPanel, security audit and full Core rollback remain outstanding.
+> **Next issue:** [#13 C13 — Plugin migration recovery](https://github.com/manbir6-ux/84pad-core/issues/13): finish migration-failure safeguards and rollback approach; then [#14 C14 — Core updater/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Browser installer/cPanel QA remain release gates.
+> **Runnable:** Plugin restore and additive schema implementation pass PHP 8.3/8.4 CI. Latest MySQL 8 job steps passed; run-level completion was pending at last check. Not deployed to cPanel or approved for production.
+> **Environment test status:** [Core CI #39625847746](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847746) PASSED PHP 8.3/8.4 with plugin restore and plugin schema tests. [MySQL CI #39625847866](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847866) had all job steps successful, though full workflow state was still pending. Live cPanel, security audit, full database rollback remain outstanding.
 
 ## Work checklist
 
@@ -23,12 +23,20 @@
 | [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | **Executable trusted local PHP on dashboard; uninstall/migrations pending** | Activation, hook, deactivation and signed install tests [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | **HookBus connected to demo plugin; versioning/error boundaries incomplete** | Priority/order, dispatch, active widget and fault fallback [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | **CI verified; issue closed** | First-party PHP widget appears only after activation and disappears after deactivation [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
-| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | **Signed-upload plugin quarantine uninstall CI tested; migrations/rollback still pending** | Owner-confirmed safe quarantine preserves DB tables and plugin code [PHP CI #39618022600](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022600) and [MySQL #39618022701](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022701) |
+| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Plugin-owned schema migration and quarantine | **Create-only schema/history + quarantine restore CI tested; automatic DDL rollback pending** | PHP 8.3/8.4 [CI #39625847746](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847746) passed. MySQL job [#39625847866](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847866) steps green; production recovery pending |
 | [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | **Pinned-key Ed25519 verifier + owner CLI recovery; updater/rollback not built** | Verifier tests [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600); central release manager deferred |
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
 | [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **Token-gated Owner wizard CI tested; zero-config host bootstrap pending** | [docs/WEB-INSTALL.md](WEB-INSTALL.md), [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 
 ## Work log
+
+### 2026-10-22 — C13 schema and restore checkpoint
+- Extended `PluginQuarantine` with snapshot listing and exact-snapshot restoration. Owner-only restore route/UI requires typed plugin ID; restores as disabled, protects occupied destination and rejects invalid snapshots.
+- Added `core_plugin_schema_history` ledger and explicit `84pad:plugin-schema` CLI that reads a restrictive additive `schema.json`, validates the entire plan, allows only plugin-namespaced new tables, records per-table revision SHA-256 checksum, skips matching repeats and blocks changed definitions or collisions. No automatic destructive schema operations.
+- Added feature tests for plugin restore (wrong ID, repeat restore, Owner authorization), safe plugin schema creation, idempotency, drift, collision and core-table namespace protection.
+- [PHP Core CI #39625847746](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847746) PASSED PHP 8.3/8.4. [MySQL CI #39625847866](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847866) job steps were green when last inspected; run-level confirmation still required.
+- [docs/PLUGIN-SCHEMA.md](PLUGIN-SCHEMA.md) explains that MySQL DDL auto-commits and the Core **does not** provide automatic schema rollback, production backup, or arbitrary plugin data migrations yet. C13 remains open.
+
 
 ### 2026-10-22 — signed plugin quarantine tested
 - Added signed-upload provenance marker, Owner-confirmed plugin uninstall route and quarantine manager that disables then moves uploaded plugin code to private storage without deleting plugin database records.
