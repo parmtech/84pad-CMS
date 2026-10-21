@@ -19,6 +19,15 @@ class HostPreflightTest extends TestCase
         $this->artisan('84pad:doctor')->assertExitCode(1);
     }
 
+    public function test_doctor_rejects_insecure_production_configuration(): void
+    {
+        Config::set('app.env', 'production');
+        Config::set('app.url', 'http://example.test');
+        Config::set('app.debug', true);
+
+        $this->artisan('84pad:doctor')->assertExitCode(1);
+    }
+
     public function test_doctor_rejects_an_unsupported_database_driver(): void
     {
         Config::set('database.default', 'unknown');
