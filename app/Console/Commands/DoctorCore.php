@@ -23,6 +23,10 @@ class DoctorCore extends Command
             'Storage writable' => is_writable(storage_path()),
             'Bootstrap cache writable' => is_writable(base_path('bootstrap/cache')),
             'APP_KEY configured' => (bool) config('app.key'),
+            'Production URL HTTPS' => config('app.env') !== 'production'
+                || str_starts_with((string) config('app.url'), 'https://'),
+            'Production debug disabled' => config('app.env') !== 'production'
+                || ! (bool) config('app.debug'),
         ];
 
         $driver = (string) config('database.default');
