@@ -8,6 +8,7 @@ use App\Support\Plugins\PluginCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
@@ -40,11 +41,17 @@ final class CoreSettingsController extends Controller
     public function saveCpanel(Request $request, CoreSettings $settings): RedirectResponse
     {
         abort_unless($request->user()?->isOwner(), 403);
-        $data = $request->validate([
+        // Avoid Laravel's default input-flashing on validation errors:
+        // the raw API token must NEVER be copied into session flash storage.
+        $check = Validator::make($request->all(), [
             'host' => ['required','string','max:253'],
             'username' => ['required','string','max:64'],
             'api_token' => ['nullable','string','min:16','max:4096'],
         ]);
+        if ($check->fails()) {
+            return back()->withErrors($check)->onlyInput('host', 'username');
+        }
+        $data = $check->validated();
         try {
             $settings->saveCpanel(
                 $data['host'], $data['username'], ($data['api_token'] ?? '') === ''
