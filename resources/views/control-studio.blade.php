@@ -150,6 +150,29 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <article class="plugin"><h3>No plugins discovered</h3><p>Add a compatible local plugin manifest to begin.</p></article>
 @endforelse
 </div></div></section>
+@can('core.manage-plugins')
+@if(count($quarantined))
+<section id="quarantine">
+<div class="section-head"><h2>Recovery vault</h2><p>Signed uploads saved from removal</p></div>
+<div class="panel">
+<p style="color:#a2bed5;font-size:12px">These plugin files are held in private storage, with their database data preserved. Restoring a plugin does not activate it automatically.</p>
+<div class="plugins">
+@foreach($quarantined as $snapshot)
+<article class="plugin">
+<h3>{{ $snapshot['slug'] }}</h3>
+<p class="meta">VERSION {{ $snapshot['version'] }}</p>
+<p>Snapshot {{ $snapshot['snapshot'] }}</p>
+<form method="post" action="{{ route('plugins.restore', ['snapshot'=>$snapshot['snapshot']]) }}">@csrf
+<label style="font-size:12px;display:block">Confirm plugin ID to restore</label>
+<input name="confirm_slug" type="text" required maxlength="64" autocomplete="off"
+ style="width:100%;padding:10px;margin-top:9px;border-radius:10px;border:1px solid #456788;background:#0b1529;color:white">
+<button type="submit">Restore disabled</button>
+</form>
+</article>
+@endforeach
+</div></div></section>
+@endif
+@endcan
 <footer>84PAD CORE • DEVELOPED BY PARMTECH • NOT YET PRODUCTION READY</footer>
 </div></div>
 </body></html>
