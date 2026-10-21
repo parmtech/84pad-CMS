@@ -7,6 +7,8 @@ use App\Http\Controllers\PluginStateController;
 use App\Http\Controllers\PluginInstallController;
 use App\Http\Controllers\PluginUninstallController;
 use App\Http\Controllers\PluginRestoreController;
+use App\Http\Controllers\CoreSettingsController;
+use App\Http\Controllers\GuidedTourController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -19,6 +21,12 @@ Route::middleware('guest')->group(function (): void {
 });
 Route::middleware(['auth','auth.session'])->group(function (): void {
     Route::get('/dashboard', ControlStudioController::class)->middleware('can:core.view-dashboard')->name('dashboard');
+    Route::get('/dashboard/settings', [CoreSettingsController::class, 'show'])->middleware('can:core.manage-security')->name('settings.show');
+    Route::post('/dashboard/settings/cpanel', [CoreSettingsController::class, 'saveCpanel'])->middleware(['can:core.manage-security','throttle:5,1'])->name('settings.cpanel');
+    Route::post('/dashboard/settings/switch', [CoreSettingsController::class, 'switch'])->middleware(['can:core.manage-security','throttle:20,1'])->name('settings.switch');
+    Route::post('/dashboard/settings/permission', [CoreSettingsController::class, 'permission'])->middleware(['can:core.manage-security','throttle:20,1'])->name('settings.permission');
+    Route::post('/dashboard/settings/disconnect', [CoreSettingsController::class, 'disconnect'])->middleware(['can:core.manage-security','throttle:5,1'])->name('settings.disconnect');
+    Route::post('/dashboard/tour/complete', [GuidedTourController::class, 'complete'])->middleware(['can:core.manage-security','throttle:10,1'])->name('tour.complete');
     Route::post('/dashboard/plugins/install', PluginInstallController::class)
         ->middleware(['can:core.manage-plugins','throttle:5,1'])->name('plugins.install');
     Route::post('/dashboard/plugins/quarantine/{snapshot}/restore', PluginRestoreController::class)
