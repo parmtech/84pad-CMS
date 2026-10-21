@@ -62,7 +62,8 @@ final class ChangePasswordTest extends TestCase
             'name' => 'Viewer', 'email' => 'viewer@example.test',
             'role' => 'viewer', 'password' => 'viewer-strong-password',
         ]);
-        $this->actingAs($viewer)->post('/account/security', [
+        $this->actingAs($viewer)->get('/account/security')->assertForbidden();
+        $this->post('/account/security', [
             'current_password' => 'viewer-strong-password',
             'password' => 'viewer-new-strong-password',
             'password_confirmation' => 'viewer-new-strong-password',
