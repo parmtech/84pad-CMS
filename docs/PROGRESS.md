@@ -1,11 +1,11 @@
 # 84PAD Core — Resume Checkpoint
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
-> Last updated: 2026-10-21 (Australia/Sydney).
+> Last updated: 2026-10-22 (Australia/Sydney).
 > **Current phase:** Core 0.1 — foundation verified on earlier CI commit; installer/auth/plugin preview code added and now requires its own verification.
-> **Next issue:** [#3 C03 — Installation prerequisite checks](https://github.com/manbir6-ux/84pad-core/issues/3).
-> **Runnable:** Latest tested commit `336cda4` passed CI on PHP 8.3/8.4, including owner installer idempotence. Not deployed to cPanel or approved for production.
-> **Environment test status:** [CI run 39606560227](https://github.com/manbir6-ux/84pad-core/actions/runs/39606560227) **SUCCESS** for PHP 8.3 and PHP 8.4, including owner install replay/invalid-password tests, Composer, migrations, PHPUnit and lint. No MySQL concurrency or live cPanel test yet.
+> **Next issue:** [#4 C04 — One-time owner installer](https://github.com/manbir6-ux/84pad-core/issues/4) (MySQL concurrency/recovery), then [#5 C05 — Authentication](https://github.com/manbir6-ux/84pad-core/issues/5).
+> **Runnable:** Latest tested commit `be03c09` passed CI on PHP 8.3/8.4. Not deployed to cPanel or approved for production.
+> **Environment test status:** [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) **SUCCESS** on PHP 8.3/8.4. Confirms Composer/install, migrations, PHPUnit tests including login throttling and safe 503 on database failure, lint. No concurrent MySQL or live cPanel tests yet.
 
 ## Work checklist
 
@@ -13,9 +13,9 @@
 |---|---|---|---|
 | [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | **CI verified (PHP 8.3 & 8.4)** | [Run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743); still unmerged and not production approved |
 | [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | **CI verified; issue closed** | [Run 39605702869](https://github.com/manbir6-ux/84pad-core/actions/runs/39605702869); nested secret ignores + filename guard |
-| [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | **In progress, CI tests green** | [Run 39606241862](https://github.com/manbir6-ux/84pad-core/actions/runs/39606241862): host doctor rejects missing APP_KEY, unknown DB and insecure production HTTP/debug; remaining installer acceptance testing pending |
+| [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | **CI verified; issue closed** | Installer now executes `84pad:doctor` before migrations; [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) |
 | [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | **Sequential replay/weak password tests passed** | [Run 39606560227](https://github.com/manbir6-ux/84pad-core/actions/runs/39606560227); concurrent MySQL installs/recovery still pending |
-| [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | **Implementation preview** | Owner login/logout guarded routes and feature tests; security review pending |
+| [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | **Implemented, CI tested; security review pending** | Wrong password and sixth attempt (429) tested; database failure returns generic 503; [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) |
 | [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | Partial | Owner-only controls; full RBAC not implemented |
 | [C07](https://github.com/manbir6-ux/84pad-core/issues/7) | Control Studio dashboard | **Implementation preview** | Initial owner dashboard view; gaming UI polish and browser testing pending |
 | [C08](https://github.com/manbir6-ux/84pad-core/issues/8) | Plugin manifest | Partial source added | JSON manifest scanner; no signatures |
@@ -28,6 +28,12 @@
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
 
 ## Work log
+
+### 2026-10-22 — preflight enforcement and login hardening
+- Installer now invokes `84pad:doctor` before migrations; insecure production configuration exits without creating owner or installation marker. [CI run 39607425378](https://github.com/manbir6-ux/84pad-core/actions/runs/39607425378) passed on PHP 8.3/8.4.
+- `tests/Feature/AuthenticationFlowTest.php` now covers invalid password and login throttling after 5 attempts; login returns generic `503` on database failure, without exposing raw diagnostic details.
+- [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) passed PHP 8.3 and 8.4 for the latest auth hardening. C03 issue closed, C04/C05 remain open for further security and operational verification.
+
 
 ### 2026-10-22 — owner installer acceptance tests
 - Added `tests/Feature/OwnerInstallerTest.php`: first CLI owner install succeeds, retry fails without a second user/installation marker, and invalid short password leaves no installation marker.
