@@ -17,12 +17,12 @@
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
 - Core update **signature-verification interface** using Ed25519 with trusted public keys. There is no automatic upgrader, central release server, or verified rollback yet.
 
-**Most recent verified CI for uploaded-plugin changes:** [PHP 8.3/8.4 #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600), and [MySQL 8 #39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) (check latest completed status). These do not replace a live shared-hosting deployment, penetration test or installer package acceptance.
+**Latest verified CI:** [PHP 8.3/8.4 #39618022600](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022600) and [MySQL 8 #39618022701](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022701), both succeeded, including signed package quarantine tests. This is not a live shared-hosting deployment or security audit.
 
 ## Important gaps before Core release
 
 - Complete browser bootstrap that configures the database and application key without SSH or manual `.env` editing.
-- Signed plugin update, uninstall, dependency resolution and plugin-owned migration/recovery lifecycle.
+- Automatic signed plugin updates, dependency resolution, plugin-owned migrations and automated rollback. **Signed-uploaded plugins can already be moved to private quarantine by confirmed Owner action**, without deleting database data.
 - Full unattended Core updater, maintenance mode, rollback/recovery plan, release packaging and security audit.
 - Clean cPanel shared-host installation and browser/mobile visual acceptance testing.
 - Review/merge the [draft development PR](https://github.com/manbir6-ux/84pad-core/pull/17) only after all acceptance checks pass. **No production release is claimed.**
