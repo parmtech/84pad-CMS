@@ -1,14 +1,26 @@
-# Owner installation — unverified development code
+# Owner installation — development CLI
 
-This is a **CLI-only** first-owner installer. There is deliberately no public signup flow.
+The first-owner CLI installer has passed automated SQLite and MySQL tests, including concurrent MySQL first-owner attempts. **84PAD is not approved for live production use.** A browser-based installation wizard is tracked separately in [issue #18](https://github.com/manbir6-ux/84pad-core/issues/18).
 
-1. Install Composer, Laravel PHP extensions and configure the untracked `.env`.
-2. Set APP_KEY with `php artisan key:generate`.
-3. Configure a **new empty** database. Production deployment is not approved.
-4. Run `php artisan 84pad:install --name="Site Owner" --email="owner@example.com"`.
-5. Enter password in the hidden prompt (minimum 12 characters).
-6. Sign in at `/login` using HTTPS when in a secured environment.
+## Fresh installation on a development host
 
-The setup transaction inserts a unique installation marker and then the owner. Repeated installer attempts fail without adding another owner.
+1. Install compatible PHP extensions and Composer dependencies; copy `.env.example` to an untracked `.env`.
+2. Configure an empty test MySQL/SQLite database and set `APP_KEY` with `php artisan key:generate`.
+3. Run `php artisan 84pad:doctor`; fix failed prerequisites before any migration.
+4. Run `php artisan 84pad:install --name="Site Owner" --email="owner@example.test"`.
+5. Enter a strong password into the **hidden prompt** (at least 12 characters); it must not be placed in command arguments.
+6. Open `/login` over HTTPS with production debug mode disabled when testing behind a correctly configured host.
 
-**Known limitation:** Composer install, integration tests, rollback and fresh installation have not been executed in this session. Treat the entire build as development-only, not production-ready.
+## Headless CI/password managers
+
+The CLI also supports `--password-stdin`, reading a single password line from standard input instead of command arguments. Use this only with trusted local stdin or your deployment secret manager. Do **not** hard-code real passwords into shell scripts, GitHub Actions YAML, logs, terminal history, or the repository. The GitHub race tests use **dummy throwaway CI-only passwords**.
+
+## What has actually been tested
+
+- [Core CI run #39609985107](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985107): PHP 8.3/8.4 Composer install, routes, migrations, PHPUnit and syntax checks.
+- [MySQL run #39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317): MySQL 8 migrations/test suite and two concurrent first-owner CLI processes. Exactly one installer succeeded, with one linked owner and one installation marker.
+- Invalid password and repeat-installation tests also pass.
+
+## What remains
+
+This is still **CLI-only**; no first-run public web installer, no tested shared-host deployment, no emergency recovery release, and no complete plugin execution engine. Do not publish a production installation yet.
