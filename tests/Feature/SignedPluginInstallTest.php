@@ -19,6 +19,9 @@ final class SignedPluginInstallTest extends TestCase
     protected function tearDown(): void
     {
         File::deleteDirectory(base_path('plugins/upload-test'));
+        foreach (File::glob(storage_path('app/private/plugin-quarantine/upload-test-*')) ?: [] as $dir) {
+            File::deleteDirectory($dir);
+        }
         parent::tearDown();
     }
 
@@ -94,6 +97,47 @@ PHP
         } finally {
             @unlink($path);
         }
+    }
+
+    public function test_signed_plugin_uninstall_moves_code_to_private_quarantine(): void
+    {
+        $owner = $this->owner();
+        [$path, $signature] = $this->package();
+        try {
+            $this->actingAs($owner)->post('/dashboard/plugins/install', [
+                'package' => new UploadedFile($path, 'plugin.zip', 'application/zip', null, true),
+                'signature' => $signature,
+            ])->assertRedirect('/dashboard');
+
+            $this->post('/dashboard/plugins/upload-test/state', ['action'=>'activate'])
+                ->assertRedirect();
+            $this->assertDatabaseHas('core_plugins', ['slug'=>'upload-test','enabled'=>1]);
+
+            $this->post('/dashboard/plugins/upload-test/uninstall', [
+                'confirm_slug' => 'wrong-id',
+            ])->assertSessionHasErrors('plugin');
+            $this->assertTrue(is_dir(base_path('plugins/upload-test')));
+
+            $this->post('/dashboard/plugins/upload-test/uninstall', [
+                'confirm_slug' => 'upload-test',
+            ])->assertRedirect('/dashboard');
+            $this->assertFalse(is_dir(base_path('plugins/upload-test')));
+            $this->assertDatabaseHas('core_plugins', ['slug'=>'upload-test','enabled'=>0]);
+            $this->assertNotEmpty(File::glob(
+                storage_path('app/private/plugin-quarantine/upload-test-*')
+            ));
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_bundled_demo_cannot_be_removed_as_an_uploaded_plugin(): void
+    {
+        $this->actingAs($this->owner())
+            ->post('/dashboard/plugins/demo-widget/uninstall', [
+                'confirm_slug' => 'demo-widget',
+            ])->assertSessionHasErrors('plugin');
+        $this->assertTrue(is_dir(base_path('plugins/demo-widget')));
     }
 
     public function test_missing_trusted_key_rejects_plugin_without_writing_it(): void
