@@ -9,7 +9,7 @@ class ControlStudioController extends Controller
 {
     public function __invoke(Request $request, PluginRegistry $registry): View
     {
-        abort_unless($request->user()?->isOwner(), 403);
+        abort_unless($request->user()?->can('core.view-dashboard'), 403);
         return view('control-studio', ['user' => $request->user(), 'plugins' => $registry->states()]);
     }
 }
