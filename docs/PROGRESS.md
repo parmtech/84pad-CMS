@@ -2,10 +2,10 @@
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-22 (Australia/Sydney).
-> **Current phase:** Core 0.1 staging build — secure cPanel no-SSH first-run bootstrap, private staging ZIP, Core code snapshot verification, plugin runtime and signed archive inspection implemented. Final release gates remain.
+> **Current phase:** Core 0.1 staging build — new Owner Settings, encrypted cPanel API credential, deny-by-default per-plugin grants, independent feature switches, guided first-login training, and 128 MiB signed plugin upload added. Live compatibility/release gates remain.
 > **Next issue:** [#13 C13 — Plugin migration recovery](https://github.com/manbir6-ux/84pad-core/issues/13): finish migration-failure safeguards and rollback approach; then [#14 C14 — Core updater/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Browser installer/cPanel QA remain release gates.
 > **Runnable:** New staging distribution built with Composer vendor bundled, and the latest PHP 8.3/8.4 and MySQL 8 suites pass. Not deployed to live cPanel or approved for production.
-> **Environment test status:** [Core CI #39686927563](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927563) **SUCCESS** PHP 8.3/8.4; [MySQL CI #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537) **SUCCESS**, including disposable database no-SSH bootstrap and existing-config protection; [Stage Distribution #39686927599](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927599) **SUCCESS**, private staging ZIP artifact. Live cPanel/visual/security, production backups and automatic update rollback outstanding.
+> **Environment test status:** [Core CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) **SUCCESS** PHP 8.3/8.4 with first-login tutorial, encryption/permissions, 128 MiB ZIP and JavaScript syntax tests; [MySQL CI #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) **SUCCESS**; [Staging ZIP #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) **SUCCESS**. Live cPanel API, browser visual/accessibility and production security/recovery tests remain pending.
 
 ## Work checklist
 
@@ -27,8 +27,21 @@
 | [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update and emergency recovery | **Signed update inspection + private source snapshot verified; full rollback not built** | `84pad:core-snapshot` integrity-tested [Core CI #39686927563](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927563); signed release inspection previously verified |
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | **Staging ZIP reproducibility CI passed; live acceptance incomplete** | [Stage Distribution #39686927599](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927599) generated vendor-bundled, secret-excluded artifact; composer.lock and cPanel acceptance still pending |
 | [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **No-SSH token-gated PHP bootstrap + Laravel Owner wizard CI tested; real cPanel acceptance pending** | Disposable MySQL [CI #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537) verified `.env`/APP_KEY creation without overwrite; [docs/WEB-INSTALL.md](WEB-INSTALL.md) |
+| [C17](https://github.com/manbir6-ux/84pad-core/issues/19) | Central cPanel credentials, Core Settings, plugin API grants | **Core/UI + read-only UAPI gateway CI tested; live API/writes pending** | [PHP #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) / [MySQL #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395); token encrypted and optional |
+| [C18](https://github.com/manbir6-ux/84pad-core/issues/20) | First-login Guided Tour | **Arrow tutorial and completion/replay tested; browser accessibility QA pending** | [Core CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418): GuidedTourTest and JS syntax |
+| [C19](https://github.com/manbir6-ux/84pad-core/issues/21) | Increase signed plugin ZIP upload to 128 MiB | **CI verified; issue closed** | 128 MiB compressed, 512 MiB extracted, <=5000 entries, ratio checks; [Core CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) / [MySQL](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) |
 
 ## Work log
+
+### 2026-10-22 — Owner cPanel Settings, 128 MiB plugins, first-login Guided Tour
+- Added `core_settings`, `core_cpanel_grants` and per-user `core_user_preferences` migrations. Owner-only settings let users store an APP_KEY-encrypted cPanel API token, control independent Core switches, and grant/revoke specific plugin capabilities. Integration defaults OFF, so login and unrelated plugins work without any token.
+- Added `CpanelPermissions` checks and preliminary fixed read-only `CpanelGateway` operations; privileged PHP plugin code remains full-trust, not sandboxed. No real cPanel API account tested and write commands remain deferred.
+- Added guided arrow/spotlight tour across Dashboard and Settings, with Back/Next/Skip/Finish, initial Owner auto-start, persisted completion and replay option. `GuidedTourTest` and JavaScript syntax checks passed; real browser accessibility checks still pending.
+- Increased signed ZIP upload to **128 MiB** compressed, **512 MiB** expanded, **5000** entries with ratio checks and tests. Host PHP upload/post limits must support file size; C19 issue closed.
+- Security test verifies token encryption, no plaintext token in UI/session flash, Owner authorization, global/individual API access, graceful operation without cPanel, and reject arbitrary API calls/file paths.
+- [PHP CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) **SUCCESS** PHP 8.3/8.4, [MySQL CI #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) **SUCCESS**, and [Stage Distribution #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) **SUCCESS**.
+- Docs: [Core Settings, cPanel and Guided Tour](CORE-SETTINGS-AND-TOUR.md). C17 and C18 remain open for live-host and browser/accessibility verification; Core itself is **still staging preview**.
+
 
 ### 2026-10-22 — cPanel staging distribution, bootstrap and source recovery
 - Added `public/84pad-bootstrap.php`: only on direct HTTPS with a 32+ char owner-generated private token, empty MySQL database, CSRF/rate limits, exclusive `.env` creation, generated APP_KEY and fail-closed existing configuration. Added `tests/Fixtures/BootSetupGet.php`, `BootSetupPost.php`, `BootstrapGateTest.php`, `BootstrapMySqlTest.php`.
