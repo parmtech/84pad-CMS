@@ -10,4 +10,8 @@ return [
     'release_public_keys' => array_values(array_filter(
         array_map('trim', explode(',', (string) env('PAD_RELEASE_PUBLIC_KEYS', '')))
     )),
+    // Trusted plugin publisher public keys (base64, comma-separated).
+    'plugin_public_keys' => array_values(array_filter(
+        array_map('trim', explode(',', (string) env('PAD_PLUGIN_PUBLIC_KEYS', '')))
+    )),
 ];
