@@ -18,3 +18,15 @@
 /storage/framework/sessions/*
 /storage/framework/views/*
 /public/storage
+
+# Block nested plugin/site secrets and certificate private material
+.env
+.env.*
+!.env.example
+auth.json
+id_rsa
+id_ed25519
+*.pem
+*.p12
+*.pfx
+*.key
