@@ -11,20 +11,22 @@ use Illuminate\View\View;
 
 final class ChangePasswordController extends Controller
 {
-    public function edit(): View
+    public function edit(Request $request): View
     {
+        abort_unless($request->user()?->isOwner(), 403);
         return view('auth.change-password');
     }
 
     public function update(Request $request): RedirectResponse
     {
+        abort_unless($request->user()?->isOwner(), 403);
+
         $validated = $request->validate([
             'current_password' => ['required', 'current_password:web'],
             'password' => ['required', 'confirmed', 'different:current_password', Password::min(12), 'max:1024'],
         ]);
 
         $owner = $request->user();
-        abort_unless($owner && $owner->isOwner(), 403);
         $owner->forceFill([
             'password' => Hash::make($validated['password']),
             'remember_token' => \Illuminate\Support\Str::random(60),
