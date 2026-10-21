@@ -9,17 +9,25 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
+use Throwable;
 
 class LoginController extends Controller
 {
     private function requireInstalled(): void
     {
-        abort_unless(
-            Schema::hasTable('core_installations')
-                && DB::table('core_installations')->where('id', 1)->exists(),
-            503,
-            '84PAD has not been installed by its owner.'
-        );
+        // A fresh or temporarily unavailable database must produce a safe
+        // unavailable response, not a raw connection exception.
+        try {
+            $installed = Schema::hasTable('core_installations')
+                && DB::table('core_installations')
+                    ->where('id', 1)
+                    ->whereNotNull('owner_user_id')
+                    ->exists();
+        } catch (Throwable $e) {
+            $installed = false;
+        }
+
+        abort_unless($installed, 503, '84PAD is not ready for sign-in.');
     }
 
     public function show(): View
