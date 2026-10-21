@@ -53,6 +53,8 @@ jobs:
       DB_DATABASE: pad_ci
       DB_USERNAME: padtester
       DB_PASSWORD: test_only_password
+      # Explicitly throwaway password for disposable CI service only.
+      CI_BOOTSTRAP_ROOT_PASSWORD: test_only_root
       SESSION_DRIVER: array
       CACHE_STORE: array
 
