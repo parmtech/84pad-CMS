@@ -7,11 +7,27 @@ on:
       - main
     paths:
       - '.github/workflows/stage-distribution.yml'
+      - 'public/**'
+      - 'app/**'
+      - 'config/**'
+      - 'database/**'
+      - 'routes/**'
+      - 'resources/**'
+      - 'composer.json'
+      - 'composer.lock'
   push:
     branches:
       - 'core/**'
     paths:
       - '.github/workflows/stage-distribution.yml'
+      - 'public/**'
+      - 'app/**'
+      - 'config/**'
+      - 'database/**'
+      - 'routes/**'
+      - 'resources/**'
+      - 'composer.json'
+      - 'composer.lock'
 
 permissions:
   contents: read
@@ -63,6 +79,7 @@ jobs:
           names=z.namelist()
           assert 'vendor/autoload.php' in names, "Runtime dependencies missing"
           assert 'public/index.php' in names, "Web entry point missing"
+          assert 'public/84pad-bootstrap.php' in names, "No-SSH bootstrap script missing"
           assert '.env.example' in names, "Expected config template missing"
           blocked=[x for x in names if x=='.env' or x.startswith('.git/') or x.startswith('storage/app/') or x.startswith('storage/logs/') or x.endswith(('.pem','.key','.p12','.pfx'))]
           assert not blocked, "Sensitive files included: "+str(blocked[:10])
