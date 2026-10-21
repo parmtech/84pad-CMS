@@ -15,6 +15,8 @@ final class PluginRegistry
             $all[$slug] = $manifest + [
                 'compatible'=>$this->catalog->compatible($manifest),
                 'enabled'=>(bool)($registered[$slug]->enabled ?? false),
+                'removable'=>is_file(base_path('plugins/'.$slug.'/.84pad-signed-upload')),
+
             ];
         }
         return $all;
