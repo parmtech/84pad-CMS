@@ -28,13 +28,13 @@ UTF8("84PAD_PLUGIN_ZIP_V1\n") || SHA256(zip_file_binary_bytes)
 
 Only ZIPs installed through the trusted signed installer can be uninstalled in the UI. The Owner must type the exact plugin slug. Uninstall first disables the plugin and then moves its directory into private `storage/app/private/plugin-quarantine/` instead of immediately deleting files. Database tables and user data are deliberately **retained**. Bundled Core/demo plugins cannot be removed by this upload-uninstall flow.
 
-This is a reversible staging mechanism, not a fully tested automated rollback. Restoration from quarantine currently requires trusted host-file access; automatic migration rollback remains future work. Quarantine storage should be considered sensitive and included in the site's recovery plan.
+This is a reversible staging mechanism, not a fully tested automated rollback. Owners can now restore matching signed-upload snapshots through the Control Studio Recovery vault. Restoration requires exact plugin ID confirmation and keeps the plugin disabled. It refuses an already occupied installed plugin destination. Automated Core/plugin database rollback remains future work. Quarantine storage should be considered sensitive and included in the site's recovery plan.
 
 ## Current limits
 
-- No central marketplace, auto-update, dependency resolution or automatic migration rollback yet. Basic signed-upload quarantine uninstall is implemented.
+- No central marketplace, auto-update, dependency resolution or automatic migration rollback yet. Signed-upload quarantine uninstall **and guarded restoration** are implemented.
 - Plugin execution currently integrates with Control Studio dashboard hooks, not arbitrary public-facing pages.
 - A first-party demo lives in `plugins/demo-widget/` and is covered by automated activation/deactivation tests.
-- Safe migration/uninstall and signed central distribution are separate pending Core milestones. See `docs/PROGRESS.md`.
+- Explicit create-only plugin schema changes use `schema.json` and the `84pad:plugin-schema` CLI. They are recorded in a checksum ledger and never execute on upload/activation; see [Plugin schema contract](../docs/PLUGIN-SCHEMA.md). Destructive changes, automatic rollback and central distribution are still pending.
 
 The public 84PAD website and SSL God/Email/File Manager/Backup plugins are deferred until the Core is stabilized.
