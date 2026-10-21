@@ -15,14 +15,14 @@
 - Fully redesigned responsive futuristic Control Studio with real status and local plugin management.
 - JSON plugin manifest discovery, owner-controlled activation/deactivation, HookBus integration and first-party executable demo widget.
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
-- Core update **signature-verification interface** using Ed25519 with trusted public keys. There is no automatic upgrader, central release server, or verified rollback yet.
+- Core update **signature-verification and inspection/dry-run CLI** using Ed25519, semantic version, PHP compatibility and safe archive-path checks. There is **no automatic updater, central release server or verified rollback yet**.
 
-**Latest verified CI:** [PHP 8.3/8.4 #39618022600](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022600) and [MySQL 8 #39618022701](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022701), both succeeded, including signed package quarantine tests. This is not a live shared-hosting deployment or security audit.
+**Latest fully confirmed PHP CI for C13:** [PHP 8.3/8.4 #39625847746](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847746) passed. [MySQL #39625847866](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847866) individual job steps succeeded; run status to be checked. Newer Core update-inspection tests also require CI sign-off. This is not a live shared-hosting deployment or security audit.
 
 ## Important gaps before Core release
 
 - Complete browser bootstrap that configures the database and application key without SSH or manual `.env` editing.
-- Automatic signed plugin updates, dependency resolution, plugin-owned migrations and automated rollback. **Signed-uploaded plugins can already be moved to private quarantine by confirmed Owner action**, without deleting database data.
+- Automatic signed plugin updates, dependency resolution, arbitrary plugin data transformations and automated database rollback. Signed-uploaded plugins can be quarantined and restored disabled; safe explicit plugin-owned **create-only schema** is available from CLI ([contract](docs/PLUGIN-SCHEMA.md)).
 - Full unattended Core updater, maintenance mode, rollback/recovery plan, release packaging and security audit.
 - Clean cPanel shared-host installation and browser/mobile visual acceptance testing.
 - Review/merge the [draft development PR](https://github.com/manbir6-ux/84pad-core/pull/17) only after all acceptance checks pass. **No production release is claimed.**
