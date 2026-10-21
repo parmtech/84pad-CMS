@@ -3,15 +3,15 @@
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-21 (Australia/Sydney).
 > **Current phase:** Core 0.1 — foundation.
-> **Next issue:** [#1 C01 — Bootstrap Laravel 12 foundation](https://github.com/manbir6-ux/84pad-core/issues/1).
-> **Runnable:** NOT VERIFIED. C01 partial Laravel source scaffold is now committed on a feature branch; dependencies have not been installed or executed.
-> **Environment test status:** NOT RUN on GitHub scaffold. The working container has PHP 8.4.24, but Composer, mbstring and a SQLite driver were not available in the checked runtime. No Laravel app/test command succeeded.
+> **Next issue:** [#2 C02 — Configuration and secret hygiene](https://github.com/manbir6-ux/84pad-core/issues/2).
+> **Runnable:** CI verified on PHP 8.3 and 8.4; not deployed to hosting or approved for production.
+> **Environment test status:** GitHub Actions [run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743): PHP 8.3 and PHP 8.4 jobs passed Composer install, artisan bootstrap/routes, SQLite migrations, PHPUnit and PHP syntax checks. Local container still lacks Composer and required PHP extensions.
 
 ## Work checklist
 
 | ID | Task | State | Proof |
 |---|---|---|---|
-| [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | **In progress — source committed, runtime unverified** | [Feature branch](https://github.com/manbir6-ux/84pad-core/tree/core/C01-laravel-foundation): 23 changed files; not yet merged to main |
+| [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | **CI verified (PHP 8.3 & 8.4)** | [Run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743); still unmerged and not production approved |
 | [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | Not started | none |
 | [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | Not started | none |
 | [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | Not started | none |
@@ -28,6 +28,13 @@
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
 
 ## Work log
+
+### 2026-10-22
+- Added `.github/workflows/core-ci.yml` on `core/C01-laravel-foundation` ([commit 632df90](https://github.com/manbir6-ux/84pad-core/commit/632df90b5cf87fef53ff9ca103a6f4cdfde4c895)).
+- [GitHub Actions run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743) **PASSED** on PHP 8.3 and 8.4: Composer validation/install, environment setup, Laravel bootstrap/routes, SQLite migrations, PHPUnit tests, and PHP lint.
+- Foundation now has model/config/migration/owner CLI/auth/control-studio **development previews**; installed on CI runners only. No cPanel production or UI browser acceptance tests done.
+- Opened [draft PR #17](https://github.com/manbir6-ux/84pad-core/pull/17) for review; do NOT merge as a production release. Next focus: C02 config/secrets; C03+ require separate acceptance and security tests.
+
 
 ### 2026-10-21
 - Verified GitHub repo `manbir6-ux/84pad-core` exists, remains **private**, and connector has push access.
