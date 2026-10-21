@@ -75,3 +75,47 @@ jobs:
         run: php artisan migrate --force --no-interaction
       - name: Run Core tests against MySQL
         run: php artisan test --no-ansi
+      - name: Reject concurrent duplicate owners on ephemeral MySQL
+        run: |
+          # Destructive reset is allowed ONLY against the temporary CI MySQL service.
+          test "$GITHUB_ACTIONS" = "true"
+          test "$APP_ENV" = "testing"
+          test "$DB_DATABASE" = "pad_ci"
+          php artisan migrate:fresh --force --no-interaction
+
+          set +e
+          (printf '%s\\n' 'CI-first-owner-test-password-123' | php artisan 84pad:install --name="Owner One" --email="one@example.test" --password-stdin >/tmp/owner-one.log 2>&1) &
+          one_pid=$!
+          (printf '%s\\n' 'CI-second-owner-test-password-123' | php artisan 84pad:install --name="Owner Two" --email="two@example.test" --password-stdin >/tmp/owner-two.log 2>&1) &
+          two_pid=$!
+
+          wait "$one_pid"
+          first_exit=$?
+          wait "$two_pid"
+          second_exit=$?
+          set -e
+
+          if { [ "$first_exit" -eq 0 ] && [ "$second_exit" -ne 0 ]; } || { [ "$second_exit" -eq 0 ] && [ "$first_exit" -ne 0 ]; }; then
+            echo "Exactly one installation succeeded (as required)."
+          else
+            echo "Unexpected concurrent installer results: $first_exit, $second_exit"
+            cat /tmp/owner-one.log /tmp/owner-two.log
+            exit 1
+          fi
+
+          php -r '
+          $db = new PDO(
+              "mysql:host=".getenv("DB_HOST").";port=".getenv("DB_PORT").";dbname=".getenv("DB_DATABASE"),
+              getenv("DB_USERNAME"),
+              getenv("DB_PASSWORD"),
+              [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+          );
+          $owners = (int) $db->query("SELECT COUNT(*) FROM users WHERE role = '\''owner'\''")->fetchColumn();
+          $markers = (int) $db->query("SELECT COUNT(*) FROM core_installations WHERE id = 1")->fetchColumn();
+          $linked = (int) $db->query("SELECT COUNT(*) FROM core_installations c JOIN users u ON c.owner_user_id = u.id WHERE u.role = '\''owner'\''")->fetchColumn();
+          if ($owners !== 1 || $markers !== 1 || $linked !== 1) {
+              fwrite(STDERR, "ERROR: invalid owner/installation marker state\\n");
+              exit(1);
+          }
+          echo "PASS: exactly one owner and one valid marker\\n";
+          '
