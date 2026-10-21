@@ -72,14 +72,12 @@ final class CoreSnapshotTest extends TestCase
 
     public function test_snapshot_cli_creates_new_archive_without_changing_database(): void
     {
-        $this->artisan('84pad:core-snapshot')->assertExitCode(0);
         $root = storage_path('app/private/core-snapshots');
-        $files = glob($root.'/core-*.zip') ?: [];
-        $this->assertNotEmpty($files);
-        foreach ($files as $file) {
-            if (app(CoreSnapshot::class)->verify($file)) {
-                $this->snapshots[] = $file;
-            }
-        }
+        $previous = glob($root.'/core-*.zip') ?: [];
+        $this->artisan('84pad:core-snapshot')->assertExitCode(0);
+        $created = array_values(array_diff(glob($root.'/core-*.zip') ?: [], $previous));
+        $this->assertCount(1, $created);
+        $this->snapshots[] = $created[0];
+        $this->assertTrue(app(CoreSnapshot::class)->verify($created[0]));
     }
 }
