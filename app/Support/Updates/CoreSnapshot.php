@@ -196,6 +196,14 @@ final class CoreSnapshot
     private function excluded(string $relative): bool
     {
         $segments = explode('/', str_replace('\\', '/', $relative));
+        $filename = strtolower(basename($relative));
+        if (in_array($filename, ['auth.json', 'credentials.json', 'secrets.json', 'id_rsa', 'id_ed25519'], true)
+            || str_ends_with($filename, '.pem')
+            || str_ends_with($filename, '.key')
+            || str_ends_with($filename, '.p12')
+            || str_ends_with($filename, '.pfx')) {
+            return true;
+        }
         foreach ($segments as $segment) {
             if ($segment === '' || $segment === '.' || $segment === '..'
                 || (str_starts_with($segment, '.') && $segment !== '.htaccess')) {
