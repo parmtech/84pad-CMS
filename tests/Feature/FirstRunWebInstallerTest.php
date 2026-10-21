@@ -18,6 +18,30 @@ final class FirstRunWebInstallerTest extends TestCase
         Config::set('84pad.setup_token', str_repeat('Q', 40));
     }
 
+    public function test_locked_installer_does_not_run_migrations_or_create_an_owner(): void
+    {
+        $path = storage_path('framework/84pad-first-run.lock');
+        $file = fopen($path, 'c');
+        $this->assertNotFalse($file);
+        $this->assertTrue(flock($file, LOCK_EX | LOCK_NB));
+
+        try {
+            $this->post('/setup', [
+                'setup_token' => str_repeat('Q', 40),
+                'name' => 'First Owner',
+                'email' => 'owner@example.test',
+                'password' => 'a-very-long-secret-passphrase',
+                'password_confirmation' => 'a-very-long-secret-passphrase',
+            ])->assertRedirect()->assertSessionHasErrors('setup');
+
+            $this->assertDatabaseCount('users', 0);
+            $this->assertDatabaseCount('core_installations', 0);
+        } finally {
+            flock($file, LOCK_UN);
+            fclose($file);
+        }
+    }
+
     public function test_setup_is_disabled_without_a_configured_secret(): void
     {
         Config::set('84pad.setup_token', '');
