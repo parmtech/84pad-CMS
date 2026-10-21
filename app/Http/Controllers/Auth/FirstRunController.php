@@ -64,13 +64,38 @@ final class FirstRunController extends Controller
             'password' => ['required','confirmed',Password::min(12),'max:1024'],
         ]);
 
-        // Run the same read-only host checks used by the CLI installer.
+        // Serialize the entire migrate + owner-creation phase. Two browser
+        // requests must never run Laravel's DDL migrations concurrently.
+        $lockPath = storage_path('framework/84pad-first-run.lock');
+        $lock = @fopen($lockPath, 'c');
+        if ($lock === false) {
+            return back()->withErrors([
+                'setup' => 'Setup lock could not be opened. Check private storage permissions.',
+            ])->onlyInput('name', 'email');
+        }
+        if (! flock($lock, LOCK_EX | LOCK_NB)) {
+            fclose($lock);
+            return back()->withErrors([
+                'setup' => 'Installation is already running. Please wait and retry.',
+            ])->onlyInput('name', 'email');
+        }
+
         try {
+            // Re-check inside the exclusive lock to close the time-of-check
+            // race between initially loading the form and applying DDL.
+            $this->assertAvailable($request);
+
             if (Artisan::call('84pad:doctor') !== 0) {
-                return back()->withErrors(['setup' => 'Host configuration failed preflight checks.'])
-                    ->onlyInput('name','email');
+                throw new \RuntimeException('Installer preflight rejected the host.');
             }
-            Artisan::call('migrate', ['--force' => true, '--no-interaction' => true]);
+
+            // Laravel commands may report a failing exit code without throwing.
+            // Never create an Owner if any migration returned failure.
+            if (Artisan::call('migrate', [
+                '--force' => true, '--no-interaction' => true,
+            ]) !== 0) {
+                throw new \RuntimeException('Required migrations did not succeed.');
+            }
 
             DB::transaction(function () use ($data): void {
                 $claimed = DB::table('core_installations')->insertOrIgnore([
@@ -79,6 +104,7 @@ final class FirstRunController extends Controller
                 if ($claimed !== 1 || User::query()->exists()) {
                     throw new \RuntimeException('Already installed');
                 }
+
                 $owner = User::query()->create([
                     'name' => $data['name'],
                     'email' => strtolower($data['email']),
@@ -90,8 +116,11 @@ final class FirstRunController extends Controller
             }, 3);
         } catch (Throwable $e) {
             return back()->withErrors([
-                'setup' => 'Installation could not be completed. Contact your hosting administrator.',
-            ])->onlyInput('name','email');
+                'setup' => 'Installation could not be completed. Check server configuration.',
+            ])->onlyInput('name', 'email');
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
         }
 
         // The standalone cPanel bootstrap token is only needed before the
