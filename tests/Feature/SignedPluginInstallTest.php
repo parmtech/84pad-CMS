@@ -16,6 +16,14 @@ final class SignedPluginInstallTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Package lifecycle tests use multiple requests; throttle limits are
+        // checked independently and must not leak between test methods.
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+    }
+
     protected function tearDown(): void
     {
         File::deleteDirectory(base_path('plugins/upload-test'));
