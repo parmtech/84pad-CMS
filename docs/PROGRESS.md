@@ -2,10 +2,10 @@
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-22 (Australia/Sydney).
-> **Current phase:** Core 0.1 — foundation verified on earlier CI commit; installer/auth/plugin preview code added and now requires its own verification.
-> **Next issue:** [#4 C04 — One-time owner installer](https://github.com/manbir6-ux/84pad-core/issues/4) (MySQL concurrency/recovery), then [#5 C05 — Authentication](https://github.com/manbir6-ux/84pad-core/issues/5).
-> **Runnable:** The latest code including hook and plugin metadata tests passed CI on PHP 8.3/8.4 (run 39608854765). Not deployed to cPanel or production approved.
-> **Environment test status:** [CI run 39608854765](https://github.com/manbir6-ux/84pad-core/actions/runs/39608854765) **SUCCESS** on PHP 8.3/8.4. Includes login, core hooks, plugin metadata state, migration and lint tests. No concurrent MySQL/live cPanel installation yet.
+> **Current phase:** Core 0.1 — Laravel, CLI owner installer and tests verified; web installer, production security and executable plugin lifecycle remain open.
+> **Next issue:** [#5 C05 — Authentication security](https://github.com/manbir6-ux/84pad-core/issues/5), then [#18 C16 — browser installer](https://github.com/manbir6-ux/84pad-core/issues/18); C06–C15 still open.
+> **Runnable:** CI verified on PHP 8.3/8.4 and MySQL 8. Not deployed to cPanel or production approved.
+> **Environment test status:** [Core CI 39609985107](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985107) passed PHP 8.3/8.4. [MySQL CI 39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317) passed MySQL migrations, PHP tests and two concurrent owner installers; exactly one successful installation. Live cPanel browser tests remain outstanding.
 
 ## Work checklist
 
@@ -14,7 +14,7 @@
 | [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | **CI verified (PHP 8.3 & 8.4)** | [Run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743); still unmerged and not production approved |
 | [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | **CI verified; issue closed** | [Run 39605702869](https://github.com/manbir6-ux/84pad-core/actions/runs/39605702869); nested secret ignores + filename guard |
 | [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | **CI verified; issue closed** | Installer now executes `84pad:doctor` before migrations; [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) |
-| [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | **Sequential replay/weak password tests passed** | [Run 39606560227](https://github.com/manbir6-ux/84pad-core/actions/runs/39606560227); concurrent MySQL installs/recovery still pending |
+| [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner CLI installer | **CI verified; issue closed** | [MySQL concurrent first-owner CI 39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317); production web installer is separate #18 |
 | [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | **Implemented, CI tested; security review pending** | Wrong password and sixth attempt (429) tested; database failure returns generic 503; [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) |
 | [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | Partial | Owner-only controls; full RBAC not implemented |
 | [C07](https://github.com/manbir6-ux/84pad-core/issues/7) | Control Studio dashboard | **Implementation preview** | Initial owner dashboard view; gaming UI polish and browser testing pending |
@@ -26,8 +26,17 @@
 | [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | Partial schema | Users/cache/jobs/install/plugin tables; rollback strategy pending |
 | [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | Not started | none |
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
+| [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **Planned** | CLI works in CI, but public web installation remains unbuilt |
 
 ## Work log
+
+### 2026-10-22 — MySQL concurrent first-owner acceptance
+- Added `--password-stdin` to the CLI installer for secure headless input (never a password argument). The normal hidden password prompt remains the default.
+- Created `.github/workflows/mysql-compat.yml` and validated migrations/tests against MySQL 8.
+- [MySQL CI run 39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317) **passed** with two simultaneous installer processes and exactly one owner/installation marker, plus the full test suite.
+- C04 (CLI one-time Owner install) closed after verified acceptance; created [issue #18](https://github.com/manbir6-ux/84pad-core/issues/18) for the **still-unbuilt browser-based web installer**.
+- Production shared-hosting deployment/security audit remains pending, draft PR #17 has not been merged.
+
 
 ### 2026-10-22 — plugin contract verification
 - Added `tests/Unit/HookBusContractTest.php` covering hook priority/registration order, dispatch, unknown-hook behavior, and invalid names.
