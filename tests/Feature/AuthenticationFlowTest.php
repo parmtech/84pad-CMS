@@ -39,6 +39,46 @@ class AuthenticationFlowTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_bad_password_does_not_authenticate(): void
+    {
+        $owner = User::query()->create([
+            'name' => 'Owner', 'email' => 'owner@example.test',
+            'password' => 'a-strong-test-password', 'role' => 'owner',
+        ]);
+        DB::table('core_installations')->insert([
+            'id' => 1, 'owner_user_id' => $owner->id, 'created_at' => now(),
+        ]);
+
+        $this->post('/login', [
+            'email' => 'owner@example.test', 'password' => 'definitely-not-the-password',
+        ])->assertRedirect()->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+        $this->get('/dashboard')->assertRedirect('/login');
+    }
+
+    public function test_repeated_bad_login_attempts_are_rate_limited(): void
+    {
+        $owner = User::query()->create([
+            'name' => 'Owner', 'email' => 'owner@example.test',
+            'password' => 'a-strong-test-password', 'role' => 'owner',
+        ]);
+        DB::table('core_installations')->insert([
+            'id' => 1, 'owner_user_id' => $owner->id, 'created_at' => now(),
+        ]);
+
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
+            $this->post('/login', [
+                'email' => 'owner@example.test', 'password' => 'wrong-password',
+            ])->assertRedirect();
+        }
+
+        $this->post('/login', [
+            'email' => 'owner@example.test', 'password' => 'wrong-password',
+        ])->assertStatus(429);
+        $this->assertGuest();
+    }
+
     public function test_non_owner_cannot_see_control_studio(): void
     {
         $viewer = User::query()->create([
