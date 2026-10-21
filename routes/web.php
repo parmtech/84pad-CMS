@@ -11,10 +11,10 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1')->name('login.submit');
 });
 Route::middleware(['auth','auth.session'])->group(function (): void {
-    Route::get('/dashboard', ControlStudioController::class)->name('dashboard');
+    Route::get('/dashboard', ControlStudioController::class)->middleware('can:core.view-dashboard')->name('dashboard');
     Route::post('/dashboard/plugins/{slug}/state', PluginStateController::class)
-        ->middleware('throttle:20,1')->name('plugins.state');
-    Route::get('/account/security', [ChangePasswordController::class, 'edit'])->name('password.edit');
-    Route::post('/account/security', [ChangePasswordController::class, 'update'])->middleware('throttle:5,1')->name('password.update');
+        ->middleware(['can:core.manage-plugins','throttle:20,1'])->name('plugins.state');
+    Route::get('/account/security', [ChangePasswordController::class, 'edit'])->middleware('can:core.manage-security')->name('password.edit');
+    Route::post('/account/security', [ChangePasswordController::class, 'update'])->middleware(['can:core.manage-security','throttle:5,1'])->name('password.update');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
