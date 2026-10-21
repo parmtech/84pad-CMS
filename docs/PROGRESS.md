@@ -5,7 +5,7 @@
 > **Current phase:** Core 0.1 development preview — authenticated owner/admin shell, token-gated browser setup, live demo plugin and signed local plugin ZIP install are coded/tested; major release tasks remain.
 > **Next issue:** [#13 C13 — Plugin migration/uninstall boundaries](https://github.com/manbir6-ux/84pad-core/issues/13), followed by [#14 C14 — Safe update/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Finish security/visual/web installer sign-off before C15 release.
 > **Runnable:** Development source passes hosted PHP 8.3/8.4 CI at the signed ZIP implementation commit. No cPanel live deployment or production approval.
-> **Environment test status:** [PHP CI #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) succeeded on PHP 8.3/8.4 for the signed-plugin/ZIP hardening code. MySQL CI [#39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) had all job steps marked successful when inspected; run-level completion still needs confirming. Earlier MySQL 8 [#39609408194](https://github.com/manbir6-ux/84pad-core/actions/runs/39609408194) passed and concurrent owner [#39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317) passed. Live cPanel tests are outstanding.
+> **Environment test status:** [PHP CI #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) succeeded on PHP 8.3/8.4 for the signed-plugin/ZIP hardening code. MySQL CI [#39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) **completed successfully**, including database migrations, PHPUnit, signed plugin ZIP checks and concurrent first-owner test. Earlier MySQL 8 [#39609408194](https://github.com/manbir6-ux/84pad-core/actions/runs/39609408194) passed and concurrent owner [#39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317) passed. Live cPanel tests are outstanding.
 
 ## Work checklist
 
@@ -37,7 +37,7 @@
 - Added owner-only signed plugin ZIP upload with pinned Ed25519 publisher public keys, size/path/symlink/duplicate entry protection and disabled-by-default installs; PHP plugins remain full-trust, not sandboxed. Signed package feature tests cover valid installs, missing keys and path traversal rejection.
 - Added token-gated rate-limited browser setup form/controller, fail-closed installer marker and PHP tests. **Requires host-configured DB/.env/APP_KEY**, so no-click shared-host setup remains unbuilt.
 - Added signed Core update artifact verifier, but no upgrade installer, automatic rollback or off-host backup yet.
-- [Core CI #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) succeeded on PHP 8.3 and 8.4; [MySQL CI #39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) reported successful job steps but run-level completion to be rechecked. No live cPanel deployment.
+- [Core CI #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) succeeded on PHP 8.3 and 8.4; [MySQL CI #39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) completed successfully. No live cPanel deployment.
 - **Do not merge PR #17 or call this a production release yet**. Primary remaining tasks: C13 plugin migrations/uninstall, C14 rollback/upgrade implementation, full C16 web setup, C07 browser QA and C15 security/release acceptance.
 
 
