@@ -1,10 +1,22 @@
 # 84PAD Core
 
-**Status:** Early development. Tracking set up; Laravel scaffold not yet verified runnable.
+**Status:** Core 0.1 development preview. Laravel foundation and included automated tests pass GitHub CI on PHP 8.3/8.4. **Not production ready or deployed.**
 
 **Resume here:** [Progress checkpoint](docs/PROGRESS.md) · [Development workflow](docs/WORKFLOW.md) · [Core task board (15 issues)](https://github.com/manbir6-ux/84pad-core/issues).
 
 84PAD is a lightweight, plugin-first PHP CMS and application platform maintained by ParmTech.
+
+## What is implemented so far
+
+- Laravel 12 bootstrap, Composer configuration, database migrations and CI checks.
+- CLI first-owner installation with preflight checks, replay protection and hidden password prompt; **not a public web installer yet**.
+- Guarded sign-in/sign-out and initial Control Studio view (still a development UI).
+- JSON plugin discovery and activation/deactivation **metadata markers only**. Plugin PHP is deliberately **not executed** until trusted lifecycle/loading contracts are built and tested.
+- HookBus contract with priority ordering and action dispatch, with unit tests. It is not yet connected to running plugins.
+- `84pad:doctor` read-only host checks, plus basic secrets hygiene and negative-path tests.
+
+**Latest known green CI:** [PHP 8.3/8.4 run #39608854765](https://github.com/manbir6-ux/84pad-core/actions/runs/39608854765). This is not a live shared-hosting installation or a full security audit.
+
 
 ## Core 0.1 scope
 
