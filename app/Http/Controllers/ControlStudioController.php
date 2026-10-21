@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Support\Hooks\HookBus;
 use App\Support\Plugins\PluginRegistry;
 use App\Support\Plugins\PluginRuntime;
+use App\Support\Plugins\PluginQuarantine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -16,6 +17,7 @@ class ControlStudioController extends Controller
         Request $request,
         PluginRegistry $registry,
         PluginRuntime $runtime,
+        PluginQuarantine $quarantine,
         HookBus $hooks
     ): View {
         abort_unless($request->user()?->can('core.view-dashboard'), 403);
@@ -35,6 +37,7 @@ class ControlStudioController extends Controller
         return view('control-studio', [
             'user' => $request->user(),
             'plugins' => $registry->states(),
+            'quarantined' => $quarantine->snapshots(),
             'widgets' => is_array($widgets) ? $widgets : [],
         ]);
     }
