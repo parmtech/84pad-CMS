@@ -109,6 +109,11 @@ final class PluginPackageInstaller
             if (! is_file($stage.'/plugin.json') || is_link($stage.'/plugin.json')) {
                 throw new RuntimeException('Invalid extracted manifest.');
             }
+            // Provenance marker is created by the trusted installer after ZIP
+            // signature verification; local bundled plugins have no marker.
+            if (file_put_contents($stage.'/.84pad-signed-upload', "signed-upload-v1\n") === false) {
+                throw new RuntimeException('Unable to mark installed package.');
+            }
             if (! rename($stage, $destination)) {
                 throw new RuntimeException('Unable to install plugin package.');
             }
