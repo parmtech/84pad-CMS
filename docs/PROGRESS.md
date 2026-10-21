@@ -4,8 +4,8 @@
 > Last updated: 2026-10-21 (Australia/Sydney).
 > **Current phase:** Core 0.1 — foundation verified on earlier CI commit; installer/auth/plugin preview code added and now requires its own verification.
 > **Next issue:** [#3 C03 — Installation prerequisite checks](https://github.com/manbir6-ux/84pad-core/issues/3).
-> **Runnable:** Earlier foundation passed CI on PHP 8.3 and 8.4. LATER code commits must pass NEW CI before their functionality can be claimed runnable. Not approved for production.
-> **Environment test status:** Earlier run [39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743) passed foundation tests. Latest post-feature CI [39605970221](https://github.com/manbir6-ux/84pad-core/actions/runs/39605970221) was **PENDING at verification**. Local container lacks Composer and required PHP extensions; DO NOT claim later features tested until a completed green run is checked.
+> **Runnable:** Latest code at commit `88d3725` passed GitHub CI for PHP 8.3/8.4. Not deployed to cPanel or approved for production.
+> **Environment test status:** [GitHub Actions run 39606241862](https://github.com/manbir6-ux/84pad-core/actions/runs/39606241862) **SUCCEEDED** for PHP 8.3/8.4 at commit `88d3725`, including preflight tests, PHPUnit, Composer, migrations, and PHP lint. This does not replace live hosting/security tests.
 
 ## Work checklist
 
@@ -13,7 +13,7 @@
 |---|---|---|---|
 | [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | **CI verified (PHP 8.3 & 8.4)** | [Run 39605060743](https://github.com/manbir6-ux/84pad-core/actions/runs/39605060743); still unmerged and not production approved |
 | [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | **CI verified; issue closed** | [Run 39605702869](https://github.com/manbir6-ux/84pad-core/actions/runs/39605702869); nested secret ignores + filename guard |
-| [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | **In progress** | Host-preflight command committed; acceptance/safety tests pending |
+| [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | **In progress, CI tests green** | [Run 39606241862](https://github.com/manbir6-ux/84pad-core/actions/runs/39606241862): host doctor rejects missing APP_KEY, unknown DB and insecure production HTTP/debug; remaining installer acceptance testing pending |
 | [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | **Implementation preview** | CLI owner install code exists; comprehensive recovery/race testing pending |
 | [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | **Implementation preview** | Owner login/logout guarded routes and feature tests; security review pending |
 | [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | Partial | Owner-only controls; full RBAC not implemented |
@@ -28,6 +28,13 @@
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
 
 ## Work log
+
+### 2026-10-22 — preflight test verification
+- Added `tests/Feature/HostPreflightTest.php` covering valid CI host and negative APP_KEY/database configurations.
+- Added production-only HTTPS URL and debug-disabled preflight guards to `app/Console/Commands/DoctorCore.php`, plus a negative feature test.
+- [CI run 39606241862](https://github.com/manbir6-ux/84pad-core/actions/runs/39606241862) completed successfully on both PHP 8.3 and PHP 8.4, validating current source for the included tests.
+- C03 remains open pending remaining installer/replay/no-secret-error acceptance; Core still not production-ready.
+
 
 ### Latest development checkpoint
 - Feature branch: [core/C01-laravel-foundation](https://github.com/manbir6-ux/84pad-core/tree/core/C01-laravel-foundation) (DO NOT merge as production ready).
