@@ -114,6 +114,18 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 @endif
 <section id="plugins"><div class="section-head"><h2>Your plugins</h2><p>Local plugin discovery</p></div>
 <div class="panel"><p style="color:#a2bed5;font-size:12px;margin-top:0">Security note: active PHP plugins run with the hosting account's privileges. Install and activate only code you trust. Central signed distribution is not available yet.</p>
+@can('core.manage-plugins')
+<div class="plugin" style="margin-bottom:22px;border-style:dashed">
+<h3>Install signed plugin</h3>
+<p>A ZIP package must be signed by a developer public key you have explicitly trusted in your host configuration. New plugins remain disabled until activated.</p>
+<form action="{{ route('plugins.install') }}" method="post" enctype="multipart/form-data">@csrf
+<label for="package" style="display:block;font-size:12px;margin:12px 0 6px">Plugin ZIP (max 20 MB)</label>
+<input id="package" type="file" name="package" accept=".zip,application/zip" required style="max-width:100%;font-size:12px">
+<label for="signature" style="display:block;font-size:12px;margin:12px 0 6px">Ed25519 signature (base64)</label>
+<input id="signature" type="text" name="signature" maxlength="128" autocomplete="off" required style="width:100%;max-width:510px;padding:10px;border:1px solid #42668a;background:#071529;color:white;border-radius:10px">
+<div><button type="submit">Verify &amp; install disabled</button></div>
+</form></div>
+@endcan
 <div class="plugins">
 @forelse($plugins as $plugin)
 <article class="plugin">
