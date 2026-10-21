@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Support\Plugins\PluginCatalog;
+use App\Support\Plugins\PluginQuarantine;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
@@ -137,6 +138,69 @@ PHP
         } finally {
             @unlink($path);
         }
+    }
+
+    public function test_quarantined_plugin_can_be_restored_disabled_with_explicit_owner_confirmation(): void
+    {
+        $owner = $this->owner();
+        [$path, $signature] = $this->package();
+        try {
+            $this->actingAs($owner)->post('/dashboard/plugins/install', [
+                'package' => new UploadedFile($path, 'plugin.zip', 'application/zip', null, true),
+                'signature' => $signature,
+            ])->assertRedirect('/dashboard');
+            $this->post('/dashboard/plugins/upload-test/state', [
+                'action' => 'activate',
+            ])->assertRedirect();
+
+            $this->post('/dashboard/plugins/upload-test/uninstall', [
+                'confirm_slug' => 'upload-test',
+            ])->assertRedirect();
+
+            $snapshots = app(PluginQuarantine::class)->snapshots();
+            $this->assertCount(1, $snapshots);
+            $snapshot = $snapshots[0]['snapshot'];
+            $this->get('/dashboard')->assertSee('Recovery vault');
+
+            // A wrong typed slug cannot resurrect quarantined code.
+            $this->post("/dashboard/plugins/quarantine/{$snapshot}/restore", [
+                'confirm_slug' => 'not-the-plugin',
+            ])->assertSessionHasErrors('plugin');
+            $this->assertFalse(is_dir(base_path('plugins/upload-test')));
+
+            $this->post("/dashboard/plugins/quarantine/{$snapshot}/restore", [
+                'confirm_slug' => 'upload-test',
+            ])->assertRedirect('/dashboard');
+
+            $this->assertTrue(is_dir(base_path('plugins/upload-test')));
+            $this->assertDatabaseHas('core_plugins', [
+                'slug' => 'upload-test', 'enabled' => 0,
+            ]);
+            $this->assertSame([], app(PluginQuarantine::class)->snapshots());
+            $this->get('/dashboard')->assertDontSee('Signed upload works');
+
+            // No overwrite or repeat restore.
+            $this->post("/dashboard/plugins/quarantine/{$snapshot}/restore", [
+                'confirm_slug' => 'upload-test',
+            ])->assertSessionHasErrors('plugin');
+            $this->assertDatabaseHas('core_plugins', [
+                'slug' => 'upload-test', 'enabled' => 0,
+            ]);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_quarantine_restore_requires_owner_permission(): void
+    {
+        $viewer = User::query()->create([
+            'name' => 'Viewer', 'email' => 'viewer@example.test',
+            'role' => 'viewer', 'password' => 'a-long-secure-viewer-password',
+        ]);
+        $this->actingAs($viewer)->post(
+            '/dashboard/plugins/quarantine/upload-test-20261022125959-0123456789abcdef/restore',
+            ['confirm_slug' => 'upload-test']
+        )->assertForbidden();
     }
 
     public function test_bundled_demo_cannot_be_removed_as_an_uploaded_plugin(): void
