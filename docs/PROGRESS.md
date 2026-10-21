@@ -4,8 +4,8 @@
 > Last updated: 2026-10-22 (Australia/Sydney).
 > **Current phase:** Core 0.1 development preview — authenticated owner/admin shell, token-gated browser setup, live demo plugin and signed local plugin ZIP install are coded/tested; major release tasks remain.
 > **Next issue:** [#13 C13 — Plugin migration/uninstall boundaries](https://github.com/manbir6-ux/84pad-core/issues/13), followed by [#14 C14 — Safe update/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Finish security/visual/web installer sign-off before C15 release.
-> **Runnable:** Development source passes hosted PHP 8.3/8.4 CI at the signed ZIP implementation commit. No cPanel live deployment or production approval.
-> **Environment test status:** [PHP CI #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) succeeded on PHP 8.3/8.4 for the signed-plugin/ZIP hardening code. MySQL CI [#39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) **completed successfully**, including database migrations, PHPUnit, signed plugin ZIP checks and concurrent first-owner test. Earlier MySQL 8 [#39609408194](https://github.com/manbir6-ux/84pad-core/actions/runs/39609408194) passed and concurrent owner [#39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317) passed. Live cPanel tests are outstanding.
+> **Runnable:** Latest functional implementation (including safe plugin quarantine) passed PHP 8.3/8.4 and MySQL 8 CI. Not deployed to cPanel or approved for production.
+> **Environment test status:** [Core CI #39618022600](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022600) **PASSED** PHP 8.3/8.4 and [MySQL CI #39618022701](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022701) **PASSED** MySQL 8, including the non-destructive uninstall test. Live cPanel, security audit and full Core rollback remain outstanding.
 
 ## Work checklist
 
@@ -23,12 +23,19 @@
 | [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | **Executable trusted local PHP on dashboard; uninstall/migrations pending** | Activation, hook, deactivation and signed install tests [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | **HookBus connected to demo plugin; versioning/error boundaries incomplete** | Priority/order, dispatch, active widget and fault fallback [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | **CI verified; issue closed** | First-party PHP widget appears only after activation and disappears after deactivation [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
-| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | Partial schema | Users/cache/jobs/install/plugin tables; rollback strategy pending |
+| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | **Signed-upload plugin quarantine uninstall CI tested; migrations/rollback still pending** | Owner-confirmed safe quarantine preserves DB tables and plugin code [PHP CI #39618022600](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022600) and [MySQL #39618022701](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022701) |
 | [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | **Pinned-key Ed25519 verifier + owner CLI recovery; updater/rollback not built** | Verifier tests [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600); central release manager deferred |
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
 | [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **Token-gated Owner wizard CI tested; zero-config host bootstrap pending** | [docs/WEB-INSTALL.md](WEB-INSTALL.md), [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 
 ## Work log
+
+### 2026-10-22 — signed plugin quarantine tested
+- Added signed-upload provenance marker, Owner-confirmed plugin uninstall route and quarantine manager that disables then moves uploaded plugin code to private storage without deleting plugin database records.
+- Bundled plugin uninstall blocked; signed upload quarantine tested. One functional test initially failed due test rate-limit counter accumulation, isolated throttling in package lifecycle tests while retaining production route throttles; rerun passed.
+- [PHP CI #39618022600](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022600) completed **SUCCESS** for PHP 8.3/8.4; [MySQL CI #39618022701](https://github.com/manbir6-ux/84pad-core/actions/runs/39618022701) completed **SUCCESS**.
+- Remaining C13: plugin migrations, auto restore/rollback; C14: safe core update and rollback; C16: no-SSH setup; C15: complete security/visual/cPanel QA. Core is **still not complete**.
+
 
 ### 2026-10-22 — major Core implementation checkpoint
 - Added Owner password-change screen, server-only emergency recovery, Owner/Admin role Gates and route guards; feature tests include bad current password and denied non-owner actions.
