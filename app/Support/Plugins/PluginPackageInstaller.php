@@ -37,6 +37,7 @@ final class PluginPackageInstaller
             }
 
             $total = 0;
+            $seen = [];
             for ($index = 0; $index < $entries; $index++) {
                 $stat = $zip->statIndex($index);
                 if (! is_array($stat)) {
@@ -51,8 +52,12 @@ final class PluginPackageInstaller
                     || str_contains($normalized, '//')) {
                     throw new RuntimeException('Unsafe plugin archive path.');
                 }
+                if (isset($seen[$normalized])) {
+                    throw new RuntimeException('Duplicate ZIP member names are forbidden.');
+                }
+                $seen[$normalized] = true;
                 foreach (explode('/', $normalized) as $segment) {
-                    if ($segment === '.' || $segment === '..' || $segment === '') {
+                    if (str_starts_with($segment, '.') || $segment === '') {
                         throw new RuntimeException('Unsafe plugin archive path.');
                     }
                 }
