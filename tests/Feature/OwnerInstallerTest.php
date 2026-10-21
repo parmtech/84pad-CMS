@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class OwnerInstallerTest extends TestCase
@@ -47,4 +48,19 @@ class OwnerInstallerTest extends TestCase
         $this->assertDatabaseCount('users', 0);
         $this->assertDatabaseCount('core_installations', 0);
     }
+    public function test_insecure_production_preflight_blocks_owner_installation(): void
+    {
+        Config::set('app.env', 'production');
+        Config::set('app.url', 'http://insecure.example.test');
+        Config::set('app.debug', true);
+
+        $this->artisan('84pad:install', [
+            '--name' => 'Initial Owner',
+            '--email' => 'owner@example.test',
+        ])->assertExitCode(1);
+
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('core_installations', 0);
+    }
+
 }
