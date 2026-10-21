@@ -16,7 +16,7 @@ article{background:linear-gradient(135deg,#182b45,#101b2e);border:1px solid #315
 article b{font-size:22px}.pending{color:#e7b873;font-size:13px}
 .notice{border-left:4px solid #64d8be;padding:12px 16px;background:#1d3038}.error{border-color:#eca083}
 </style></head><body>
-<header><div class="brand">84PAD<span>.</span></div><form method="post" action="{{ route('logout') }}">@csrf<button>Sign out</button></form></header>
+<header><div class="brand">84PAD<span>.</span></div><div style="display:flex;gap:12px;align-items:center"><a href="{{ route('password.edit') }}" style="color:#95e9ff">Security</a><form method="post" action="{{ route('logout') }}">@csrf<button>Sign out</button></form></div></header>
 <main><small>PARMTECH / DEVELOPMENT PREVIEW</small><h1>Control Studio</h1>
 <p>Welcome, {{ $user->name }}. This Core is not yet approved for production.</p>
 @if(session('notice'))<p class="notice">{{ session('notice') }}</p>@endif
