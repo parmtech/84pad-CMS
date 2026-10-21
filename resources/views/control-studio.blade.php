@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>Control Studio · 84PAD</title>
+<meta name="robots" content="noindex,nofollow"><meta name="csrf-token" content="{{ csrf_token() }}"><title>Control Studio · 84PAD</title>
 <style>
 :root{color-scheme:dark;--ink:#dfeeff;--muted:#93a8bd;--cyan:#70ecfa;--pink:#ff70bd;--orange:#ffc17b;--indigo:#887cff;--line:#ffffff1e;--panel:#15203b}
 *{box-sizing:border-box}
@@ -64,17 +64,18 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 @media(max-width:740px){.layout{display:block}aside{position:relative;height:auto;padding:16px 15px;gap:10px;border-right:0;border-bottom:1px solid var(--line)}.brand{font-size:25px}.nav-title,.nav-footer{display:none}nav{display:flex;flex-wrap:wrap;overflow-x:visible;gap:5px;padding-bottom:3px}nav a{white-space:nowrap;padding:9px 11px;font-size:12px}.workspace{padding:20px 15px 55px}.hero{min-height:270px}.hero:before{right:-210px;opacity:.65}.hero-content{position:relative}.cards{gap:10px}.card{min-height:150px;padding:17px}.section-head h2{font-size:22px}}
 @media(max-width:400px){.cards{grid-template-columns:1fr}.pill{display:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.hero:before{animation:none}nav a,.card{transition:none}}
+.motion-off *, .motion-off *:before, .motion-off *:after {animation:none!important;transition:none!important;scroll-behavior:auto!important;}
 </style>
-</head><body>
+</head><body class="{{ $animationsEnabled ? '' : 'motion-off' }}" data-tour-page="dashboard" data-tour-owner="{{ $user->isOwner() ? '1' : '0' }}" data-tour-auto="{{ $tourAuto ? '1' : '0' }}" data-tour-complete-url="{{ route('tour.complete') }}" data-tour-settings-url="{{ route('settings.show', ['tour' => '1']) }}">
 <div class="layout">
 <aside aria-label="Control Studio navigation">
-<a class="brand" href="{{ route('dashboard') }}">84PAD<span>.</span><small>CONTROL STUDIO / CORE 0.1</small></a>
+<a id="tour-brand" class="brand" href="{{ route('dashboard') }}">84PAD<span>.</span><small>CONTROL STUDIO / CORE 0.1</small></a>
 <div><p class="nav-title">Navigation</p>
 <nav aria-label="Main">
-<a class="active" href="{{ route('dashboard') }}"><span>◆</span>Overview</a>
+<a id="tour-overview" class="active" href="{{ route('dashboard') }}"><span>◆</span>Overview</a>
 <a href="#modules"><span>◈</span>Systems</a>
 <a href="#plugins"><span>✳</span>Plugins</a>
-@can('core.manage-security')<a href="{{ route('password.edit') }}"><span>◉</span>Security</a>@endcan
+@can('core.manage-security')<a id="tour-security-link" href="{{ route('password.edit') }}"><span>◉</span>Security</a><a id="tour-settings-link" href="{{ route('settings.show') }}"><span>⚙</span>Settings</a>@endcan
 </nav></div>
 <div class="nav-footer"><strong>Built by ParmTech</strong><p>Built for possibility. Powered by a small, extensible Core. Extra website features live in plugins.</p></div>
 </aside>
@@ -82,6 +83,7 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <header class="topbar">
 <div><div class="eyebrow">84PAD / SECURE ADMIN</div><b>Welcome, {{ $user->name }}</b></div>
 <div class="top-actions"><span class="pill">● DEVELOPMENT BUILD</span>
+@if($user->isOwner())<button type="button" id="tour-start-dashboard" class="signout">Guided tour ✦</button>@endif
 <form method="post" action="{{ route('logout') }}">@csrf<button class="signout" type="submit">Sign out ↗</button></form></div>
 </header>
 @if(session('notice'))<div class="notice" role="status">{{ session('notice') }}</div>@endif
@@ -97,10 +99,10 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <div class="section-head"><h2>System universe</h2><p>Optional features stay modular</p></div>
 <div class="cards">
 <article class="card" style="--accent:#74edf2"><span class="glyph">⌘</span><h3>Core Engine</h3><p>Secure sign-in, permissions and plugin management foundation.</p><div class="status">Development verified in CI</div></article>
-<article class="card" style="--accent:#ff91b7"><span class="glyph">◇</span><h3>SSL God</h3><p>Certificate detection, installation and renewal.</p><div class="status">Future optional plugin</div></article>
-<article class="card" style="--accent:#af97ff"><span class="glyph">@</span><h3>Domain Email</h3><p>Manage same-domain mailboxes and inboxes.</p><div class="status">Future optional plugin</div></article>
-<article class="card" style="--accent:#ffc17b"><span class="glyph">▣</span><h3>File Manager</h3><p>Manage website files from one place.</p><div class="status">Future optional plugin</div></article>
-<article class="card" style="--accent:#71eca5"><span class="glyph">↺</span><h3>Backups</h3><p>Scheduled off-host backups and safe restore.</p><div class="status">Future optional plugin</div></article>
+<article class="card" id="tour-ssl" style="--accent:#ff91b7"><span class="glyph">◇</span><h3>SSL God</h3><p>Certificate detection, installation and renewal.</p><div class="status">Future optional plugin</div></article>
+<article class="card" id="tour-email" style="--accent:#af97ff"><span class="glyph">@</span><h3>Domain Email</h3><p>Manage same-domain mailboxes and inboxes.</p><div class="status">Future optional plugin</div></article>
+<article class="card" id="tour-files" style="--accent:#ffc17b"><span class="glyph">▣</span><h3>File Manager</h3><p>Manage website files from one place.</p><div class="status">Future optional plugin</div></article>
+<article class="card" id="tour-backups" style="--accent:#71eca5"><span class="glyph">↺</span><h3>Backups</h3><p>Scheduled off-host backups and safe restore.</p><div class="status">Future optional plugin</div></article>
 </div></section>
 @if(count($widgets))
 <section><div class="section-head"><h2>Active plugin widgets</h2><p>Content delivered through 84PAD hooks</p></div>
@@ -115,16 +117,20 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <section id="plugins"><div class="section-head"><h2>Your plugins</h2><p>Local plugin discovery</p></div>
 <div class="panel"><p style="color:#a2bed5;font-size:12px;margin-top:0">Security note: active PHP plugins run with the hosting account's privileges. Install and activate only code you trust. Central signed distribution is not available yet.</p>
 @can('core.manage-plugins')
-<div class="plugin" style="margin-bottom:22px;border-style:dashed">
+@if($signedUploadsEnabled)
+<div class="plugin" id="tour-plugin-upload" style="margin-bottom:22px;border-style:dashed">
 <h3>Install signed plugin</h3>
 <p>A ZIP package must be signed by a developer public key you have explicitly trusted in your host configuration. New plugins remain disabled until activated.</p>
 <form action="{{ route('plugins.install') }}" method="post" enctype="multipart/form-data">@csrf
-<label for="package" style="display:block;font-size:12px;margin:12px 0 6px">Plugin ZIP (max 20 MB)</label>
+<label for="package" style="display:block;font-size:12px;margin:12px 0 6px">Plugin ZIP (max 128 MB, up to 512 MB extracted)</label>
 <input id="package" type="file" name="package" accept=".zip,application/zip" required style="max-width:100%;font-size:12px">
 <label for="signature" style="display:block;font-size:12px;margin:12px 0 6px">Ed25519 signature (base64)</label>
 <input id="signature" type="text" name="signature" maxlength="128" autocomplete="off" required style="width:100%;max-width:510px;padding:10px;border:1px solid #42668a;background:#071529;color:white;border-radius:10px">
 <div><button type="submit">Verify &amp; install disabled</button></div>
 </form></div>
+@else
+<p id="tour-plugin-upload" class="notice">Signed plugin uploads are disabled in Settings.</p>
+@endif
 @endcan
 <div class="plugins">
 @forelse($plugins as $plugin)
@@ -175,4 +181,5 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 @endcan
 <footer>84PAD CORE • DEVELOPED BY PARMTECH • NOT YET PRODUCTION READY</footer>
 </div></div>
+<script defer src="{{ asset('js/84pad-tour.js') }}"></script>
 </body></html>
