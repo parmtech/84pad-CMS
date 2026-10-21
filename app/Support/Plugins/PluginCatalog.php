@@ -33,6 +33,8 @@ final class PluginCatalog
 
     public function compatible(array $plugin): bool
     {
-        return version_compare('0.1.0', $plugin['requires_core'], '>=');
+        return isset($plugin['requires_core'])
+            && is_string($plugin['requires_core'])
+            && version_compare((string) config('84pad.core_version', '0.1.0'), $plugin['requires_core'], '>=');
     }
 }
