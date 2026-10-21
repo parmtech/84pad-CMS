@@ -5,4 +5,9 @@ return [
     // and stored only in the untracked .env or hosting secret manager.
     // When absent, the browser installer is entirely disabled.
     'setup_token' => env('PAD_SETUP_TOKEN', ''),
+    // Whitelisted Ed25519 public keys, added by the site owner.
+    // Without trusted keys, no update artifact may be accepted.
+    'release_public_keys' => array_values(array_filter(
+        array_map('trim', explode(',', (string) env('PAD_RELEASE_PUBLIC_KEYS', '')))
+    )),
 ];
