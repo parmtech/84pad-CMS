@@ -4,8 +4,8 @@
 > Last updated: 2026-10-22 (Australia/Sydney).
 > **Current phase:** Core 0.1 — foundation verified on earlier CI commit; installer/auth/plugin preview code added and now requires its own verification.
 > **Next issue:** [#4 C04 — One-time owner installer](https://github.com/manbir6-ux/84pad-core/issues/4) (MySQL concurrency/recovery), then [#5 C05 — Authentication](https://github.com/manbir6-ux/84pad-core/issues/5).
-> **Runnable:** Latest tested commit `be03c09` passed CI on PHP 8.3/8.4. Not deployed to cPanel or approved for production.
-> **Environment test status:** [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) **SUCCESS** on PHP 8.3/8.4. Confirms Composer/install, migrations, PHPUnit tests including login throttling and safe 503 on database failure, lint. No concurrent MySQL or live cPanel tests yet.
+> **Runnable:** The latest code including hook and plugin metadata tests passed CI on PHP 8.3/8.4 (run 39608854765). Not deployed to cPanel or production approved.
+> **Environment test status:** [CI run 39608854765](https://github.com/manbir6-ux/84pad-core/actions/runs/39608854765) **SUCCESS** on PHP 8.3/8.4. Includes login, core hooks, plugin metadata state, migration and lint tests. No concurrent MySQL/live cPanel installation yet.
 
 ## Work checklist
 
@@ -21,13 +21,20 @@
 | [C08](https://github.com/manbir6-ux/84pad-core/issues/8) | Plugin manifest | Partial source added | JSON manifest scanner; no signatures |
 | [C09](https://github.com/manbir6-ux/84pad-core/issues/9) | Plugin discovery | Partial source added | Metadata-only discovery; unverified |
 | [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | Partial source added | DB activation **markers only**; no untrusted plugin PHP execution |
-| [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | Draft code added | HookBus; not connected to plugin execution |
+| [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | **Unit tests green; integration pending** | Priority/order, dispatch and invalid hook name tested in [CI 39608854765](https://github.com/manbir6-ux/84pad-core/actions/runs/39608854765); no plugin loading yet |
 | [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | Manifest only | Demo is not executable |
 | [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | Partial schema | Users/cache/jobs/install/plugin tables; rollback strategy pending |
 | [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | Not started | none |
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
 
 ## Work log
+
+### 2026-10-22 — plugin contract verification
+- Added `tests/Unit/HookBusContractTest.php` covering hook priority/registration order, dispatch, unknown-hook behavior, and invalid names.
+- Added plugin state tests for activation then deactivation and rejection of unknown plugins; feature remains intentionally metadata-only, no third-party PHP execution.
+- [CI run 39608854765](https://github.com/manbir6-ux/84pad-core/actions/runs/39608854765) **passed** on PHP 8.3 and PHP 8.4. README updated to accurately describe scope.
+- Next: C04 concurrent MySQL installer validation, C05 final auth recovery/security decisions, then executable plugin lifecycle after security design. C10/C11 remain open.
+
 
 ### 2026-10-22 — preflight enforcement and login hardening
 - Installer now invokes `84pad:doctor` before migrations; insecure production configuration exits without creating owner or installation marker. [CI run 39607425378](https://github.com/manbir6-ux/84pad-core/actions/runs/39607425378) passed on PHP 8.3/8.4.
