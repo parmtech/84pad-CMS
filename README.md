@@ -17,7 +17,7 @@
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
 - Core update **signature-verification and inspection/dry-run CLI** using Ed25519, semantic version, PHP compatibility and safe archive-path checks. There is **no automatic updater, central release server or verified rollback yet**.
 
-**Latest fully confirmed PHP CI for C13:** [PHP 8.3/8.4 #39625847746](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847746) passed. [MySQL #39625847866](https://github.com/manbir6-ux/84pad-core/actions/runs/39625847866) individual job steps succeeded; run status to be checked. Newer Core update-inspection tests also require CI sign-off. This is not a live shared-hosting deployment or security audit.
+**Latest verified code CI:** [PHP 8.3/8.4 #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977) and [MySQL 8 #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968) completed successfully, including plugin schema, quarantine restore and signed-update inspector tests. These do not replace a live shared-hosting deployment or security audit.
 
 ## Important gaps before Core release
 
