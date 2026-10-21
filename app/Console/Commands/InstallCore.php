@@ -21,6 +21,12 @@ class InstallCore extends Command
             return self::FAILURE;
         }
 
+        // Never mutate the database until all installation prerequisites pass.
+        if ($this->call('84pad:doctor') !== self::SUCCESS) {
+            $this->error('Installation preflight failed. No migrations were attempted.');
+            return self::FAILURE;
+        }
+
         try {
             $this->call('migrate', ['--force' => true]);
         } catch (Throwable $e) {
