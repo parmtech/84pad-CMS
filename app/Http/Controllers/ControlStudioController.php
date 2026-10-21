@@ -6,6 +6,8 @@ use App\Support\Hooks\HookBus;
 use App\Support\Plugins\PluginRegistry;
 use App\Support\Plugins\PluginRuntime;
 use App\Support\Plugins\PluginQuarantine;
+use App\Support\Settings\CoreSettings;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -18,11 +20,14 @@ class ControlStudioController extends Controller
         PluginRegistry $registry,
         PluginRuntime $runtime,
         PluginQuarantine $quarantine,
+        CoreSettings $settings,
         HookBus $hooks
     ): View {
         abort_unless($request->user()?->can('core.view-dashboard'), 403);
 
-        $runtime->boot($hooks, $registry);
+        if ($settings->enabled('plugins.runtime_enabled')) {
+            $runtime->boot($hooks, $registry);
+        }
         try {
             $widgets = $hooks->filter('core.dashboard_widgets', []);
         } catch (Throwable $e) {
@@ -39,6 +44,13 @@ class ControlStudioController extends Controller
             'plugins' => $registry->states(),
             'quarantined' => $quarantine->snapshots(),
             'widgets' => is_array($widgets) ? $widgets : [],
+            'signedUploadsEnabled' => $settings->enabled('plugins.signed_uploads_enabled'),
+            'animationsEnabled' => $settings->enabled('ui.animations_enabled'),
+            'tourAuto' => $request->user()->isOwner() && (
+                $request->query('tour') === '1'
+                || ! (bool) DB::table('core_user_preferences')
+                    ->where('user_id', $request->user()->id)->value('tour_completed')
+            ),
         ]);
     }
 }
