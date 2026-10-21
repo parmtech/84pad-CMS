@@ -8,15 +8,26 @@
 
 ## What is implemented so far
 
-- Laravel 12 bootstrap, Composer configuration, database migrations and CI checks.
-- CI-tested CLI first-owner installation with preflight checks, replay/concurrency protection, hidden password prompt and headless stdin option. A browser-based installer is **not built yet** ([tracked here](https://github.com/manbir6-ux/84pad-core/issues/18)).
-- Guarded sign-in/sign-out and initial Control Studio view (still a development UI).
-- JSON plugin discovery and activation/deactivation **metadata markers only**. Plugin PHP is deliberately **not executed** until trusted lifecycle/loading contracts are built and tested.
-- HookBus contract with priority ordering and action dispatch, with unit tests. It is not yet connected to running plugins.
-- `84pad:doctor` read-only host checks, plus basic secrets hygiene and negative-path tests.
+- Laravel 12 bootstrap, database migrations, project configuration, PHP 8.3/8.4 and MySQL CI.
+- CLI first-owner installation with host preflight and MySQL concurrency protection, and an **experimental** token-gated browser installer. Browser setup currently expects preconfigured `.env`, database and `APP_KEY` ([instructions](docs/WEB-INSTALL.md)).
+- Guarded login/logout, session protection, Owner password rotation and trusted server-side CLI recovery.
+- Role permissions: Owner controls plugins/security; Administrator can view Control Studio, other roles remain denied by default.
+- Fully redesigned responsive futuristic Control Studio with real status and local plugin management.
+- JSON plugin manifest discovery, owner-controlled activation/deactivation, HookBus integration and first-party executable demo widget.
+- Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
+- Core update **signature-verification interface** using Ed25519 with trusted public keys. There is no automatic upgrader, central release server, or verified rollback yet.
 
-**Verified CI:** [PHP 8.3/8.4 #39609985107](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985107), and [MySQL 8 concurrency #39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317). These are not a live shared-hosting installation or a full security audit.
+**Most recent verified CI for uploaded-plugin changes:** [PHP 8.3/8.4 #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600), and [MySQL 8 #39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) (check latest completed status). These do not replace a live shared-hosting deployment, penetration test or installer package acceptance.
 
+## Important gaps before Core release
+
+- Complete browser bootstrap that configures the database and application key without SSH or manual `.env` editing.
+- Signed plugin update, uninstall, dependency resolution and plugin-owned migration/recovery lifecycle.
+- Full unattended Core updater, maintenance mode, rollback/recovery plan, release packaging and security audit.
+- Clean cPanel shared-host installation and browser/mobile visual acceptance testing.
+- Review/merge the [draft development PR](https://github.com/manbir6-ux/84pad-core/pull/17) only after all acceptance checks pass. **No production release is claimed.**
+
+See [docs/PROGRESS.md](docs/PROGRESS.md) for verified and remaining tasks.
 
 ## Core 0.1 scope
 
@@ -56,4 +67,4 @@ SSL God (certificate detection and safe renewal), domain email management, file 
 6. Build independent SSL, Email, File Manager and Backup plugins.
 7. Build a separate signed central release service after Core architecture stabilizes.
 
-This README defines the starting contract only; it is not a claim that any listed feature is implemented.
+This source tree is an in-development Core preview, not a production release. Use staging only until the remaining acceptance tasks pass.
