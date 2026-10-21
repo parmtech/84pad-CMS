@@ -2,10 +2,10 @@
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-22 (Australia/Sydney).
-> **Current phase:** Core 0.1 — Laravel, CLI owner installer and tests verified; web installer, production security and executable plugin lifecycle remain open.
-> **Next issue:** [#5 C05 — Authentication security](https://github.com/manbir6-ux/84pad-core/issues/5), then [#18 C16 — browser installer](https://github.com/manbir6-ux/84pad-core/issues/18); C06–C15 still open.
-> **Runnable:** CI verified on PHP 8.3/8.4 and MySQL 8. Not deployed to cPanel or production approved.
-> **Environment test status:** [Core CI 39609985107](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985107) passed PHP 8.3/8.4. [MySQL CI 39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317) passed MySQL migrations, PHP tests and two concurrent owner installers; exactly one successful installation. Live cPanel browser tests remain outstanding.
+> **Current phase:** Core 0.1 development preview — authenticated owner/admin shell, token-gated browser setup, live demo plugin and signed local plugin ZIP install are coded/tested; major release tasks remain.
+> **Next issue:** [#13 C13 — Plugin migration/uninstall boundaries](https://github.com/manbir6-ux/84pad-core/issues/13), followed by [#14 C14 — Safe update/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Finish security/visual/web installer sign-off before C15 release.
+> **Runnable:** Development source passes hosted PHP 8.3/8.4 CI at the signed ZIP implementation commit. No cPanel live deployment or production approval.
+> **Environment test status:** [PHP CI #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) succeeded on PHP 8.3/8.4 for the signed-plugin/ZIP hardening code. MySQL CI [#39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) had all job steps marked successful when inspected; run-level completion still needs confirming. Earlier MySQL 8 [#39609408194](https://github.com/manbir6-ux/84pad-core/actions/runs/39609408194) passed and concurrent owner [#39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317) passed. Live cPanel tests are outstanding.
 
 ## Work checklist
 
@@ -15,20 +15,31 @@
 | [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | **CI verified; issue closed** | [Run 39605702869](https://github.com/manbir6-ux/84pad-core/actions/runs/39605702869); nested secret ignores + filename guard |
 | [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | **CI verified; issue closed** | Installer now executes `84pad:doctor` before migrations; [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) |
 | [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner CLI installer | **CI verified; issue closed** | [MySQL concurrent first-owner CI 39609985317](https://github.com/manbir6-ux/84pad-core/actions/runs/39609985317); production web installer is separate #18 |
-| [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | **Implemented, CI tested; security review pending** | Wrong password and sixth attempt (429) tested; database failure returns generic 503; [CI run 39607991669](https://github.com/manbir6-ux/84pad-core/actions/runs/39607991669) |
-| [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | Partial | Owner-only controls; full RBAC not implemented |
-| [C07](https://github.com/manbir6-ux/84pad-core/issues/7) | Control Studio dashboard | **Implementation preview** | Initial owner dashboard view; gaming UI polish and browser testing pending |
-| [C08](https://github.com/manbir6-ux/84pad-core/issues/8) | Plugin manifest | Partial source added | JSON manifest scanner; no signatures |
-| [C09](https://github.com/manbir6-ux/84pad-core/issues/9) | Plugin discovery | Partial source added | Metadata-only discovery; unverified |
-| [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | Partial source added | DB activation **markers only**; no untrusted plugin PHP execution |
-| [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | **Unit tests green; integration pending** | Priority/order, dispatch and invalid hook name tested in [CI 39608854765](https://github.com/manbir6-ux/84pad-core/actions/runs/39608854765); no plugin loading yet |
-| [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | Manifest only | Demo is not executable |
+| [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | **Login/password rotation/CLI recovery CI tested; review pending** | [PHP CI #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600); production HTTPS/cookie audit outstanding |
+| [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | **Owner/Admin Gates and route checks CI tested; role management pending** | Dashboard Admin; owner-only plugin/security; viewer default-deny; [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
+| [C07](https://github.com/manbir6-ux/84pad-core/issues/7) | Control Studio dashboard | **Futuristic responsive UI committed; browser QA pending** | Full-width gaming-inspired UI, plugin controls, reduced-motion CSS; [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
+| [C08](https://github.com/manbir6-ux/84pad-core/issues/8) | Plugin manifest | **Validated manifests and signed ZIP installed; dependencies pending** | Uploads require pinned Ed25519 publisher public keys, ZIP inspection; [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
+| [C09](https://github.com/manbir6-ux/84pad-core/issues/9) | Plugin discovery | **Discovery and registry operational; API/install lifecycle not final** | Source registry, dashboard list, signed ZIP installed disabled |
+| [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | **Executable trusted local PHP on dashboard; uninstall/migrations pending** | Activation, hook, deactivation and signed install tests [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
+| [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | **HookBus connected to demo plugin; versioning/error boundaries incomplete** | Priority/order, dispatch, active widget and fault fallback [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
+| [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | **CI verified; issue closed** | First-party PHP widget appears only after activation and disappears after deactivation [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | Partial schema | Users/cache/jobs/install/plugin tables; rollback strategy pending |
-| [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | Not started | none |
+| [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | **Pinned-key Ed25519 verifier + owner CLI recovery; updater/rollback not built** | Verifier tests [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600); central release manager deferred |
 | [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
-| [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **Planned** | CLI works in CI, but public web installation remains unbuilt |
+| [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **Token-gated Owner wizard CI tested; zero-config host bootstrap pending** | [docs/WEB-INSTALL.md](WEB-INSTALL.md), [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 
 ## Work log
+
+### 2026-10-22 — major Core implementation checkpoint
+- Added Owner password-change screen, server-only emergency recovery, Owner/Admin role Gates and route guards; feature tests include bad current password and denied non-owner actions.
+- Built an animated responsive futuristic Control Studio shell; browser visual QA still required.
+- Added plugin runtime with actual HookBus-executed first-party demo widget; active/deactive and hook fault isolation covered in PHPUnit; C12 issue closed.
+- Added owner-only signed plugin ZIP upload with pinned Ed25519 publisher public keys, size/path/symlink/duplicate entry protection and disabled-by-default installs; PHP plugins remain full-trust, not sandboxed. Signed package feature tests cover valid installs, missing keys and path traversal rejection.
+- Added token-gated rate-limited browser setup form/controller, fail-closed installer marker and PHP tests. **Requires host-configured DB/.env/APP_KEY**, so no-click shared-host setup remains unbuilt.
+- Added signed Core update artifact verifier, but no upgrade installer, automatic rollback or off-host backup yet.
+- [Core CI #39615871600](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) succeeded on PHP 8.3 and 8.4; [MySQL CI #39615871551](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871551) reported successful job steps but run-level completion to be rechecked. No live cPanel deployment.
+- **Do not merge PR #17 or call this a production release yet**. Primary remaining tasks: C13 plugin migrations/uninstall, C14 rollback/upgrade implementation, full C16 web setup, C07 browser QA and C15 security/release acceptance.
+
 
 ### 2026-10-22 — MySQL concurrent first-owner acceptance
 - Added `--password-stdin` to the CLI installer for secure headless input (never a password argument). The normal hidden password prompt remains the default.
