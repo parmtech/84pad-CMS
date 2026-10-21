@@ -94,6 +94,13 @@ final class FirstRunController extends Controller
             ])->onlyInput('name','email');
         }
 
+        // The standalone cPanel bootstrap token is only needed before the
+        // Owner exists. Discard its private seed once setup succeeds.
+        $tokenFile = storage_path('app/private/first-run-token');
+        if (is_file($tokenFile) && ! is_link($tokenFile)) {
+            @unlink($tokenFile);
+        }
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
