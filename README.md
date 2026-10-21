@@ -9,21 +9,21 @@
 ## What is implemented so far
 
 - Laravel 12 bootstrap, database migrations, project configuration, PHP 8.3/8.4 and MySQL CI.
-- CLI first-owner installation with host preflight and MySQL concurrency protection, and an **experimental** token-gated browser installer. Browser setup currently expects preconfigured `.env`, database and `APP_KEY` ([instructions](docs/WEB-INSTALL.md)).
+- CI-tested first-owner CLI installer plus a **staging no-SSH browser bootstrap**: cPanel user uploads the vendor-bundled staging ZIP, creates a private one-time token, connects a **new empty MySQL database**, then the bootstrap creates `.env`/APP_KEY and opens the Owner wizard ([instructions](docs/WEB-INSTALL.md)). Live cPanel compatibility remains unverified.
 - Guarded login/logout, session protection, Owner password rotation and trusted server-side CLI recovery.
 - Role permissions: Owner controls plugins/security; Administrator can view Control Studio, other roles remain denied by default.
 - Fully redesigned responsive futuristic Control Studio with real status and local plugin management.
 - JSON plugin manifest discovery, owner-controlled activation/deactivation, HookBus integration and first-party executable demo widget.
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
-- Core update **signature-verification and inspection/dry-run CLI** using Ed25519, semantic version, PHP compatibility and safe archive-path checks. There is **no automatic updater, central release server or verified rollback yet**.
+- Core update Ed25519 verification/dry-run plus a **private code-only snapshot** command (`84pad:core-snapshot`) with corruption checks. It does not back up databases, uploads, plugin data, vendor or `.env`; automatic updater and full rollback remain unbuilt.
 
-**Latest verified code CI:** [PHP 8.3/8.4 #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977) and [MySQL 8 #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968) completed successfully, including plugin schema, quarantine restore and signed-update inspector tests. These do not replace a live shared-hosting deployment or security audit.
+**Latest verified staging code CI:** [PHP 8.3/8.4 #39686927563](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927563), [MySQL 8 #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537), and [staging ZIP artifact #39686927599](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927599) all succeeded. This is not a production security audit or a live shared-hosting deployment.
 
 ## Important gaps before Core release
 
-- Complete browser bootstrap that configures the database and application key without SSH or manual `.env` editing.
+- **Live cPanel acceptance** of the staging no-SSH bootstrap, including PHP extensions, reverse-proxy HTTPS, web document root and permissions. A private token/file-manager step is still required.
 - Automatic signed plugin updates, dependency resolution, arbitrary plugin data transformations and automated database rollback. Signed-uploaded plugins can be quarantined and restored disabled; safe explicit plugin-owned **create-only schema** is available from CLI ([contract](docs/PLUGIN-SCHEMA.md)).
-- Full unattended Core updater, maintenance mode, rollback/recovery plan, release packaging and security audit.
+- Full unattended signed Core updater, maintenance mode, integrated database backup and rollback, **reproducible committed composer.lock**, signed release packaging, and security audit.
 - Clean cPanel shared-host installation and browser/mobile visual acceptance testing.
 - Review/merge the [draft development PR](https://github.com/manbir6-ux/84pad-core/pull/17) only after all acceptance checks pass. **No production release is claimed.**
 
