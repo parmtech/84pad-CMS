@@ -14,7 +14,7 @@ final class PluginInstallController extends Controller
         abort_unless($request->user()?->isOwner(), 403);
 
         $input = $request->validate([
-            'package' => ['required','file','max:20480'],
+            'package' => ['required','file','max:'.(int) floor(config('84pad.plugin_zip_max_bytes', 134217728) / 1024)],
             'signature' => ['required','string','max:128'],
         ]);
 
