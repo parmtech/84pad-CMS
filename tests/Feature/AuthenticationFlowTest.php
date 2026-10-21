@@ -93,6 +93,20 @@ class AuthenticationFlowTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_admin_can_view_dashboard_but_cannot_manage_plugins(): void
+    {
+        $admin = User::query()->create([
+            'name' => 'Administrator', 'email' => 'admin@example.test',
+            'password' => 'admin-secure-password', 'role' => 'admin',
+        ]);
+
+        $this->actingAs($admin)->get('/dashboard')->assertOk();
+        $this->post('/dashboard/plugins/demo-widget/state', ['action' => 'activate'])
+            ->assertForbidden();
+        $this->get('/account/security')->assertForbidden();
+        $this->assertDatabaseMissing('core_plugins', ['slug' => 'demo-widget']);
+    }
+
     public function test_non_owner_cannot_see_control_studio(): void
     {
         $viewer = User::query()->create([
