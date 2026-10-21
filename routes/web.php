@@ -1,11 +1,15 @@
 <?php
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\FirstRunController;
 use App\Http\Controllers\Auth\ChangePasswordController;
 use App\Http\Controllers\ControlStudioController;
 use App\Http\Controllers\PluginStateController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
+// First-run installer is unavailable until a 32+ character secret is set in .env.
+Route::get('/setup', [FirstRunController::class, 'show'])->middleware('throttle:10,1')->name('setup.show');
+Route::post('/setup', [FirstRunController::class, 'store'])->middleware('throttle:3,1')->name('setup.store');
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1')->name('login.submit');
