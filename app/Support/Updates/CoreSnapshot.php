@@ -179,11 +179,10 @@ final class CoreSnapshot
         }
         $path = $root.'/'.$relative;
         $size = filesize($path);
-        if ($size === false || $size > self::MAX_BYTES
-            || ++$bytes < 0) {
+        if ($size === false || $size > self::MAX_BYTES) {
             throw new RuntimeException('Unreadable source file.');
         }
-        $bytes += $size - 1;
+        $bytes += $size;
         if ($bytes > self::MAX_BYTES || count($entries) >= self::MAX_FILES) {
             throw new RuntimeException('Core snapshot limits exceeded.');
         }
@@ -199,7 +198,7 @@ final class CoreSnapshot
         $segments = explode('/', str_replace('\\', '/', $relative));
         foreach ($segments as $segment) {
             if ($segment === '' || $segment === '.' || $segment === '..'
-                || str_starts_with($segment, '.')) {
+                || (str_starts_with($segment, '.') && $segment !== '.htaccess')) {
                 return true;
             }
         }
