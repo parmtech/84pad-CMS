@@ -15,7 +15,7 @@ final class PluginPackageInstaller
     {
         $path = $upload->getRealPath();
         if (! $upload->isValid() || $path === false || ! is_file($path)
-            || filesize($path) === false || filesize($path) > 20971520
+            || filesize($path) === false || filesize($path) > (int) config('84pad.plugin_zip_max_bytes', 134217728)
             || ! $this->verifyPublisherSignature($path, $signatureBase64)) {
             throw new RuntimeException('Untrusted or invalid plugin archive.');
         }
@@ -32,7 +32,7 @@ final class PluginPackageInstaller
         $stage = null;
         try {
             $entries = $zip->numFiles;
-            if ($entries < 1 || $entries > 1024) {
+            if ($entries < 1 || $entries > (int) config('84pad.plugin_zip_max_entries', 5000)) {
                 throw new RuntimeException('Invalid ZIP entry count.');
             }
 
@@ -61,9 +61,16 @@ final class PluginPackageInstaller
                         throw new RuntimeException('Unsafe plugin archive path.');
                     }
                 }
-                $total += (int) ($stat['size'] ?? 0);
-                if ($total > 52428800) {
-                    throw new RuntimeException('Plugin package too large.');
+                $expanded = (int) ($stat['size'] ?? -1);
+                $compressed = (int) ($stat['comp_size'] ?? -1);
+                if ($expanded < 0 || $compressed < 0
+                    || ($expanded > 0 && $compressed === 0)
+                    || ($compressed > 0 && $expanded > $compressed * 500)) {
+                    throw new RuntimeException('Unsafe ZIP compression ratio.');
+                }
+                $total += $expanded;
+                if ($total > (int) config('84pad.plugin_extracted_max_bytes', 536870912)) {
+                    throw new RuntimeException('Plugin extracted content exceeds safety limit.');
                 }
                 $opsys = 0;
                 $attributes = 0;
