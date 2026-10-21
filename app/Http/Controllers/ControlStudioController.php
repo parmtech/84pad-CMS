@@ -27,6 +27,9 @@ class ControlStudioController extends Controller
             // A misbehaving plugin must not lock the owner out of Control Studio.
             Log::error('84PAD dashboard hook failed');
             $widgets = [];
+        } finally {
+            // Avoid leaked plugin callbacks in long-lived PHP workers and tests.
+            $hooks->clear();
         }
 
         return view('control-studio', [
