@@ -37,6 +37,9 @@ jobs:
           coverage: none
           tools: composer:v2
 
+      - name: Reject accidentally tracked credentials
+        run: python3 scripts/check_tracked_secrets.py
+
       - name: Validate Composer metadata
         run: composer validate --no-check-publish
 
