@@ -13,11 +13,14 @@
 - Guarded login/logout, session protection, Owner password rotation and trusted server-side CLI recovery.
 - Role permissions: Owner controls plugins/security; Administrator can view Control Studio, other roles remain denied by default.
 - Fully redesigned responsive futuristic Control Studio with real status and local plugin management.
+- **Core Settings:** central encrypted cPanel API token vault, optional global access toggle, independent feature switches, deny-by-default plugin capabilities and a fixed read-only UAPI gateway contract. No live cPanel connection verification yet.
+- **First-login Guided Tour:** arrows/spotlight explain dashboard features and navigate into Settings, with Next/Back/Skip/Finish and per-Owner completion/replay.
+- **128 MiB signed plugin ZIP upload:** 512 MiB extraction ceiling, 5000-member maximum and compression-ratio protections; underlying hosting PHP upload limits must allow it.
 - JSON plugin manifest discovery, owner-controlled activation/deactivation, HookBus integration and first-party executable demo widget.
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
 - Core update Ed25519 verification/dry-run plus a **private code-only snapshot** command (`84pad:core-snapshot`) with corruption checks. It does not back up databases, uploads, plugin data, vendor or `.env`; automatic updater and full rollback remain unbuilt.
 
-**Latest verified staging code CI:** [PHP 8.3/8.4 #39686927563](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927563), [MySQL 8 #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537), and [staging ZIP artifact #39686927599](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927599) all succeeded. This is not a production security audit or a live shared-hosting deployment.
+**Latest verified staging code CI:** [PHP 8.3/8.4 #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418), [MySQL 8 #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395), and [staging ZIP artifact #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) all succeeded. This is not a production security audit or a live shared-hosting deployment.
 
 ## Important gaps before Core release
 
