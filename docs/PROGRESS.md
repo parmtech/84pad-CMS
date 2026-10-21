@@ -5,7 +5,7 @@
 > **Current phase:** Core 0.1 — foundation verified on earlier CI commit; installer/auth/plugin preview code added and now requires its own verification.
 > **Next issue:** [#3 C03 — Installation prerequisite checks](https://github.com/manbir6-ux/84pad-core/issues/3).
 > **Runnable:** Latest code at commit `88d3725` passed GitHub CI for PHP 8.3/8.4. Not deployed to cPanel or approved for production.
-> **Environment test status:** [GitHub Actions run 39606241862](https://github.com/manbir6-ux/84pad-core/actions/runs/39606241862) **SUCCEEDED** for PHP 8.3/8.4 at commit `88d3725`, including preflight tests, PHPUnit, Composer, migrations, and PHP lint. This does not replace live hosting/security tests.
+> **Environment test status:** [CI run 39606241862](https://github.com/manbir6-ux/84pad-core/actions/runs/39606241862) **SUCCESS** on PHP 8.3 and PHP 8.4 at commit `88d37254`; both jobs completed successfully. Local container still lacks Composer and required PHP extensions.
 
 ## Work checklist
 
@@ -46,6 +46,13 @@
 - Added owner-only plugin state UI and feature tests: [219ce12](https://github.com/manbir6-ux/84pad-core/commit/219ce128d075866f956281fd65561531c1acca4f).
 - CI on latest feature code was **pending** when inspected; no permission to declare C03–C15 complete. Core 0.1 is **unfinished**.
 - **Next action:** check most recent CI logs, fix any red tests, validate `84pad:doctor`, CLI installation once-only, login security and plugin status tests. Then assess issue completion individually.
+
+### Verified build and remaining acceptance (2026-10-21)
+- Latest reviewed source commit: [88d37254](https://github.com/manbir6-ux/84pad-core/commit/88d37254ea901e1490e0b6ba138c294a480ae4bc).
+- [GitHub Actions CI run 39606241862](https://github.com/manbir6-ux/84pad-core/actions/runs/39606241862) **completed SUCCESS** on PHP 8.3 and 8.4, including automated PHP/Laravel test steps.
+- This is **automated CI verification**, not a full cPanel production install, browser compatibility test or security approval.
+- Next unfinished work: close C02 after secret-hygiene audit, then validate one-time owner setup on new MySQL, expand roles and policies, build signed and executable plugin lifecycle, safe database evolution, core updater with verified backup/recovery and release acceptance.
+- No background work is assumed; continue from open issues and current repo state on the next authorized session.
 
 ## Archived work log
 
