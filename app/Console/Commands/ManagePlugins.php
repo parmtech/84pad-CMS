@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 class ManagePlugins extends Command
 {
     protected $signature = '84pad:plugins {action=list : list|activate|deactivate} {slug?}';
-    protected $description = 'Inspect/mark plugins (no untrusted code execution)';
+    protected $description = 'Inspect and control local plugins (activation may execute PHP)';
 
     public function handle(PluginRegistry $plugins): int
     {
@@ -24,9 +24,9 @@ class ManagePlugins extends Command
             $rows = [];
             foreach ($plugins->states() as $p) {
                 $rows[] = [$p['id'],$p['version'],$p['compatible']?'yes':'no',
-                    $p['enabled']?'marked enabled':'disabled'];
+                    $p['enabled']?'active':'disabled'];
             }
-            $this->table(['Plugin','Version','Compatible','Activation marker'],$rows);
+            $this->table(['Plugin','Version','Compatible','State'],$rows);
             return self::SUCCESS;
         }
 
@@ -36,7 +36,8 @@ class ManagePlugins extends Command
         }
         try {$plugins->setEnabled((string)$this->argument('slug'),$action==='activate');}
         catch (\InvalidArgumentException $e) {$this->error('Plugin not found/compatible.');return self::FAILURE;}
-        $this->info('State saved. Executable plugin lifecycle is not yet available.');
+        $this->warn('Only activate PHP plugins from developers you trust. Active code runs with the hosting account privileges.');
+        $this->info('Plugin state saved.');
         return self::SUCCESS;
     }
 }
