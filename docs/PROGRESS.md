@@ -2,10 +2,10 @@
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-22 (Australia/Sydney).
-> **Current phase:** Core 0.1 development preview — authenticated owner/admin shell, token-gated browser setup, live demo plugin and signed local plugin ZIP install are coded/tested; major release tasks remain.
+> **Current phase:** Core 0.1 staging build — secure cPanel no-SSH first-run bootstrap, private staging ZIP, Core code snapshot verification, plugin runtime and signed archive inspection implemented. Final release gates remain.
 > **Next issue:** [#13 C13 — Plugin migration recovery](https://github.com/manbir6-ux/84pad-core/issues/13): finish migration-failure safeguards and rollback approach; then [#14 C14 — Core updater/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Browser installer/cPanel QA remain release gates.
-> **Runnable:** Latest Core 0.1 development code passes hosted PHP 8.3/8.4 and MySQL 8 automated tests, including restore, additive schema and signed update inspection. Not deployed to cPanel or approved for production.
-> **Environment test status:** [Core CI #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977) completed **SUCCESS** on PHP 8.3/8.4; [MySQL CI #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968) completed **SUCCESS** with database migrations, plugin schema/restore tests, signed update inspector tests and concurrent Owner install. Live cPanel, security audit, full schema/Core rollback still outstanding.
+> **Runnable:** New staging distribution built with Composer vendor bundled, and the latest PHP 8.3/8.4 and MySQL 8 suites pass. Not deployed to live cPanel or approved for production.
+> **Environment test status:** [Core CI #39686927563](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927563) **SUCCESS** PHP 8.3/8.4; [MySQL CI #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537) **SUCCESS**, including disposable database no-SSH bootstrap and existing-config protection; [Stage Distribution #39686927599](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927599) **SUCCESS**, private staging ZIP artifact. Live cPanel/visual/security, production backups and automatic update rollback outstanding.
 
 ## Work checklist
 
@@ -24,11 +24,20 @@
 | [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | **HookBus connected to demo plugin; versioning/error boundaries incomplete** | Priority/order, dispatch, active widget and fault fallback [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | **CI verified; issue closed** | First-party PHP widget appears only after activation and disappears after deactivation [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
 | [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Plugin-owned schema migration and quarantine | **Additive schema/history + quarantine restore CI verified; automatic DDL rollback pending** | [PHP CI #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977) and [MySQL #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968) passed |
-| [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update and emergency recovery | **Signed ZIP offline inspection verified; updater/rollback not built** | [PHP CI #39626800977](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800977), [MySQL #39626800968](https://github.com/manbir6-ux/84pad-core/actions/runs/39626800968); see [docs/CORE-UPDATES.md](CORE-UPDATES.md) |
-| [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
-| [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **Token-gated Owner wizard CI tested; zero-config host bootstrap pending** | [docs/WEB-INSTALL.md](WEB-INSTALL.md), [PHP CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39615871600) |
+| [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update and emergency recovery | **Signed update inspection + private source snapshot verified; full rollback not built** | `84pad:core-snapshot` integrity-tested [Core CI #39686927563](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927563); signed release inspection previously verified |
+| [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | **Staging ZIP reproducibility CI passed; live acceptance incomplete** | [Stage Distribution #39686927599](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927599) generated vendor-bundled, secret-excluded artifact; composer.lock and cPanel acceptance still pending |
+| [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **No-SSH token-gated PHP bootstrap + Laravel Owner wizard CI tested; real cPanel acceptance pending** | Disposable MySQL [CI #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537) verified `.env`/APP_KEY creation without overwrite; [docs/WEB-INSTALL.md](WEB-INSTALL.md) |
 
 ## Work log
+
+### 2026-10-22 — cPanel staging distribution, bootstrap and source recovery
+- Added `public/84pad-bootstrap.php`: only on direct HTTPS with a 32+ char owner-generated private token, empty MySQL database, CSRF/rate limits, exclusive `.env` creation, generated APP_KEY and fail-closed existing configuration. Added `tests/Fixtures/BootSetupGet.php`, `BootSetupPost.php`, `BootstrapGateTest.php`, `BootstrapMySqlTest.php`.
+- [MySQL CI #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537) **SUCCESS**: disposable MySQL database host-bootstrap POST wrote `.env`, generated APP_KEY and blocked repeat overwrite. Browser Core Owner setup remains separate but previously tested; no live cPanel acceptance yet.
+- Added `.github/workflows/stage-distribution.yml`, bundles runtime Composer vendor in secret-excluded staging ZIP. [Stage Distribution #39686927599](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927599) **SUCCESS**, artifact available on GitHub Actions for 7 days. The ZIP is not a signed production release and Composer lockfile is not committed.
+- Added `CoreSnapshot` class and `84pad:core-snapshot` CLI for **source-code-only** ZIP and SHA-256 integrity verification. Snapshot excludes runtime .env/secrets, vendor, installed plugins, uploads and database; tested corruption detection. Full site backup/recovery and automatic updates/rollback are NOT implemented.
+- [Core CI #39686927563](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927563) completed **SUCCESS** PHP 8.3/8.4. No deployment made to production hosting.
+- **Next release blockers:** commit verified composer.lock, live cPanel 8.3/8.4 install, signed release delivery/updater with backup and rollback, plugin schema recovery, browser/mobile visual and security audit. Keep issues #13/#14/#15/#18 open.
+
 
 ### 2026-10-22 — C14 signed update inspection checkpoint
 - Added `UpdateInspector` with signature verification before parsing ZIP, version/PHP compatibility, path/symlink/duplicate and uncompressed-size checks, and non-installing `84pad:update-inspect` CLI.
