@@ -33,7 +33,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: sodium, mbstring, pdo_sqlite, sqlite3, dom, xml, curl, fileinfo, openssl, tokenizer
+          extensions: sodium, zip, mbstring, pdo_sqlite, sqlite3, dom, xml, curl, fileinfo, openssl, tokenizer
           coverage: none
           tools: composer:v2
 
