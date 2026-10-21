@@ -2,6 +2,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Support\Hooks\HookBus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -73,6 +74,23 @@ class PluginStateTest extends TestCase
             ->assertRedirect();
         $this->get('/dashboard')
             ->assertOk()->assertDontSee('Demo plugin running');
+    }
+
+    public function test_failing_dashboard_hook_does_not_lock_out_owner(): void
+    {
+        $owner=User::query()->create([
+            'name'=>'Owner','email'=>'owner@example.test',
+            'password'=>'long-test-password','role'=>'owner',
+        ]);
+        DB::table('core_installations')->insert([
+            'id'=>1,'owner_user_id'=>$owner->id,'created_at'=>now(),
+        ]);
+        app(HookBus::class)->listen('core.dashboard_widgets', static function (): never {
+            throw new \RuntimeException('A plugin failed unexpectedly');
+        });
+
+        $this->actingAs($owner)->get('/dashboard')->assertOk()
+            ->assertDontSee('A plugin failed unexpectedly');
     }
 
     public function test_viewer_cannot_change_plugin_state(): void
