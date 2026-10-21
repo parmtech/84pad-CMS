@@ -2,10 +2,26 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
-    public function boot(): void {}
+    public function register(): void
+    {
+    }
+
+    public function boot(): void
+    {
+        Gate::define('core.view-dashboard', fn (User $user): bool =>
+            in_array($user->role, ['owner', 'admin'], true)
+        );
+        Gate::define('core.manage-plugins', fn (User $user): bool =>
+            $user->role === 'owner'
+        );
+        Gate::define('core.manage-security', fn (User $user): bool =>
+            $user->role === 'owner'
+        );
+    }
 }
