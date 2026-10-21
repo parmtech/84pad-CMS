@@ -14,7 +14,7 @@
 
 ## Signed ZIP package
 
-The ZIP contains `plugin.json` and optional `bootstrap.php` at the **archive root**, plus assets. No parent paths, hidden paths, symlinks or duplicate archive paths are allowed. Limits: ZIP <= 20 MiB, uncompressed <= 50 MiB, <= 1024 entries.
+The ZIP contains `plugin.json` and optional `bootstrap.php` at the **archive root**, plus assets. No parent paths, hidden paths, symlinks or duplicate archive paths are allowed. Limits: signed ZIP <= **128 MiB**, extracted <= **512 MiB**, <= **5000 entries**, plus a 500:1 per-file compression ratio check.
 
 Owner supplies a base64-encoded detached Ed25519 signature over exactly:
 
