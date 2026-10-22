@@ -48,7 +48,7 @@ final class BackupPanel
                 $this->service->backup();
                 $message = 'Encrypted full-site backup created and verified.';
             } elseif ($action === 'import') {
-                $data = $request->validate(['archive' => 'required|file|max:2097152']);
+                $data = $request->validate(['archive' => 'required|file|max:8388608']);
                 $this->service->portableImport($data['archive']);
                 $message = 'Portable ZIP verified and imported. Restore is not enabled in this preview.';
             } elseif ($action === 'verify') {
