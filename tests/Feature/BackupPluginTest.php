@@ -115,6 +115,14 @@ final class BackupPluginTest extends TestCase
             $this->assertNotFalse($zip->locateName('site/.env'));
             $this->assertNotFalse($zip->locateName('site/plugins/pad-backup/plugin.json'));
             $zip->close();
+
+            $uploaded = new UploadedFile($export, 'portable.zip', 'application/zip', null, true);
+            $imported = $service->portableImport($uploaded);
+            $this->assertSame('imported', $imported['reason']);
+            $this->assertTrue($service->verify($imported['id']));
+            // Changing any ciphertext byte must invalidate the stored digest.
+            file_put_contents($service->directory().'/'.$created['id'].'.84bk', 'altered', FILE_APPEND);
+            $this->assertFalse($service->verify($created['id']));
         } finally {
             @unlink($export);
         }
