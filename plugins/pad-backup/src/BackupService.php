@@ -205,7 +205,7 @@ final class BackupService
         foreach (['.env','artisan','composer.json','composer.lock'] as $file) {
             if (is_file($root.'/'.$file) && !is_link($root.'/'.$file)) $files[$file] = $root.'/'.$file;
         }
-        foreach (['app','bootstrap','config','database','plugins','public','resources','routes','vendor','storage/app/public'] as $dir) {
+        foreach (['app','bootstrap','config','database','plugins','public','resources','routes','vendor','storage/app'] as $dir) {
             $absolute = $root.'/'.$dir;
             if (!is_dir($absolute) || is_link($absolute)) continue;
             $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($absolute, \FilesystemIterator::SKIP_DOTS));
@@ -385,6 +385,17 @@ final class BackupService
 
     private function prune(): void
     {
+        // A crash can leave unencrypted SQL/ZIP staging files behind.
+        // Only touch recognized stale scratch names from this plugin.
+        foreach (glob($this->directory().'/*') ?: [] as $scratch) {
+            $name = basename($scratch);
+            if (is_link($scratch) || !is_file($scratch)) continue;
+            if ((preg_match('/^b[0-9]{14}-[a-f0-9]{16}\\.partial\\.(sql|zip)$/D', $name)
+                    || preg_match('/^(export|verify)-[a-f0-9]{16}\\.zip$/D', $name))
+                && filemtime($scratch) < time()-86400) {
+                @unlink($scratch);
+            }
+        }
         foreach ($this->list() as $item) {
             if (is_int($item['created_at'] ?? null) && $item['created_at'] < time()-self::LIFE) {
                 @unlink($this->directory().'/'.$item['id'].'.84bk');
