@@ -10,6 +10,7 @@ use App\Http\Controllers\PluginRestoreController;
 use App\Http\Controllers\CoreSettingsController;
 use App\Http\Controllers\GuidedTourController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PluginExtensionController;
 
 Route::view('/', 'welcome')->name('home');
 // First-run installer is unavailable until a 32+ character secret is set in .env.
@@ -37,5 +38,8 @@ Route::middleware(['auth','auth.session'])->group(function (): void {
         ->middleware(['can:core.manage-plugins','throttle:20,1'])->name('plugins.state');
     Route::get('/account/security', [ChangePasswordController::class, 'edit'])->middleware('can:core.manage-security')->name('password.edit');
     Route::post('/account/security', [ChangePasswordController::class, 'update'])->middleware(['can:core.manage-security','throttle:5,1'])->name('password.update');
+    Route::match(['GET', 'POST'], '/dashboard/extensions/{slug}/{action?}', PluginExtensionController::class)
+        ->where(['slug' => '[a-z][a-z0-9-]{1,63}', 'action' => '[a-z][a-z0-9-]{0,31}'])
+        ->middleware(['can:core.manage-plugins', 'throttle:30,1'])->name('plugins.extension');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

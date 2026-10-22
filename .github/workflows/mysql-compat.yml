@@ -4,12 +4,15 @@ on:
   push:
     branches:
       - 'core/**'
+      - 'plugin/**'
     paths:
       - '.github/workflows/mysql-compat.yml'
       - 'app/**'
       - 'config/database.php'
       - 'database/**'
       - 'tests/**'
+      - 'plugins/**'
+      - 'routes/**'
   pull_request:
     branches:
       - main
@@ -19,6 +22,8 @@ on:
       - 'config/database.php'
       - 'database/**'
       - 'tests/**'
+      - 'plugins/**'
+      - 'routes/**'
 
 permissions:
   contents: read

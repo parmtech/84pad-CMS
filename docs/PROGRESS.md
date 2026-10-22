@@ -33,6 +33,15 @@
 
 ## Work log
 
+### 2026-10-22 — Separate 84PAD Backup plugin experiment (development branch only)
+
+- New `plugin/backup-v0.1` branch adds `plugins/pad-backup` first-party v0.1.0 prototype for encrypted snapshots, scheduled retention and verified import/export. **Not merged to Core main or the original Core foundation branch.**
+- Includes **proposed** generic Core plugin owner request and cron dispatch hooks; owner approval, stabilized versioned contracts and CI validation are prerequisites to merging.
+- [Backup B01 tracker #23](https://github.com/manbir6-ux/84pad-core/issues/23), plugin [checkpoint](../plugins/pad-backup/docs/PROGRESS.md). Full restore remains unimplemented.
+- Initial Backup branch Actions failed before runner allocation / any test steps; do **not** interpret as passed tests. Inspect and rerun on a working runner.
+
+
+
 ### 2026-10-22 — Owner cPanel Settings, 128 MiB plugins, first-login Guided Tour
 - Added `core_settings`, `core_cpanel_grants` and per-user `core_user_preferences` migrations. Owner-only settings let users store an APP_KEY-encrypted cPanel API token, control independent Core switches, and grant/revoke specific plugin capabilities. Integration defaults OFF, so login and unrelated plugins work without any token.
 - Added `CpanelPermissions` checks and preliminary fixed read-only `CpanelGateway` operations; privileged PHP plugin code remains full-trust, not sandboxed. No real cPanel API account tested and write commands remain deferred.
