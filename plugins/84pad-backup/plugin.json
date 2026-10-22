@@ -1,0 +1,12 @@
+{
+  "id": "84pad-backup",
+  "name": "84PAD Backup",
+  "version": "0.1.0",
+  "requires_core": "0.1.0",
+  "description": "Encrypted manual and scheduled full-site snapshots with 60-day retention and verified portable import/export",
+  "dependencies": [],
+  "permissions": [
+    "backup.manage"
+  ],
+  "author": "ParmTech"
+}
