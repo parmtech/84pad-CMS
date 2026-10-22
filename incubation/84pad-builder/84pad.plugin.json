@@ -1,0 +1,20 @@
+{
+  "schema": "84pad.plugin.draft-v1",
+  "name": "84PAD Builder",
+  "slug": "84pad-builder",
+  "version": "0.1.0-dev",
+  "vendor": "ParmTech",
+  "minimum_core_version": "1.0.0",
+  "contract_status": "PROVISIONAL_UNTIL_CORE_C08_C12",
+  "php": ">=8.3",
+  "dependencies": [],
+  "permissions": [
+    "builder.view",
+    "builder.edit",
+    "builder.publish"
+  ],
+  "entrypoints": {
+    "development_editor": "resources/editor/standalone.html",
+    "planned_admin_route": "/admin/plugins/84pad-builder"
+  }
+}
