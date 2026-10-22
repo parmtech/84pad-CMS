@@ -10,7 +10,7 @@ use Pad\Backup\BackupService;
 use Tests\TestCase;
 use ZipArchive;
 
-require_once __DIR__.'/../../plugins/84pad-backup/src/BackupService.php';
+require_once __DIR__.'/../../plugins/pad-backup/src/BackupService.php';
 
 final class BackupPluginTest extends TestCase
 {
@@ -22,7 +22,7 @@ final class BackupPluginTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $dir = storage_path('app/private/84pad-backups');
+        $dir = storage_path('app/private/pad-backups');
         $settings = $dir.'/settings.json';
         $this->previousSettings = is_file($settings) ? (string)file_get_contents($settings) : null;
         $this->previousFiles = is_dir($dir) ? glob($dir.'/*') ?: [] : [];
@@ -30,7 +30,7 @@ final class BackupPluginTest extends TestCase
 
     protected function tearDown(): void
     {
-        $dir = storage_path('app/private/84pad-backups');
+        $dir = storage_path('app/private/pad-backups');
         foreach (array_diff(glob($dir.'/*') ?: [], $this->previousFiles) as $path) {
             if (is_file($path)) @unlink($path);
         }
@@ -57,31 +57,31 @@ final class BackupPluginTest extends TestCase
     public function test_backup_panel_requires_owner_and_active_plugin(): void
     {
         $owner = $this->owner();
-        $this->get('/dashboard/extensions/84pad-backup')->assertRedirect('/login');
-        $this->actingAs($owner)->get('/dashboard/extensions/84pad-backup')->assertNotFound();
-        $this->post('/dashboard/plugins/84pad-backup/state',['action'=>'activate'])->assertRedirect();
-        $this->get('/dashboard/extensions/84pad-backup')->assertOk()->assertSee('Backup');
-        $this->post('/dashboard/plugins/84pad-backup/state',['action'=>'deactivate'])->assertRedirect();
-        $this->get('/dashboard/extensions/84pad-backup')->assertNotFound();
+        $this->get('/dashboard/extensions/pad-backup')->assertRedirect('/login');
+        $this->actingAs($owner)->get('/dashboard/extensions/pad-backup')->assertNotFound();
+        $this->post('/dashboard/plugins/pad-backup/state',['action'=>'activate'])->assertRedirect();
+        $this->get('/dashboard/extensions/pad-backup')->assertOk()->assertSee('Backup');
+        $this->post('/dashboard/plugins/pad-backup/state',['action'=>'deactivate'])->assertRedirect();
+        $this->get('/dashboard/extensions/pad-backup')->assertNotFound();
     }
 
     public function test_owner_can_set_schedule_without_cpanel_api(): void
     {
         $owner = $this->owner();
-        $this->actingAs($owner)->post('/dashboard/plugins/84pad-backup/state',['action'=>'activate'])->assertRedirect();
-        $this->post('/dashboard/extensions/84pad-backup/settings',['frequency'=>'hourly'])->assertRedirect();
+        $this->actingAs($owner)->post('/dashboard/plugins/pad-backup/state',['action'=>'activate'])->assertRedirect();
+        $this->post('/dashboard/extensions/pad-backup/settings',['frequency'=>'hourly'])->assertRedirect();
         $this->assertSame('hourly',(new BackupService())->settings()['frequency']);
         $this->assertSame(60,(new BackupService())->settings()['retention_days']);
-        $this->post('/dashboard/extensions/84pad-backup/settings',['frequency'=>'every second'])->assertSessionHasErrors('frequency');
+        $this->post('/dashboard/extensions/pad-backup/settings',['frequency'=>'every second'])->assertSessionHasErrors('frequency');
     }
 
     public function test_invalid_portable_import_does_not_execute_or_install(): void
     {
         $owner = $this->owner();
-        $this->actingAs($owner)->post('/dashboard/plugins/84pad-backup/state',['action'=>'activate'])->assertRedirect();
+        $this->actingAs($owner)->post('/dashboard/plugins/pad-backup/state',['action'=>'activate'])->assertRedirect();
         $file = UploadedFile::fake()->createWithContent('bad.zip','not a backup');
-        $this->post('/dashboard/extensions/84pad-backup/import',['archive'=>$file])
-            ->assertRedirect('/dashboard/extensions/84pad-backup');
+        $this->post('/dashboard/extensions/pad-backup/import',['archive'=>$file])
+            ->assertRedirect('/dashboard/extensions/pad-backup');
         $this->assertCount(0,(new BackupService())->list());
     }
 
@@ -113,7 +113,7 @@ final class BackupPluginTest extends TestCase
             $this->assertSame(true,$zip->open($export));
             $this->assertNotFalse($zip->locateName('site/database.sql'));
             $this->assertNotFalse($zip->locateName('site/.env'));
-            $this->assertNotFalse($zip->locateName('site/plugins/84pad-backup/plugin.json'));
+            $this->assertNotFalse($zip->locateName('site/plugins/pad-backup/plugin.json'));
             $zip->close();
         } finally {
             @unlink($export);

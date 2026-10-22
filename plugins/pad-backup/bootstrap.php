@@ -13,13 +13,13 @@ return static function (HookBus $hooks): void {
         $widgets[] = [
             'title' => '84PAD Backup',
             'description' => 'Encrypted full-site snapshots · automatic 60-day cleanup · manual import/export',
-            'url' => '/dashboard/extensions/84pad-backup',
+            'url' => '/dashboard/extensions/pad-backup',
         ];
         return $widgets;
     });
 
     $hooks->listen('core.plugin_request', static function (array $payload): array {
-        if (($payload['slug'] ?? '') !== '84pad-backup') return $payload;
+        if (($payload['slug'] ?? '') !== 'pad-backup') return $payload;
         $payload['response'] = (new BackupPanel(new BackupService()))->handle(
             $payload['request'], (string) $payload['action']
         );

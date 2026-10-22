@@ -37,11 +37,11 @@ small{color:#8facce}.warning{border-left:3px solid #ecb66f;padding:12px 18px;bac
 @if($errors->any())<div class="notice error" role="alert">{{ $errors->first() }}</div>@endif
 <div class="grid">
 <section class="panel"><h2>Manual snapshot</h2><p>Capture your current installation now. Contents are encrypted with a key derived from this installation's APP_KEY.</p>
-<form method="post" action="/dashboard/extensions/84pad-backup/run">@csrf
+<form method="post" action="/dashboard/extensions/pad-backup/run">@csrf
 <button type="submit">✦ Create backup now</button></form>
 <p class="hint">Large websites need temporary free disk space for the SQL dump, ZIP and encrypted archive.</p>
 </section>
-<section class="panel"><h2>Automatic schedule</h2><form method="post" action="/dashboard/extensions/84pad-backup/settings">@csrf
+<section class="panel"><h2>Automatic schedule</h2><form method="post" action="/dashboard/extensions/pad-backup/settings">@csrf
 <label for="frequency">Run backups</label>
 <select id="frequency" name="frequency">
 @foreach(['off'=>'Disabled','hourly'=>'Every hour','daily'=>'Every day','weekly'=>'Every week','monthly'=>'Every month'] as $value => $label)
@@ -52,7 +52,7 @@ small{color:#8facce}.warning{border-left:3px solid #ecb66f;padding:12px 18px;bac
 <button type="submit">Save schedule</button></form>
 </section>
 <section class="panel"><h2>Import backup</h2><p>Upload a previously exported 84PAD ZIP. The archive is validated before being encrypted in private storage.</p>
-<form method="post" enctype="multipart/form-data" action="/dashboard/extensions/84pad-backup/import">@csrf
+<form method="post" enctype="multipart/form-data" action="/dashboard/extensions/pad-backup/import">@csrf
 <label for="archive">Portable backup .zip</label><input type="file" name="archive" id="archive" accept=".zip,application/zip" required>
 <div style="height:12px"></div><button type="submit">↑ Verify and import</button></form>
 <p class="hint">Upload size depends on your host's PHP configuration. Import does not overwrite the live website.</p></section>
@@ -71,15 +71,15 @@ small{color:#8facce}.warning{border-left:3px solid #ecb66f;padding:12px 18px;bac
 <td>{{ number_format(($backup['bytes'] ?? 0)/1048576,1) }} MB</td>
 <td>{{ gmdate('Y-m-d H:i', (int)$backup['created_at']+60*86400) }}</td>
 <td><div class="actions">
-<a href="/dashboard/extensions/84pad-backup/export?id={{ urlencode($backup['id']) }}">Export ZIP</a>
-<form method="post" action="/dashboard/extensions/84pad-backup/verify">@csrf
+<a href="/dashboard/extensions/pad-backup/export?id={{ urlencode($backup['id']) }}">Export ZIP</a>
+<form method="post" action="/dashboard/extensions/pad-backup/verify">@csrf
 <input type="hidden" name="id" value="{{ $backup['id'] }}"><button class="ghost" type="submit">Verify</button></form>
-<form method="post" action="/dashboard/extensions/84pad-backup/delete" onsubmit="return confirm('Permanently delete this backup?')">@csrf
+<form method="post" action="/dashboard/extensions/pad-backup/delete" onsubmit="return confirm('Permanently delete this backup?')">@csrf
 <input type="hidden" name="id" value="{{ $backup['id'] }}"><button class="danger" type="submit">Delete</button></form>
 </div></td></tr>
 @endforeach
 </tbody></table></div>
 @endif
 </section></div>
-<footer><p class="hint">84PAD Backup · Built by ParmTech · Stored under non-public storage/app/private/84pad-backups · No external API required.</p></footer>
+<footer><p class="hint">84PAD Backup · Built by ParmTech · Stored under non-public storage/app/private/pad-backups · No external API required.</p></footer>
 </main></body></html>

@@ -35,7 +35,7 @@ final class BackupPanel
                 ])->deleteFileAfterSend(true);
             } catch (Throwable $e) {
                 Log::warning('84PAD portable backup export failed');
-                return redirect('/dashboard/extensions/84pad-backup')->with('backup_error', 'Export failed. Check backup integrity and APP_KEY.');
+                return redirect('/dashboard/extensions/pad-backup')->with('backup_error', 'Export failed. Check backup integrity and APP_KEY.');
             }
         }
         abort_unless($request->isMethod('POST'), 405);
@@ -62,14 +62,14 @@ final class BackupPanel
             } else {
                 abort(404);
             }
-            return redirect('/dashboard/extensions/84pad-backup')->with('backup_notice', $message);
+            return redirect('/dashboard/extensions/pad-backup')->with('backup_notice', $message);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
         } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
             throw $e;
         } catch (Throwable $e) {
             Log::warning('84PAD backup operation failed', ['action' => $action]);
-            return redirect('/dashboard/extensions/84pad-backup')
+            return redirect('/dashboard/extensions/pad-backup')
                 ->with('backup_error', 'Backup action failed. Check storage space, PHP upload limits, database permissions and logs.');
         }
     }
