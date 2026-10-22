@@ -109,7 +109,11 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <div class="widgets">
 @foreach($widgets as $widget)
 @if(is_array($widget) && is_string($widget['title'] ?? null) && is_string($widget['description'] ?? null))
-<article class="plugin"><h3>{{ $widget['title'] }}</h3><p>{{ $widget['description'] }}</p></article>
+<article class="plugin"><h3>{{ $widget['title'] }}</h3><p>{{ $widget['description'] }}</p>
+@if(is_string($widget['url'] ?? null) && preg_match('~^/dashboard/extensions/[a-z][a-z0-9-]+$~D', $widget['url']))
+<a href="{{ $widget['url'] }}" style="color:#63eaf7;font-weight:700">Open plugin →</a>
+@endif
+</article>
 @endif
 @endforeach
 </div></section>
