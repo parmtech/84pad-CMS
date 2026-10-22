@@ -27,18 +27,18 @@ Artisan::command('84pad:plugins:tick', function (): void {
     if (! Schema::hasTable('core_plugins')) {
         return;
     }
-    if (! app(\App\\Support\\Settings\\CoreSettings::class)->enabled('plugins.runtime_enabled')) {
+    if (! app(\App\Support\Settings\CoreSettings::class)->enabled('plugins.runtime_enabled')) {
         return;
     }
-    $hooks = app(\App\\Support\\Hooks\\HookBus::class);
+    $hooks = app(\App\Support\Hooks\HookBus::class);
     try {
-        app(\App\\Support\\Plugins\\PluginRuntime::class)
-            ->boot($hooks, app(\App\\Support\\Plugins\\PluginRegistry::class));
+        app(\App\Support\Plugins\PluginRuntime::class)
+            ->boot($hooks, app(\App\Support\Plugins\PluginRegistry::class));
         $hooks->dispatch('core.schedule_tick', new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
     } finally {
         $hooks->clear();
     }
 })->purpose('Run enabled plugins\' periodic maintenance and scheduled actions');
 
-\Illuminate\\Support\\Facades\\Schedule::command('84pad:plugins:tick')
+\Illuminate\Support\Facades\Schedule::command('84pad:plugins:tick')
     ->everyMinute()->withoutOverlapping();
