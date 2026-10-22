@@ -19,12 +19,12 @@ final class PluginExtensionController extends Controller
 {
     public function __invoke(
         Request $request,
-        string $slug,
-        ?string $action,
         PluginRegistry $registry,
         PluginRuntime $runtime,
         CoreSettings $settings,
-        HookBus $hooks
+        HookBus $hooks,
+        string $slug,
+        ?string $action = null
     ): Response {
         abort_unless($request->user()?->isOwner(), 403);
         abort_unless($settings->enabled('plugins.runtime_enabled'), 404);
