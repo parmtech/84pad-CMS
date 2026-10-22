@@ -153,6 +153,23 @@ final class BackupService
             $files = $this->siteFiles();
             $files['database.sql'] = $sqlPath;
             ksort($files, SORT_STRING);
+            // Do not exhaust shared-host storage: a ZIP and encrypted copy
+            // coexist until publication. Refuse when free space is insufficient.
+            $estimated = 0;
+            foreach ($files as $candidate) {
+                $length = filesize($candidate);
+                if ($length === false || $length < 0) {
+                    throw new RuntimeException('Unreadable backup source.');
+                }
+                $estimated += $length;
+                if ($estimated > self::MAX_BYTES) {
+                    throw new RuntimeException('Backup source exceeds safety limit.');
+                }
+            }
+            $free = disk_free_space($this->directory());
+            if ($free !== false && $free < $estimated * 2 + 33554432) {
+                throw new RuntimeException('Not enough free disk space for a safe local snapshot.');
+            }
             $manifestFiles = [];
             $total = 0;
             $zip = new ZipArchive();
