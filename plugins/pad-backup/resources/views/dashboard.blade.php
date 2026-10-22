@@ -81,5 +81,5 @@ small{color:#8facce}.warning{border-left:3px solid #ecb66f;padding:12px 18px;bac
 </tbody></table></div>
 @endif
 </section></div>
-<footer><p class="hint">84PAD Backup · Built by ParmTech · Stored under non-public storage/app/private/pad-backups · No external API required.</p></footer>
+<footer><p class="hint">84PAD Backup · Built by ParmTech · Stored under non-public storage/app/private/84pad-backups · No external API required.</p></footer>
 </main></body></html>
