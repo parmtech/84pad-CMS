@@ -22,7 +22,7 @@ final class BackupPluginTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $dir = storage_path('app/private/pad-backups');
+        $dir = storage_path('app/private/84pad-backups');
         $settings = $dir.'/settings.json';
         $this->previousSettings = is_file($settings) ? (string)file_get_contents($settings) : null;
         $this->previousFiles = is_dir($dir) ? glob($dir.'/*') ?: [] : [];
@@ -30,7 +30,7 @@ final class BackupPluginTest extends TestCase
 
     protected function tearDown(): void
     {
-        $dir = storage_path('app/private/pad-backups');
+        $dir = storage_path('app/private/84pad-backups');
         foreach (array_diff(glob($dir.'/*') ?: [], $this->previousFiles) as $path) {
             if (is_file($path)) @unlink($path);
         }
