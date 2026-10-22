@@ -5,7 +5,7 @@ First-party ParmTech plugin, slug `pad-backup`. Intended for Laravel 12/PHP 8.3+
 ## Features
 
 - Manual full-installation snapshot: Core directories, plugins, installed vendor runtime, media, `.env` and a **base-table** MySQL dump (not stored routines/triggers/views/events).
-- Per-file SHA-256 checked ZIP inside a libsodium secretstream container. Private directory `storage/app/private/pad-backups` is owner-only (not web-accessible). Encryption key uses HKDF with the **current site's APP_KEY** and a random per-archive salt.
+- Per-file SHA-256 checked ZIP inside a libsodium secretstream container. Private directory `storage/app/private/84pad-backups` is owner-only (not web-accessible). Encryption key uses HKDF with the **current site's APP_KEY** and a random per-archive salt.
 - Owner-only dashboard at `/dashboard/extensions/pad-backup`, after activation.
 - Automatic hourly/daily/weekly/monthly/off option; schedule state persisted in private JSON; `60 days` retained from snapshot creation; automatic removal via cron ticks. No per-plugin tables/migrations.
 - Portable ZIP export (decrypted, includes secrets), ZIP import (validate first, then encrypt at rest), integrity verification, delete.
