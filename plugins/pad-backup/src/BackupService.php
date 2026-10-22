@@ -279,6 +279,18 @@ final class BackupService
         } finally { fclose($handle); }
     }
 
+    private function safeMember(string $name): bool
+    {
+        if ($name === 'manifest.json') return true;
+        if (strlen($name) > 1024 || !str_starts_with($name, 'site/')
+            || str_contains($name, chr(92))
+            || preg_match('/[\x00-\x1F\x7F]/', $name)) return false;
+        foreach (explode('/', $name) as $part) {
+            if ($part === '' || $part === '.' || $part === '..') return false;
+        }
+        return true;
+    }
+
     private function verifyZip(string $path): void
     {
         if (!class_exists(ZipArchive::class) || !is_file($path) || is_link($path))
@@ -298,8 +310,7 @@ final class BackupService
                 $s = $zip->statIndex($i);
                 $name = $s['name'] ?? null;
                 if (!is_string($name) || isset($seen[$name]) || !is_int($s['size'] ?? null)
-                    || ($name !== 'manifest.json' && !preg_match('~^site/(?:[a-zA-Z0-9_.-]+/)*[a-zA-Z0-9_.-]+$~D',$name))
-                    || str_contains($name,'..') || str_contains($name,'//'))
+                    || !$this->safeMember($name))
                     throw new RuntimeException('Unsafe ZIP entry.');
                 $seen[$name]=true;
                 if ($name === 'manifest.json') continue;
