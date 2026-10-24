@@ -63,8 +63,10 @@ jobs:
       - name: Run PHPUnit feature and unit tests
         run: php artisan test --no-ansi
 
-      - name: Check guided tour JavaScript syntax
-        run: node --check public/js/84pad-tour.js
+      - name: Check Control Studio JavaScript syntax
+        run: |
+          node --check public/js/84pad-tour.js
+          node --check public/js/84pad-bootstrap-wizard.js
 
       - name: Check PHP syntax
         run: |
