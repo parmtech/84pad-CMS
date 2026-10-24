@@ -18,9 +18,11 @@ final class FirstRunController extends Controller
 {
     private function assertAvailable(Request $request): void
     {
-        // Never allow setup without an owner-provided out-of-band secret.
+        // Only the browser that proved file-level hosting ownership can create Owner.
         $token = (string) config('84pad.setup_token');
         abort_unless(strlen($token) >= 32, 404);
+        $grant = $request->cookie('84pad_owner_setup');
+        abort_unless(is_string($grant) && hash_equals($token, $grant), 403);
 
         if (config('app.env') === 'production') {
             abort_unless($request->isSecure() && ! config('app.debug'), 404);
@@ -51,13 +53,6 @@ final class FirstRunController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $this->assertAvailable($request);
-        $configured = (string) config('84pad.setup_token');
-        $submitted = (string) $request->input('setup_token', '');
-
-        if (strlen($submitted) > 256 || ! hash_equals($configured, $submitted)) {
-            abort(403);
-        }
-
         $data = $request->validate([
             'name' => ['required','string','min:2','max:120'],
             'email' => ['required','email','max:255'],
@@ -123,16 +118,11 @@ final class FirstRunController extends Controller
             fclose($lock);
         }
 
-        // The standalone cPanel bootstrap token is only needed before the
-        // Owner exists. Discard its private seed once setup succeeds.
-        $tokenFile = storage_path('app/private/first-run-token');
-        if (is_file($tokenFile) && ! is_link($tokenFile)) {
-            @unlink($tokenFile);
-        }
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('status', 'Core installed. Please sign in.');
+        return redirect()->route('login')
+            ->withCookie(cookie()->forget('84pad_owner_setup', '/setup'))
+            ->with('status', 'Core installed. Please sign in.');
     }
 }
