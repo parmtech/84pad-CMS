@@ -11,7 +11,24 @@ final class PluginPackageInstaller
 {
     public function __construct(private readonly PluginCatalog $catalog) {}
 
+    /**
+     * Inspect a signed native 84PAD plugin without writing it to the plugin directory.
+     * The archive bytes are verified again during the final install.
+     *
+     * @return array{id:string,name:string,version:string,requires_core:string}
+     */
+    public function inspect(UploadedFile $upload, string $signatureBase64): array
+    {
+        return $this->installOrInspect($upload, $signatureBase64, true);
+    }
+
     public function install(UploadedFile $upload, string $signatureBase64): string
+    {
+        return $this->installOrInspect($upload, $signatureBase64, false);
+    }
+
+    /** @return string|array{id:string,name:string,version:string,requires_core:string} */
+    private function installOrInspect(UploadedFile $upload, string $signatureBase64, bool $inspectOnly): string|array
     {
         $path = $upload->getRealPath();
         if (! $upload->isValid() || $path === false || ! is_file($path)
@@ -94,6 +111,15 @@ final class PluginPackageInstaller
                 || ! preg_match('/^\d+\.\d+\.\d+$/D', $manifest['requires_core'])
                 || ! $this->catalog->compatible($manifest)) {
                 throw new RuntimeException('Invalid or incompatible plugin manifest.');
+            }
+
+            if ($inspectOnly) {
+                return [
+                    'id' => $slug,
+                    'name' => $manifest['name'],
+                    'version' => $manifest['version'],
+                    'requires_core' => $manifest['requires_core'],
+                ];
             }
 
             $root = base_path('plugins');
