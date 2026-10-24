@@ -64,6 +64,18 @@ final class FirstRunWebInstallerTest extends TestCase
         }
     }
 
+    public function test_owner_setup_uses_english_control_studio_design(): void
+    {
+        $this->get('/setup')
+            ->assertOk()
+            ->assertSee('lang="en"', false)
+            ->assertSee('/css/84pad-installer.css', false)
+            ->assertSee('Create your Owner account.')
+            ->assertSee('Owner display name')
+            ->assertSee('Secure Owner login')
+            ->assertDontSee(str_repeat('Q', 40));
+    }
+
     public function test_setup_is_disabled_without_a_configured_secret(): void
     {
         Config::set('84pad.setup_token', '');
