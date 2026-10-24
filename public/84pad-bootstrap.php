@@ -373,7 +373,7 @@ html.js [data-mode-fields].visible{display:block}
 </div>
 </div>
 <div data-mode-fields="cpanel">
-<div class="notice">In cPanel go to <strong>Security → Manage API Tokens → Create</strong>. Copy the token once, then enter your hosting server's hostname (not a full URL). API access must be supported by your hosting plan. <a href="https://api.docs.cpanel.net/cpanel/tokens" target="_blank" rel="noopener noreferrer">Official token guide ↗</a></div>
+<div class="notice">In cPanel go to <strong>Security → Manage API Tokens → Create</strong>. Copy the token once, then enter your hosting server's hostname (not a full URL). API access must be supported by your hosting plan. <a href="https://docs.cpanel.net/cpanel/security/manage-api-tokens-in-cpanel/" target="_blank" rel="noopener noreferrer">Official token guide ↗</a></div>
 <div class="grid2">
 <div class="field"><label for="cp-host">cPanel server hostname</label><input id="cp-host" name="cpanel_host" placeholder="server.example.com" maxlength="253"><small>From your cPanel URL, without https:// or :2083</small></div>
 <div class="field"><label for="cp-user">cPanel username</label><input id="cp-user" name="cpanel_username" maxlength="16" placeholder="account"></div>
@@ -406,8 +406,8 @@ html.js [data-mode-fields].visible{display:block}
 <li><span>✓</span><div><strong>Private setup token</strong><br>Create the one-time file outside the public directory.</div></li>
 <li><span>✓</span><div><strong>Database access</strong><br>Automatic cPanel connection or manual MySQL credentials.</div></li>
 </ul>
-<details><summary>Where do I find the cPanel API token?</summary><p>Login to cPanel → Security → Manage API Tokens → Create. Use the cPanel account username, not the email address. Some hosts disable tokens.</p></details>
-<details><summary>How do I create a database manually?</summary><p>Open MySQL Databases or MySQL Database Wizard in your hosting dashboard. Create a new database and user, assign privileges, then enter the full prefixed names above.</p></details>
+<details><summary>Where do I find the cPanel API token?</summary><p>Login to cPanel → Security → Manage API Tokens → Create. Use the cPanel account username, not the email address. Some hosts disable tokens. Use a short expiration when available, and revoke the token after setup because it is not saved by this bootstrap.</p></details>
+<details><summary>How do I create a database manually?</summary><p>Open MySQL Databases or MySQL Database Wizard in your hosting dashboard. Create a new database and user, assign privileges, then enter the full prefixed names above. On newer cPanel versions the section may be called <strong>Database Wizard</strong>.</p></details>
 <details><summary>Is cPanel required after setup?</summary><p>No. Core and unrelated plugins work without a cPanel token. You can optionally reconnect later in encrypted Core Settings and grant individual plugin permissions.</p></details>
 <details><summary>Why does the wizard require a private token?</summary><p>It prevents visitors from claiming ownership of an uninstalled website. The setup file must be outside the publicly served directory.</p></details>
 </div></aside></div>
