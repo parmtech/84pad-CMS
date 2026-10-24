@@ -8,6 +8,8 @@
     const modeFields = Array.from(form.querySelectorAll('[data-mode-fields]'));
     const next = form.querySelector('[data-next]');
     const back = form.querySelector('[data-back]');
+    const counter = document.querySelector('[data-step-count]');
+    const hostReady = form.dataset.hostReady === 'yes';
     let current = 0;
 
     document.documentElement.classList.add('js');
@@ -42,9 +44,12 @@
         progress.forEach((item, i) => {
             const active = i === current;
             item.classList.toggle('active', active);
+            item.classList.toggle('complete', i < current);
             if (active) item.setAttribute('aria-current', 'step');
             else item.removeAttribute('aria-current');
         });
+        if (counter) counter.textContent = 'STEP ' + String(current + 1).padStart(2, '0') + ' OF ' + String(pages.length).padStart(2, '0');
+        if (next) next.disabled = current === 0 && !hostReady;
         back.hidden = current === 0;
         next.hidden = current === pages.length - 1;
         const submit = form.querySelector('button[type="submit"]');
@@ -68,13 +73,16 @@
         input.addEventListener('change', updateMode);
     });
     next?.addEventListener('click', () => {
+        if (current === 0 && !hostReady) return;
         if (validateCurrent()) show(current + 1);
     });
     back?.addEventListener('click', () => show(current - 1));
     form.addEventListener('submit', event => {
         if (current !== pages.length - 1) {
             event.preventDefault();
-            if (validateCurrent()) show(current + 1);
+            if ((current !== 0 || hostReady) && validateCurrent()) show(current + 1);
+        } else if (!validateCurrent()) {
+            event.preventDefault();
         }
     });
     show(0);
