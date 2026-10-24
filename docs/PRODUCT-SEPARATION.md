@@ -30,3 +30,12 @@
 - **Not tested:** release-server ZIP uploads against an actual PHP ZIP extension, owner-trusted signing workflow, real cPanel deployment, HTTPS sessions, live domain DNS, marketing website redirects, MySQL/hosting Core setup or CI for the standalone Release Server. Both are **not production approved**.
 - **Future repository:** Create a separate `84pad-release-server` GitHub repository; do not permanently add this service to Laravel Core. Add CI, signed release publishing and hosting acceptance there, then independently deploy after approval.
 - **Permanent product requirement:** maintain unchanged website download links (see [RELEASE-DOWNLOADS.md](RELEASE-DOWNLOADS.md)), and never auto-promote an unapproved build.
+
+## 2026-10-24 — Separate Release Server PHP 8.2 security-patched compatibility
+
+- Owner encountered a website error saying the update host uses PHP 8.2 and requiring 8.3/8.4. Inspection of the separate PHP Release Server prototype showed no code requiring PHP 8.3 language features; its runtime gate had been unnecessarily strict.
+- An independent local **staging** update was built, NOT added to this Laravel Core repository and NOT deployed to the server: `84PAD-Release-Server-PHP82-Security-Patched-STAGING.zip` (complete separate release server) and `84PAD-Release-Server-PHP82-Safe-Update-PATCH.zip` (existing server's index/lib/readme only).
+- Security gate checks minimum **security-patched** PHP builds issued 2026-10-21: 8.2.35, 8.3.36, 8.4.27, 8.5.12. Older versions fail closed rather than bypassing critical remote-code-execution fixes. PHP 8.2 security support ends on **2026-12-31**; migrating to 8.4.27+ is recommended. PHP official security notes: https://www.php.net/archive/2026.php#2026-10-21-5.
+- ZIP and Sodium remain independent prerequisites for respective upload/signature verification operations; never bypass signature verification. Owner login and existing verified downloads can run without ZIP/Sodium if the PHP security version gate passes.
+- Verified locally: PHP 8.4 syntax lint, 10 minimum-version matrix cases, structure of requirements checks, ZIP structural/integrity validation (5-file complete / 3-file patch). No native PHP 8.2 interpreter available for compatibility execution; no cPanel/live-host test; production approval **pending**.
+- **Server-only change:** do not package the Release Server as an 84PAD plugin, do not silently merge it into Core CMS and do not modify the Core's own PHP hosting requirements based on this separate server patch.
