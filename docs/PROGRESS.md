@@ -2,7 +2,7 @@
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
 > Last updated: 2026-10-24 (Australia/Sydney); this branch tracks the C20 wizard review.
-> **Current phase:** Core 0.1 staging build — new Owner Settings, encrypted cPanel API credential, deny-by-default per-plugin grants, independent feature switches, guided first-login training, and 128 MiB signed plugin upload added. Live compatibility/release gates remain.
+> **Current phase:** C20 English-only installer UI redesign committed on review branch; CI/live acceptance still pending. Core 0.1 staging build — new Owner Settings, encrypted cPanel API credential, deny-by-default per-plugin grants, independent feature switches, guided first-login training, and 128 MiB signed plugin upload added. Live compatibility/release gates remain.
 > **Next issue:** [#13 C13 — Plugin migration recovery](https://github.com/manbir6-ux/84pad-core/issues/13): finish migration-failure safeguards and rollback approach; then [#14 C14 — Core updater/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Browser installer/cPanel QA remain release gates.
 > **Runnable:** New staging distribution built with Composer vendor bundled, and the latest PHP 8.3/8.4 and MySQL 8 suites pass. Not deployed to live cPanel or approved for production.
 > **Environment test status:** [Core CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) **SUCCESS** PHP 8.3/8.4 with first-login tutorial, encryption/permissions, 128 MiB ZIP and JavaScript syntax tests; [MySQL CI #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) **SUCCESS**; [Staging ZIP #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) **SUCCESS**. Live cPanel API, browser visual/accessibility and production security/recovery tests remain pending.
@@ -16,6 +16,17 @@
 - **Status: implemented on feature branch, NOT release accepted.** Current GitHub Actions runs on C20 base and review branch report **failure**; the inspected failed jobs provided no usable steps/logs in the connector, so the failure cause is unverified. Do not report these commits as tested, use any ZIP as production, or merge without passing CI.
 - **Remaining:** inspect failed Actions logs/runner availability, run PHP 8.3/8.4 Core tests and MySQL disposable integration, test automatic cPanel provisioning against a throwaway account, browser/mobile accessibility and HTTPS reverse proxy scenarios; verify zipped distribution and revoke setup token.
 - **Next:** obtain a green CI run and host acceptance evidence, then address any regressions, update checklist/issue, and request approval for merge.
+
+## 2026-10-24 — English-only professional installer UI (C20 / PR #25)
+
+- Owner feedback: all in-product installation text must remain **English**. Conversation language is independent of product UI locale.
+- Rebuilt `public/84pad-bootstrap.php` presentation with a premium shared 84PAD Control Studio visual system in `public/css/84pad-installer.css`: responsive full-width gradients and glass panels, accessible 3-step progress, selection cards, readiness diagnostics, high-contrast forms, right-side help, clear mobile stacking, and reduced-motion support. The backend credential/DB handlers were preserved. Switched the bootstrap CSP from inline styles to same-origin CSS.
+- Rebuilt `resources/views/auth/first-run.blade.php` for the final Owner screen with the **same** design and English labels. Hosting/bootstrap and Owner screens no longer appear as unrelated experiences.
+- Improved `public/js/84pad-bootstrap-wizard.js` with completed-step states, accessible current step, required-host guard and duplicate-submit feedback; no credential storage/network polling.
+- Expanded `BootstrapWizardTest.php` and `FirstRunWebInstallerTest.php`; added `InstallerDesignTest.php` verifying English-only copy, shared local assets and accessibility CSS. Tests are committed but **not reported passed** until CI reports success.
+- Branch: [`core/C20-preflight-hardening`](https://github.com/manbir6-ux/84pad-core/tree/core/C20-preflight-hardening); [draft PR #25](https://github.com/manbir6-ux/84pad-core/pull/25). No merge or live deployment.
+- CI status at checkpoint: recently triggered PHP/MySQL/Stage workflows for this branch are failing or queued. The connector did not expose actionable job log steps; no verified green runs for this redesign. **Release BLOCKED** on successful CI and real cPanel + browser/mobile QA.
+- Next: investigate Actions failures in GitHub UI, run static and feature tests against PHP 8.3/8.4 + disposable MySQL, visually QA at mobile/desktop widths and keyboard/screen-reader modes, then test on a throwaway cPanel account before owner-approved merge.
 
 ## Work checklist
 
