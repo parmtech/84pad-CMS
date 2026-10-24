@@ -19,7 +19,6 @@ final class BootstrapMySqlTest extends TestCase
         }
 
         $dbName = 'pad_bootstrap_ci_'.bin2hex(random_bytes(6));
-        $token = str_repeat('R', 48);
         $username = 'padtester';
         $userPassword = 'test_only_password';
         $temporaryRoot = sys_get_temp_dir().'/84pad-new-install-'.bin2hex(random_bytes(8));
@@ -44,17 +43,12 @@ final class BootstrapMySqlTest extends TestCase
                 base_path('public/84pad-bootstrap.php'),
                 $temporaryRoot.'/public/84pad-bootstrap.php'
             );
-            file_put_contents(
-                $temporaryRoot.'/storage/app/private/first-run-token',
-                $token
-            );
 
             $env = [
                 'CI_BOOTSTRAP_DB_HOST' => '127.0.0.1',
                 'CI_BOOTSTRAP_DB_NAME' => $dbName,
                 'CI_BOOTSTRAP_DB_USER' => $username,
                 'CI_BOOTSTRAP_DB_PASSWORD' => $userPassword,
-                'CI_BOOTSTRAP_SETUP_TOKEN' => $token,
             ];
             $command = [
                 PHP_BINARY,
@@ -73,7 +67,7 @@ final class BootstrapMySqlTest extends TestCase
             $this->assertStringContainsString('APP_DEBUG=false', $saved);
             $this->assertStringContainsString('PAD_SETUP_TOKEN=', $saved);
 
-            // A second valid token must never overwrite the APP_KEY.
+            // Repeated setup POST must never overwrite the APP_KEY.
             $second = new Process($command, null, $env);
             $second->run();
             $this->assertTrue($second->isSuccessful(), $second->getErrorOutput());
