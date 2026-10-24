@@ -49,6 +49,10 @@ final class BootstrapWizardTest extends TestCase
         $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
         $output = $process->getOutput();
         $this->assertStringContainsString('Your space begins here', $output);
+        $this->assertStringContainsString('<html lang="en">', $output);
+        $this->assertStringContainsString('/css/84pad-installer.css', $output);
+        $this->assertStringContainsString('data-host-ready="', $output);
+        $this->assertStringContainsString('Setup companion', $output);
         $this->assertStringContainsString('Hosting readiness', $output);
         $this->assertStringContainsString('Composer dependencies', $output);
         $this->assertStringContainsString('name="connection_mode" value="cpanel"', $output);
