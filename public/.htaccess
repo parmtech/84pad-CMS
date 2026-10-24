@@ -1,3 +1,7 @@
+Options -Indexes
+<FilesMatch "^(\.84pad-root\.php|84pad-bundle\.zip|\.env.*|.*\.(zip|pad|bak|sql|log))$">
+    Require all denied
+</FilesMatch>
 <IfModule mod_rewrite.c>
     Options -MultiViews -Indexes
     RewriteEngine On
