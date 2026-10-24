@@ -83,6 +83,13 @@
             if ((current !== 0 || hostReady) && validateCurrent()) show(current + 1);
         } else if (!validateCurrent()) {
             event.preventDefault();
+        } else {
+            const submit = form.querySelector('button[type="submit"]');
+            if (submit) {
+                submit.disabled = true;
+                submit.textContent = 'Preparing secure setup…';
+                submit.setAttribute('aria-busy', 'true');
+            }
         }
     });
     show(0);
