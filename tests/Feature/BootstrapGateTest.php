@@ -43,37 +43,30 @@ final class BootstrapGateTest extends TestCase
         return $process->getOutput();
     }
 
-    public function test_missing_private_token_disables_bootstrap(): void
+    public function test_empty_private_folder_opens_hosting_wizard_without_entering_setup_key(): void
     {
-        $this->assertSame('', $this->visit(true));
+        $this->assertStringContainsString('Your space begins here', $this->visit(true));
     }
 
-    public function test_valid_token_only_allows_https(): void
+    public function test_wizard_is_only_available_over_https(): void
     {
-        file_put_contents(
-            $this->temporaryRoot.'/storage/app/private/first-run-token',
-            str_repeat('Q', 48)
-        );
         $this->assertStringContainsString('requires a direct HTTPS', $this->visit(false));
         $this->assertStringContainsString('Your space begins here', $this->visit(true));
     }
 
     public function test_existing_environment_file_disables_setup_without_overwriting(): void
     {
-        file_put_contents(
-            $this->temporaryRoot.'/storage/app/private/first-run-token',
-            str_repeat('Q', 48)
-        );
         file_put_contents($this->temporaryRoot.'/.env', 'APP_ENV=production'."\n");
 
-        $this->assertSame('', $this->visit(true));
+        $this->assertStringContainsString('allow-84pad-', $this->visit(true));
+        $this->assertStringNotContainsString('name="setup_token"', $this->visit(true));
         $this->assertSame(
             'APP_ENV=production'."\n",
             file_get_contents($this->temporaryRoot.'/.env')
         );
     }
 
-    public function test_weak_token_does_not_unlock_setup(): void
+    public function test_legacy_short_token_file_does_not_grant_installation(): void
     {
         file_put_contents(
             $this->temporaryRoot.'/storage/app/private/first-run-token',
