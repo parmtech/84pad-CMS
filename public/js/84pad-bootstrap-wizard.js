@@ -39,7 +39,12 @@
             }
         });
         updateMode();
-        progress.forEach((item, i) => item.classList.toggle('active', i === current));
+        progress.forEach((item, i) => {
+            const active = i === current;
+            item.classList.toggle('active', active);
+            if (active) item.setAttribute('aria-current', 'step');
+            else item.removeAttribute('aria-current');
+        });
         back.hidden = current === 0;
         next.hidden = current === pages.length - 1;
         const submit = form.querySelector('button[type="submit"]');
