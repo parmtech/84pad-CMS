@@ -283,7 +283,7 @@ function h(string $text): string
 </header>
 <section class="hero" aria-labelledby="setup-title">
   <div class="kicker">WELCOME TO YOUR NEW CREATIVE ENGINE</div>
-  <h1 id="setup-title">Your space <em>begins here.</em></h1>
+  <h1 id="setup-title">Your space begins here.</h1>
   <p>Three simple steps to connect your hosting and prepare 84PAD. Set up a secure foundation now—build anything and plug everything in later.</p>
 </section>
 <nav class="stagebar" aria-label="Setup progress">
@@ -295,7 +295,7 @@ function h(string $text): string
 <main class="panel main-panel" aria-label="Installation configuration">
   <div class="section-top"><span class="eyebrow">84PAD / SETUP WIZARD</span><span class="section-count" data-step-count>STEP 01 OF 03</span></div>
   <?php if ($problem !== null): ?><p role="alert" class="error"><?= h($problem) ?></p><?php endif; ?>
-  <form method="post" autocomplete="off" data-wizard>
+  <form method="post" autocomplete="off" data-wizard data-host-ready="<?= $hostReady ? 'yes' : 'no' ?>">
   <input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
   <section data-step="0" class="visible" aria-labelledby="step-hosting">
     <h2 id="step-hosting" tabindex="-1">Choose your connection.</h2>
@@ -317,7 +317,7 @@ function h(string $text): string
     <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">✧</span><span><strong>Built for privacy.</strong> Only the Laravel <code>public/</code> directory must be web-accessible. Keep <code>.env</code>, storage and credentials outside the public web root.</span></div>
     <section class="readiness" aria-label="Server readiness checks">
       <div class="readiness-head">
-        <h3>Server readiness</h3><span class="health <?= $hostReady ? '' : 'warn' ?>"><?= $hostReady ? 'ALL CHECKS PASSED' : 'ACTION REQUIRED' ?></span>
+        <h3>Hosting readiness</h3><span class="health <?= $hostReady ? '' : 'warn' ?>"><?= $hostReady ? 'ALL CHECKS PASSED' : 'ACTION REQUIRED' ?></span>
       </div>
       <ul>
         <?php foreach ($hostChecks as $label => $passed): ?>
