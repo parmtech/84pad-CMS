@@ -35,7 +35,7 @@
             // Hidden steps must not block submission or keyboard focus.
             for (const element of page.querySelectorAll('input,button,select')) {
                 if (element.dataset.initialDisabled === 'true') continue;
-                if (page.getAttribute('data-step') !== '1') element.disabled = !active;
+                if (page.getAttribute('data-step') === '2') element.disabled = !active;
             }
         });
         updateMode();
