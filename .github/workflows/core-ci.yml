@@ -65,6 +65,7 @@ jobs:
 
       - name: Check guided tour JavaScript syntax
         run: node --check public/js/84pad-tour.js
+          node --check public/js/84pad-bootstrap-wizard.js
 
       - name: Check PHP syntax
         run: |
