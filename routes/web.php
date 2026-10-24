@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ChangePasswordController;
 use App\Http\Controllers\ControlStudioController;
 use App\Http\Controllers\PluginStateController;
 use App\Http\Controllers\PluginInstallController;
+use App\Http\Controllers\PluginPackageReviewController;
 use App\Http\Controllers\PluginUninstallController;
 use App\Http\Controllers\PluginRestoreController;
 use App\Http\Controllers\CoreSettingsController;
@@ -29,6 +30,13 @@ Route::middleware(['auth','auth.session'])->group(function (): void {
     Route::post('/dashboard/tour/complete', [GuidedTourController::class, 'complete'])->middleware(['can:core.manage-security','throttle:10,1'])->name('tour.complete');
     Route::post('/dashboard/plugins/install', PluginInstallController::class)
         ->middleware(['can:core.manage-plugins','throttle:5,1'])->name('plugins.install');
+    // All signed plugin changes go through manifest inspection and Owner confirmation.
+    Route::post('/dashboard/plugins/review', [PluginPackageReviewController::class, 'prepare'])
+        ->middleware(['can:core.manage-plugins','throttle:5,1'])->name('plugins.prepare');
+    Route::get('/dashboard/plugins/review/{ticket}', [PluginPackageReviewController::class, 'show'])
+        ->middleware('can:core.manage-plugins')->name('plugins.review');
+    Route::post('/dashboard/plugins/review/{ticket}/confirm', [PluginPackageReviewController::class, 'confirm'])
+        ->middleware(['can:core.manage-plugins','throttle:5,1'])->name('plugins.confirm');
     Route::post('/dashboard/plugins/quarantine/{snapshot}/restore', PluginRestoreController::class)
         ->middleware(['can:core.manage-plugins','throttle:3,1'])->name('plugins.restore');
     Route::post('/dashboard/plugins/{slug}/uninstall', PluginUninstallController::class)
