@@ -8,7 +8,9 @@ if (! is_file($bootstrap)) {
 session_name('84PAD_SETUP');
 session_start();
 $_SESSION['csrf'] = 'ci-cpanel-negative';
+$_SESSION['owner_proof'] = '0123456789abcdef01234567';
 session_write_close();
+file_put_contents(dirname($bootstrap, 2).'/storage/app/private/allow-84pad-0123456789abcdef01234567.txt', '');
 
 $_SERVER['HTTPS'] = 'on';
 $_SERVER['SERVER_PORT'] = '443';
@@ -17,7 +19,6 @@ $_SERVER['REQUEST_METHOD'] = 'POST';
 
 $_POST = [
     'csrf' => 'ci-cpanel-negative',
-    'setup_token' => str_repeat('A', 48),
     'connection_mode' => 'cpanel',
     'cpanel_host' => '127.0.0.1',
     'cpanel_username' => 'account',
