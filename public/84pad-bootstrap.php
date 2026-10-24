@@ -52,6 +52,24 @@ if (strlen($host) > 253
     $deny();
 }
 
+// Check host readiness before creating any database resources or .env.
+// Installer prerequisites are reported as booleans only (no paths or secrets).
+$hostChecks = [
+    'PHP 8.3 or newer' => PHP_VERSION_ID >= 80300,
+    'PDO MySQL' => extension_loaded('pdo_mysql'),
+    'OpenSSL' => extension_loaded('openssl'),
+    'mbstring' => extension_loaded('mbstring'),
+    'Tokenizer' => extension_loaded('tokenizer'),
+    'XML' => extension_loaded('xml'),
+    'Composer dependencies' => is_file($root.'/vendor/autoload.php'),
+    'Application directory writable' => is_writable($root),
+    'Private storage writable' => is_writable($private),
+    'Laravel storage writable' => is_dir($root.'/storage') && is_writable($root.'/storage'),
+    'Laravel bootstrap cache writable' => is_dir($root.'/bootstrap/cache')
+        && is_writable($root.'/bootstrap/cache'),
+];
+$hostReady = ! in_array(false, $hostChecks, true);
+
 ini_set('session.use_strict_mode', '1');
 ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_secure', '1');
@@ -65,7 +83,10 @@ if (! isset($_SESSION['csrf']) || ! is_string($_SESSION['csrf'])) {
 $problem = null;
 $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
-if ($method === 'POST') {
+if ($method === 'POST' && ! $hostReady) {
+    http_response_code(503);
+    $problem = 'Hosting requirements failed. Fix the checks below before configuring 84PAD.';
+} elseif ($method === 'POST') {
     $attempts = (int) ($_SESSION['setup_attempts'] ?? 0);
     $firstTry = (int) ($_SESSION['setup_first_try'] ?? time());
     if (time() - $firstTry > 900) {
@@ -289,6 +310,14 @@ button.primary{background:linear-gradient(100deg,#76f0e1,#a79cff);color:#061628;
 button.primary:hover{filter:brightness(1.1);transform:translateY(-2px)}
 button.secondary{background:#283855;color:#e5efff;border:1px solid #607699}
 .mini{font-size:12px;color:#93aac6}
+.readiness{margin:22px 0;border:1px solid #41587b;border-radius:16px;padding:17px;background:#0a162a}
+.readiness h3{font-size:16px;margin:0 0 12px;letter-spacing:-.02em}
+.readiness ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 15px}
+.readiness li{font-size:12px;display:flex;align-items:center;gap:9px;color:#cad9ee}
+.readiness li span{font-weight:900;font-size:13px}
+.readiness .passed span{color:#adf7a4}.readiness .failed span{color:#ff9caa}
+.readiness .failed{color:#ffe0e4}
+@media(max-width:600px){.readiness ul{grid-template-columns:1fr}}
 html.js [data-step]{display:none}html.js [data-step].visible{display:block}
 html.js .actions [data-back],html.js .actions [data-next]{display:inline-block}html.js .actions [hidden]{display:none!important}
 [data-back],[data-next]{display:none}html.js button[type=submit]{display:none}html.js [data-step="2"].visible ~ .actions button[type=submit]{display:inline-block}
@@ -324,6 +353,15 @@ html.js [data-mode-fields].visible{display:block}
 <label><input type="radio" name="connection_mode" value="cpanel"><strong>cPanel API</strong><small>Let 84PAD create a new database, database user and required database privileges.</small></label>
 </div>
 <div class="notice">Your website must serve only 84PAD's <code>public/</code> directory over HTTPS. Do not expose <code>.env</code>, <code>storage/</code> or Composer files to visitors.</div>
+<div class="readiness" aria-label="Server readiness checks">
+<h3>Hosting readiness <?= $hostReady ? '— ready' : '— action needed' ?></h3>
+<ul>
+<?php foreach ($hostChecks as $label => $passed): ?>
+<li class="<?= $passed ? 'passed' : 'failed' ?>"><span aria-hidden="true"><?= $passed ? '✓' : '!' ?></span><?= h((string) $label) ?>: <?= $passed ? 'Ready' : 'Fix required' ?></li>
+<?php endforeach; ?>
+</ul>
+<?php if (! $hostReady): ?><p role="alert">Some requirements are missing. Check your PHP extensions, upload the Composer-inclusive distribution, and allow private storage writes before continuing.</p><?php endif; ?>
+</div>
 </section>
 <section data-step="1">
 <h2 tabindex="-1">Database connection</h2>
