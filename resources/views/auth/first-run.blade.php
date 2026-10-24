@@ -29,15 +29,11 @@
     <main class="panel main-panel">
       <div class="section-top"><span class="eyebrow">84PAD / FINAL SETUP</span><span class="section-count">STEP 03 OF 03</span></div>
       <h2>Create your Owner account.</h2>
-      <p class="intro">This will be the primary administrator for your installation. Choose a strong, unique password and keep your private setup token secure.</p>
+      <p class="intro">This will be the primary administrator for your installation. Choose a strong, unique password. Your hosting ownership was verified automatically.</p>
       @if($errors->any())<p role="alert" class="error">{{ $errors->first() }}</p>@endif
       <form class="owner-form" method="post" action="{{ route('setup.store') }}" autocomplete="off">
         @csrf
-        <div class="field">
-          <label for="token">Private first-run token</label>
-          <input id="token" type="password" name="setup_token" autocomplete="off" required aria-describedby="owner-token-hint">
-          <small id="owner-token-hint">Enter the same private token stored in storage/app/private/first-run-token. This is not your cPanel API token.</small>
-        </div>
+        
         <div class="divider"></div>
         <div class="field">
           <label for="name">Owner display name</label>
@@ -60,7 +56,7 @@
         </div>
         <button class="btn primary" type="submit">Complete secure installation →</button>
       </form>
-      <p class="trust">One-time Owner creation · Protected setup token · Automatic installer lock after success</p>
+      <p class="trust">One-time Owner creation · Verified browser proof · Automatic installer lock after success</p>
     </main>
     <aside class="panel sidebar-panel" aria-label="Next steps">
       <div class="sidebar-heading"><span class="sidebar-icon" aria-hidden="true">✦</span><div><h2>Welcome to your studio.</h2><p>Your next chapter starts here.</p></div></div>
@@ -74,7 +70,7 @@
       <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">✧</span><span><strong>Your data stays yours.</strong> Initial migrations only target your dedicated empty database. The installer becomes unavailable after Owner setup.</span></div>
       <div class="helper">
         <div class="helper-head">SECURITY NOTE</div>
-        <p>Do not share your setup token, password, API keys or database credentials in chat, screenshots or source control.</p>
+        <p>Do not share your password, API keys or database credentials in chat, screenshots or source control.</p>
       </div>
     </aside>
   </div>
