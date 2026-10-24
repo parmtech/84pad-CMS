@@ -1,24 +1,35 @@
 # 84PAD Core — Resume Checkpoint
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
-> Last updated: 2026-10-24 (Australia/Sydney).
-> **Current phase:** Core 0.1 staging build — new Owner Settings, encrypted cPanel API credential, deny-by-default per-plugin grants, independent feature switches, guided first-login training, and 128 MiB signed plugin upload added. Live compatibility/release gates remain.
+> Last updated: 2026-10-24 (Australia/Sydney); this branch tracks the C20 wizard review.
+> **Current phase:** C20 English-only installer UI redesign committed on review branch; CI/live acceptance still pending. Core 0.1 staging build — new Owner Settings, encrypted cPanel API credential, deny-by-default per-plugin grants, independent feature switches, guided first-login training, and 128 MiB signed plugin upload added. Live compatibility/release gates remain.
 > **Next issue:** [#13 C13 — Plugin migration recovery](https://github.com/manbir6-ux/84pad-core/issues/13): finish migration-failure safeguards and rollback approach; then [#14 C14 — Core updater/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Browser installer/cPanel QA remain release gates.
 > **Runnable:** New staging distribution built with Composer vendor bundled, and the latest PHP 8.3/8.4 and MySQL 8 suites pass. Not deployed to live cPanel or approved for production.
 > **Environment test status:** [Core CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) **SUCCESS** PHP 8.3/8.4 with first-login tutorial, encryption/permissions, 128 MiB ZIP and JavaScript syntax tests; [MySQL CI #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) **SUCCESS**; [Staging ZIP #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) **SUCCESS**. Live cPanel API, browser visual/accessibility and production security/recovery tests remain pending.
 
-## 2026-10-24 — C20 Host Connection Setup Wizard (staging, in review)
+## Latest C20 installer review (2026-10-24)
 
-**Branch:** [core/C20-host-setup-wizard](https://github.com/manbir6-ux/84pad-core/tree/core/C20-host-setup-wizard). **State: IN PROGRESS / CI BLOCKED — not released.**
+- Development branch: [`core/C20-preflight-hardening`](https://github.com/manbir6-ux/84pad-core/tree/core/C20-preflight-hardening), forked from existing `core/C20-host-setup-wizard` (do not merge to production yet).
+- Existing wizard already supported **Manual MySQL** and **one-time cPanel UAPI database/user creation**, with a dedicated second Owner setup screen. These were reviewed, not rebuilt.
+- New changes: mandatory PHP/extension, Composer runtime, writable private/boot cache checks **before any provisioning or `.env` write**; visible readiness checklist, official cPanel token and manual MySQL guidance, explicit no-token fallback, step accessibility improvements, updated CI JavaScript check and tests.
+- Security boundaries: HTTPS and private token required, API token not persisted, preexisting `.env` and populated DB forbidden, no WHM/root token required. Independent Core Settings cPanel connection remains optional.
+- **Status: implemented on feature branch, NOT release accepted.** Current GitHub Actions runs on C20 base and review branch report **failure**; the inspected failed jobs provided no usable steps/logs in the connector, so the failure cause is unverified. Do not report these commits as tested, use any ZIP as production, or merge without passing CI.
+- **Remaining:** inspect failed Actions logs/runner availability, run PHP 8.3/8.4 Core tests and MySQL disposable integration, test automatic cPanel provisioning against a throwaway account, browser/mobile accessibility and HTTPS reverse proxy scenarios; verify zipped distribution and revoke setup token.
+- **Next:** obtain a green CI run and host acceptance evidence, then address any regressions, update checklist/issue, and request approval for merge.
 
-- Converted private HTTPS bootstrap into a 3-stage responsive Control Studio-style wizard with cPanel API or manual MySQL setup, inline credential-finding help and a matching Owner creation screen.
-- Added optional **strict allowlist cPanel UAPI** provisioning to create a new MySQL database, a new user and grant database privileges. Token is submitted only to the target verified-HTTPS cPanel endpoint; no API token is written to \`.env\`.
-- Preserved independent manual database provisioning so no cPanel API credential is required for Core installation.
-- Retained the first-run 32+ character private file token, CSRF, attempt limiter, empty-database requirement, exclusive \`.env\` create, HTTPS check and Owner setup lock.
-- Added \`BootstrapWizardTest\` and an isolated negative POST fixture to reject private IP destinations; existing MySQL CI remains a required regression gate. Linked JavaScript syntax check in Core CI.
-- Updated \`docs/WEB-INSTALL.md\` with precise cPanel API token location, manual database workflow, supported host requirements and failure/partial-creation recovery.
-- **Blocker:** New GitHub Actions runs on this branch report failure **with no job steps or accessible logs** (e.g. [Core CI 40062218034](https://github.com/manbir6-ux/84pad-core/actions/runs/40062218034)); do **not** claim tests passed. Inspect GitHub Actions runner/account/CI infrastructure before promoting. No live provider's cPanel API tested. Check PHP lint, MySQL integration, browser/mobile accessibility and signed staging distribution when CI runs again.
-- **Next:** Re-run PHP 8.3/8.4, MySQL CI and staging workflow; resolve every reported error, test real cPanel UAPI credential and connection (without exposing token), verify install from vendor-bundled ZIP on disposable hosting, then consider signed staging/production release.
+## 2026-10-24 — English-only professional installer UI (C20 / PR #25)
+
+- Owner feedback: all in-product installation text must remain **English**. Conversation language is independent of product UI locale.
+- Rebuilt `public/84pad-bootstrap.php` presentation with a premium shared 84PAD Control Studio visual system in `public/css/84pad-installer.css`: responsive full-width gradients and glass panels, accessible 3-step progress, selection cards, readiness diagnostics, high-contrast forms, right-side help, clear mobile stacking, and reduced-motion support. The backend credential/DB handlers were preserved. Switched the bootstrap CSP from inline styles to same-origin CSS.
+- Rebuilt `resources/views/auth/first-run.blade.php` for the final Owner screen with the **same** design and English labels. Hosting/bootstrap and Owner screens no longer appear as unrelated experiences.
+- Improved `public/js/84pad-bootstrap-wizard.js` with completed-step states, accessible current step, required-host guard and duplicate-submit feedback; no credential storage/network polling.
+- Expanded `BootstrapWizardTest.php` and `FirstRunWebInstallerTest.php`; added `InstallerDesignTest.php` verifying English-only copy, shared local assets and accessibility CSS. Tests are committed but **not reported passed** until CI reports success.
+- Branch: [`core/C20-preflight-hardening`](https://github.com/manbir6-ux/84pad-core/tree/core/C20-preflight-hardening); [draft PR #25](https://github.com/manbir6-ux/84pad-core/pull/25). No merge or live deployment.
+- Synced latest upstream C20 safety change (prevalidating DB host/port and serializing cPanel provisioning) into review branch. Reconciled upstream commits using feature-branch merge `8f4cfda793b1d60ed8e697ddb57345395f9943e9` (not merged to production/main). Draft PR #25 was reported mergeable afterwards; acceptance CI still unstable.
+- Staging workflow now explicitly verifies `public/css/84pad-installer.css` is packaged and describes private-token bootstrap rather than incorrectly instructing all users to precreate `.env`. Reference commit: `7038c55b6df6d27f05bff7123a9b479753e729b5`.
+
+- CI status at checkpoint: recently triggered PHP/MySQL/Stage workflows for this branch are failing or queued. The connector did not expose actionable job log steps; no verified green runs for this redesign. **Release BLOCKED** on successful CI and real cPanel + browser/mobile QA.
+- Next: investigate Actions failures in GitHub UI, run static and feature tests against PHP 8.3/8.4 + disposable MySQL, visually QA at mobile/desktop widths and keyboard/screen-reader modes, then test on a throwaway cPanel account before owner-approved merge.
 
 ## Work checklist
 
@@ -42,7 +53,7 @@
 | [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **No-SSH token-gated PHP bootstrap + Laravel Owner wizard CI tested; real cPanel acceptance pending** | Disposable MySQL [CI #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537) verified `.env`/APP_KEY creation without overwrite; [docs/WEB-INSTALL.md](WEB-INSTALL.md) |
 | [C17](https://github.com/manbir6-ux/84pad-core/issues/19) | Central cPanel credentials, Core Settings, plugin API grants | **Core/UI + read-only UAPI gateway CI tested; live API/writes pending** | [PHP #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) / [MySQL #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395); token encrypted and optional |
 | [C18](https://github.com/manbir6-ux/84pad-core/issues/20) | First-login Guided Tour | **Arrow tutorial and completion/replay tested; browser accessibility QA pending** | [Core CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418): GuidedTourTest and JS syntax |
-| [C20](https://github.com/manbir6-ux/84pad-core/tree/core/C20-host-setup-wizard) | Guided cPanel/manual first-run wizard | **In progress; CI infrastructure blocked** | New branch with installer UI, UAPI allowlist and tests; no verified green runs yet |
+| C20 | Secure hosting/database setup wizard | **Implemented on review branch; CI acceptance blocked** | [Review branch](https://github.com/manbir6-ux/84pad-core/tree/core/C20-preflight-hardening); PHP/MySQL/real cPanel QA pending |
 | [C19](https://github.com/manbir6-ux/84pad-core/issues/21) | Increase signed plugin ZIP upload to 128 MiB | **CI verified; issue closed** | 128 MiB compressed, 512 MiB extracted, <=5000 entries, ratio checks; [Core CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) / [MySQL](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) |
 
 ## Work log

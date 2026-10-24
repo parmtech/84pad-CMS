@@ -69,7 +69,7 @@ jobs:
             --exclude='auth.json' \
             ./ /tmp/84pad-dist/
           cp .env.example /tmp/84pad-dist/.env.example
-          printf 'STAGING PREVIEW ONLY. Configure .env/APP_KEY/database manually; serve public/ as the web root. No production approval.\n' > /tmp/84pad-dist/STAGING-NOTICE.txt
+          printf 'STAGING PREVIEW ONLY. Point the document root to public/, create storage/app/private/first-run-token, then launch /84pad-bootstrap.php. Manual MySQL or optional cPanel UAPI supported. No production approval.\n' > /tmp/84pad-dist/STAGING-NOTICE.txt
           (cd /tmp/84pad-dist && zip -qr /tmp/84pad-core-staging.zip .)
       - name: Assert bundle does not include environment secrets
         run: |
@@ -80,6 +80,7 @@ jobs:
           assert 'vendor/autoload.php' in names, "Runtime dependencies missing"
           assert 'public/index.php' in names, "Web entry point missing"
           assert 'public/84pad-bootstrap.php' in names, "No-SSH bootstrap script missing"
+          assert 'public/css/84pad-installer.css' in names, "Installer styles missing"
           assert '.env.example' in names, "Expected config template missing"
           blocked=[x for x in names if x=='.env' or x.startswith('.git/') or x.startswith('storage/app/') or x.startswith('storage/logs/') or x.endswith(('.pem','.key','.p12','.pfx'))]
           assert not blocked, "Sensitive files included: "+str(blocked[:10])

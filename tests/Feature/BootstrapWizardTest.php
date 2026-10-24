@@ -19,6 +19,9 @@ final class BootstrapWizardTest extends TestCase
         File::ensureDirectoryExists($this->root.'/public');
         File::ensureDirectoryExists($this->root.'/app/Support/Installer');
         File::ensureDirectoryExists($this->root.'/storage/app/private');
+        File::ensureDirectoryExists($this->root.'/bootstrap/cache');
+        File::ensureDirectoryExists($this->root.'/vendor');
+        file_put_contents($this->root.'/vendor/autoload.php', '<?php // fixture');
         copy(base_path('public/84pad-bootstrap.php'), $this->root.'/public/84pad-bootstrap.php');
         copy(
             base_path('app/Support/Installer/CpanelDatabaseBootstrap.php'),
@@ -46,12 +49,33 @@ final class BootstrapWizardTest extends TestCase
         $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
         $output = $process->getOutput();
         $this->assertStringContainsString('Your space begins here', $output);
+        $this->assertStringContainsString('<html lang="en">', $output);
+        $this->assertStringContainsString('/css/84pad-installer.css', $output);
+        $this->assertStringContainsString('data-host-ready="', $output);
+        $this->assertStringContainsString('Setup companion', $output);
+        $this->assertStringContainsString('Hosting readiness', $output);
+        $this->assertStringContainsString('Composer dependencies', $output);
         $this->assertStringContainsString('name="connection_mode" value="cpanel"', $output);
         $this->assertStringContainsString('name="connection_mode" value="manual"', $output);
         $this->assertStringContainsString('Manage API Tokens', $output);
         $this->assertStringContainsString('first-run-token', $output);
         $this->assertStringContainsString('/js/84pad-bootstrap-wizard.js', $output);
         $this->assertStringNotContainsString(str_repeat('A', 48), $output);
+        $this->assertFileDoesNotExist($this->root.'/.env');
+    }
+
+    public function test_missing_runtime_dependencies_block_setup_without_writing_secrets(): void
+    {
+        File::delete($this->root.'/vendor/autoload.php');
+        $process = new Process([
+            PHP_BINARY,
+            base_path('tests/Fixtures/BootCpanelRejectedPost.php'),
+            $this->root.'/public/84pad-bootstrap.php',
+        ]);
+        $process->run();
+
+        $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
+        $this->assertStringContainsString('Hosting requirements failed', $process->getOutput());
         $this->assertFileDoesNotExist($this->root.'/.env');
     }
 

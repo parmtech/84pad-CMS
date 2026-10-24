@@ -12,7 +12,7 @@ declare(strict_types=1);
 header('Cache-Control: no-store, private');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
-header("Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+header("Content-Security-Policy: default-src 'none'; style-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
 header('Referrer-Policy: no-referrer');
 
 $root = dirname(__DIR__);
@@ -52,6 +52,24 @@ if (strlen($host) > 253
     $deny();
 }
 
+// Check host readiness before creating any database resources or .env.
+// Installer prerequisites are reported as booleans only (no paths or secrets).
+$hostChecks = [
+    'PHP 8.3 or newer' => PHP_VERSION_ID >= 80300,
+    'PDO MySQL' => extension_loaded('pdo_mysql'),
+    'OpenSSL' => extension_loaded('openssl'),
+    'mbstring' => extension_loaded('mbstring'),
+    'Tokenizer' => extension_loaded('tokenizer'),
+    'XML' => extension_loaded('xml'),
+    'Composer dependencies' => is_file($root.'/vendor/autoload.php'),
+    'Application directory writable' => is_writable($root),
+    'Private storage writable' => is_writable($private),
+    'Laravel storage writable' => is_dir($root.'/storage') && is_writable($root.'/storage'),
+    'Laravel bootstrap cache writable' => is_dir($root.'/bootstrap/cache')
+        && is_writable($root.'/bootstrap/cache'),
+];
+$hostReady = ! in_array(false, $hostChecks, true);
+
 ini_set('session.use_strict_mode', '1');
 ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_secure', '1');
@@ -65,7 +83,10 @@ if (! isset($_SESSION['csrf']) || ! is_string($_SESSION['csrf'])) {
 $problem = null;
 $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
-if ($method === 'POST') {
+if ($method === 'POST' && ! $hostReady) {
+    http_response_code(503);
+    $problem = 'Hosting requirements failed. Fix the checks below before configuring 84PAD.';
+} elseif ($method === 'POST') {
     $attempts = (int) ($_SESSION['setup_attempts'] ?? 0);
     $firstTry = (int) ($_SESSION['setup_first_try'] ?? time());
     if (time() - $firstTry > 900) {
@@ -108,7 +129,7 @@ if ($method === 'POST') {
                     throw new RuntimeException('Enter a valid MySQL hostname and port before provisioning.');
                 }
                 require_once $root.'/app/Support/Installer/CpanelDatabaseBootstrap.php';
-                // Avoid simultaneous first-run requests creating overlapping resources.
+                // Serialize cPanel provisioning to avoid overlapping database side effects.
                 $apiLock = @fopen($private.'/cpanel-provision.lock', 'c');
                 if ($apiLock === false || ! flock($apiLock, LOCK_EX | LOCK_NB)) {
                     throw new RuntimeException('Another hosting setup is in progress.');
@@ -256,138 +277,138 @@ function h(string $text): string
 ?><!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>84PAD · Host Bootstrap</title>
-<style>
-:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#080d1d;color:#f4f7ff;min-height:100vh}
-.ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at 12% 8%,#22365b 0,transparent 45%),radial-gradient(ellipse at 88% 90%,#38215a 0,transparent 45%),#080d1d}
-.ambient:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#8ceafb0d 1px,transparent 1px),linear-gradient(90deg,#8ceafb0d 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(110deg,transparent,#0009,transparent)}
-.orb{position:absolute;width:32rem;height:32rem;border-radius:50%;filter:blur(90px);opacity:.19;animation:drift 17s ease-in-out infinite alternate;background:#13d7ec;top:-20rem;right:-12rem}.orb.two{background:#a477f7;top:auto;bottom:-23rem;left:-12rem;animation-delay:-8s}
-@keyframes drift{to{transform:translate(-8vw,6vh) scale(1.2)}}
-.shell{width:min(1170px,calc(100% - 36px));margin:30px auto 70px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:22px;letter-spacing:-.05em}
-.logo{display:grid;place-items:center;width:38px;height:38px;border:1px solid #baff7866;border-radius:12px;color:#ccff71;background:#baff7812;box-shadow:0 0 22px #baff781e}
-.tag{border:1px solid #7184aa77;border-radius:30px;padding:8px 14px;color:#b9d1ef;font-size:12px;font-weight:700;letter-spacing:.08em}
-.progress{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:32px 0}
-.progress>div{padding:13px 16px;border-radius:14px;border:1px solid #3a507e;background:#111a31;display:flex;gap:10px;align-items:center;color:#9db3ce;font-size:13px;font-weight:750}
-.progress b{display:grid;place-items:center;border-radius:50%;background:#2a395c;color:#c1d8f3;width:25px;height:25px;font-size:12px}
-.progress .active{border-color:#7addec;background:#1a3447;color:#fff;box-shadow:inset 0 0 30px #4ce6e60a}
-.progress .active b{background:#8aefee;color:#071b27}
-.columns{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,.85fr);gap:22px}
-.panel{background:linear-gradient(145deg,#141f38eb,#101829f0);border:1px solid #465a83;border-radius:26px;padding:clamp(22px,4vw,40px);box-shadow:0 20px 65px #0006}
-.eyebrow{color:#8be7ed;letter-spacing:.16em;font-size:11px;font-weight:900;text-transform:uppercase}
-h1{font-size:clamp(32px,5.5vw,58px);line-height:1.05;letter-spacing:-.065em;margin:16px 0}h2{font-size:24px;letter-spacing:-.04em;margin:0 0 14px}
-p{line-height:1.65;color:#bdcce1;font-size:14px}a{color:#9ceafa;text-underline-offset:4px}
-.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:25px 0}
-.modes label{margin:0;display:block;border:1px solid #3d5279;padding:18px;border-radius:17px;cursor:pointer;background:#101c32;transition:transform .22s,box-shadow .22s,border-color .22s}
-.modes label:hover{transform:translateY(-3px);border-color:#93f0eb;box-shadow:0 10px 30px #36d4ea1c}
-.modes input{width:auto;accent-color:#95f5ef;margin-right:8px}
-.modes strong{display:block;font-size:16px;margin:12px 0 4px}.modes small{display:block;color:#b0c3dc;line-height:1.55}
-.modes label:has(input:checked){border-color:#89eedb;background:#153342;box-shadow:inset 0 0 0 1px #89eedb55}
-.field{margin:15px 0}.field label{display:block;font-weight:750;font-size:13px;margin-bottom:8px}
-.field input{display:block;width:100%;padding:14px 15px;border:1px solid #536b93;border-radius:12px;background:#0b1427;color:#f3f8ff;font-size:15px;outline-offset:3px}
-.field input:focus{border-color:#7beedc;box-shadow:0 0 0 3px #7beedc1c}
-.field small{color:#98aac5;font-size:12px;display:block;margin-top:6px}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
-.notice{padding:15px 17px;border-radius:14px;background:#6cd9e70d;border:1px solid #58d8ea50;color:#c1e9f6;font-size:13px;line-height:1.6;margin:18px 0}
-.error{background:#8f264a22;border:1px solid #f593af88;color:#ffdce7;border-radius:14px;padding:14px 16px}
-aside .panel{position:sticky;top:24px;padding:24px}.checklist{list-style:none;padding:0;margin:22px 0}
-.checklist li{display:flex;gap:12px;margin:16px 0;color:#c9d8e9;font-size:13px;line-height:1.5}
-.checklist span{color:#b5f78d;font-weight:900}
-details{border-top:1px solid #405477;padding:14px 0}summary{cursor:pointer;font-size:13px;font-weight:800}details p{margin:10px 0 0}
-.actions{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:28px}
-button{border:0;padding:14px 22px;border-radius:13px;font-size:14px;font-weight:900;cursor:pointer}
-button.primary{background:linear-gradient(100deg,#76f0e1,#a79cff);color:#061628;box-shadow:0 8px 30px #65e4f233}
-button.primary:hover{filter:brightness(1.1);transform:translateY(-2px)}
-button.secondary{background:#283855;color:#e5efff;border:1px solid #607699}
-.mini{font-size:12px;color:#93aac6}
-html.js [data-step]{display:none}html.js [data-step].visible{display:block}
-html.js .actions [data-back],html.js .actions [data-next]{display:inline-block}html.js .actions [hidden]{display:none!important}
-[data-back],[data-next]{display:none}html.js button[type=submit]{display:none}html.js [data-step="2"].visible ~ .actions button[type=submit]{display:inline-block}
-html.js [data-step="2"].visible ~ .actions [data-next]{display:none}
-html.js [data-step="0"].visible ~ .actions [data-back]{display:none}
-html.js [data-mode-fields]{display:none}
-html.js [data-mode-fields].visible{display:block}
-@media(max-width:820px){.columns{grid-template-columns:1fr}aside .panel{position:static}.progress{margin:20px 0}.progress>div{padding:10px;font-size:11px}.shell{width:min(680px,calc(100% - 22px))}}
-@media(max-width:480px){.modes,.grid2{grid-template-columns:1fr}.brand{font-size:19px}.progress>div{flex-direction:column;text-align:center;gap:6px}.panel{padding:20px}.actions{flex-wrap:wrap}.actions button{flex:1}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
-</style>
+<meta name="color-scheme" content="dark">
+<title>Get Started · 84PAD Control Studio</title>
+<link rel="stylesheet" href="/css/84pad-installer.css">
 </head>
 <body>
-<div class="ambient" aria-hidden="true"><div class="orb"></div><div class="orb two"></div></div>
-<div class="shell">
-<header class="top"><div class="brand"><span class="logo" aria-hidden="true">▦</span>84PAD<span style="color:#9ff0d7">.</span></div><span class="tag">PARMTECH · CONTROL STUDIO / SETUP</span></header>
-<div class="progress" aria-label="Installation progress">
-<div class="active" data-indicator="0"><b>01</b> Connection</div>
-<div data-indicator="1"><b>02</b> Database</div>
-<div data-indicator="2"><b>03</b> Initialise</div>
-</div>
-<div class="columns"><main class="panel">
-<div class="eyebrow">Private · First-run configuration</div>
-<h1>Your space begins here.</h1>
-<p>Choose how 84PAD connects to your hosting. Automatic cPanel provisioning is optional. Manual MySQL works on compatible hosting without an API token.</p>
-<?php if ($problem !== null): ?><p role="alert" class="error"><?= h($problem) ?></p><?php endif; ?>
-<form method="post" autocomplete="off" data-wizard>
-<input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
-<section data-step="0" class="visible">
-<h2 tabindex="-1">How should we connect?</h2>
-<div class="modes">
-<label><input type="radio" name="connection_mode" value="manual" checked><strong>Manual MySQL</strong><small>Any supported PHP/MySQL hosting. Create an empty database in your hosting dashboard.</small></label>
-<label><input type="radio" name="connection_mode" value="cpanel"><strong>cPanel API</strong><small>Let 84PAD create a new database, database user and required database privileges.</small></label>
-</div>
-<div class="notice">Your website must serve only 84PAD's <code>public/</code> directory over HTTPS. Do not expose <code>.env</code>, <code>storage/</code> or Composer files to visitors.</div>
+<div class="orbs" aria-hidden="true"><i></i><i></i></div>
+<div class="site">
+<header class="site-header">
+  <a class="brand" href="#" aria-label="84PAD Setup">
+    <span class="brand-icon" aria-hidden="true"></span><span>84PAD<span class="brand-dot">.</span></span>
+  </a>
+  <div class="header-side">
+    <span class="header-label">PARMTECH / CONTROL STUDIO</span>
+    <span class="status-pill">PRIVATE INSTALLATION</span>
+  </div>
+</header>
+<section class="hero" aria-labelledby="setup-title">
+  <div class="kicker">WELCOME TO YOUR NEW CREATIVE ENGINE</div>
+  <h1 id="setup-title">Your space begins here.</h1>
+  <p>Three simple steps to connect your hosting and prepare 84PAD. Set up a secure foundation now—build anything and plug everything in later.</p>
 </section>
-<section data-step="1">
-<h2 tabindex="-1">Database connection</h2>
-<div data-mode-fields="manual">
-<p>In your hosting dashboard open <strong>MySQL Databases</strong> or <strong>MySQL Database Wizard</strong>. Create a new empty database and user, then grant that user privileges on the new database.</p>
-<div class="grid2">
-<div class="field"><label for="db-name">Database name</label><input id="db-name" name="db_name" maxlength="64" placeholder="account_84pad"></div>
-<div class="field"><label for="db-user">Database username</label><input id="db-user" name="db_user" maxlength="64" placeholder="account_paduser"></div>
-</div>
-</div>
-<div data-mode-fields="cpanel">
-<div class="notice">In cPanel go to <strong>Security → Manage API Tokens → Create</strong>. Copy the token once, then enter your hosting server's hostname (not a full URL). API access must be supported by your hosting plan. <a href="https://api.docs.cpanel.net/cpanel/tokens" target="_blank" rel="noopener noreferrer">Official token guide ↗</a></div>
-<div class="grid2">
-<div class="field"><label for="cp-host">cPanel server hostname</label><input id="cp-host" name="cpanel_host" placeholder="server.example.com" maxlength="253"><small>From your cPanel URL, without https:// or :2083</small></div>
-<div class="field"><label for="cp-user">cPanel username</label><input id="cp-user" name="cpanel_username" maxlength="16" placeholder="account"></div>
-<div class="field"><label for="cp-db">New database suffix</label><input id="cp-db" name="db_suffix" maxlength="12" value="padcore"><small>The account prefix is added automatically</small></div>
-<div class="field"><label for="cp-dbuser">New user suffix</label><input id="cp-dbuser" name="db_user_suffix" maxlength="12" value="paduser"></div>
-</div>
-<div class="field"><label for="cp-token">cPanel API token</label><input id="cp-token" type="password" name="cpanel_token" autocomplete="off" maxlength="512"><small>Used once over verified HTTPS. Not stored by the installer.</small></div>
-</div>
-<div class="grid2">
-<div class="field"><label for="db-host">MySQL hostname</label><input id="db-host" name="db_host" value="localhost" required maxlength="253"><small>Usually localhost; check your hosting panel</small></div>
-<div class="field"><label for="db-port">MySQL port</label><input id="db-port" name="db_port" value="3306" required inputmode="numeric" maxlength="5"></div>
-</div>
-<div class="field"><label for="db-pass">Database user password</label><input id="db-pass" type="password" name="db_password" autocomplete="new-password" maxlength="256" required><small>For automatic provisioning, choose a new strong password (16+ characters). For manual, enter the existing database user's password.</small></div>
-</section>
-<section data-step="2">
-<h2 tabindex="-1">Securely initialise Core</h2>
-<p>84PAD will check the database is <strong>empty</strong>, create a private application key and open the Owner-account setup. Existing databases and existing <code>.env</code> files are never overwritten.</p>
-<div class="field"><label for="setup-token">Private first-run token</label><input id="setup-token" name="setup_token" type="password" autocomplete="off" required maxlength="256"><small>In your hosting File Manager create <code>storage/app/private/first-run-token</code> (outside the public web root) containing at least 32 random characters, then enter its contents here.</small></div>
-<div class="notice">After this step you will create the Owner account. For ongoing SSL/email/file integrations, add a cPanel connection later in <strong>Core Settings</strong>, where it will be encrypted and individually permissioned.</div>
-</section>
-<div class="actions"><button class="secondary" type="button" data-back>← Back</button><button class="primary" type="button" data-next>Continue →</button><button class="primary" type="submit">Configure 84PAD Core →</button></div>
-</form>
-<p class="mini">HTTPS required · No password is sent to ParmTech · Setup closes when the environment is created</p>
+<nav class="stagebar" aria-label="Setup progress">
+  <div class="stage active" data-indicator="0" aria-current="step"><span class="number">01</span><span>Hosting connection</span></div>
+  <div class="stage" data-indicator="1"><span class="number">02</span><span>Database setup</span></div>
+  <div class="stage" data-indicator="2"><span class="number">03</span><span>Secure initialize</span></div>
+</nav>
+<div class="content">
+<main class="panel main-panel" aria-label="Installation configuration">
+  <div class="section-top"><span class="eyebrow">84PAD / SETUP WIZARD</span><span class="section-count" data-step-count>STEP 01 OF 03</span></div>
+  <?php if ($problem !== null): ?><p role="alert" class="error"><?= h($problem) ?></p><?php endif; ?>
+  <form method="post" autocomplete="off" data-wizard data-host-ready="<?= $hostReady ? 'yes' : 'no' ?>">
+  <input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
+  <section data-step="0" class="visible" aria-labelledby="step-hosting">
+    <h2 id="step-hosting" tabindex="-1">Choose your connection.</h2>
+    <p class="intro">Select how 84PAD should connect to your database. cPanel automation is optional—you remain in control of your hosting credentials.</p>
+    <div class="modes" role="radiogroup" aria-label="Database setup method">
+      <label class="mode">
+        <input type="radio" name="connection_mode" value="manual" checked>
+        <span class="mode-icon" aria-hidden="true">◇</span>
+        <strong>Manual MySQL</strong>
+        <small>Use an empty database you've already created in cPanel or another hosting control panel.</small>
+      </label>
+      <label class="mode">
+        <input type="radio" name="connection_mode" value="cpanel">
+        <span class="mode-icon" aria-hidden="true">⌘</span>
+        <strong>Automatic cPanel API</strong>
+        <small>Create a dedicated database and user automatically with a temporary API token.</small>
+      </label>
+    </div>
+    <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">✧</span><span><strong>Built for privacy.</strong> Only the Laravel <code>public/</code> directory must be web-accessible. Keep <code>.env</code>, storage and credentials outside the public web root.</span></div>
+    <section class="readiness" aria-label="Server readiness checks">
+      <div class="readiness-head">
+        <h3>Hosting readiness</h3><span class="health <?= $hostReady ? '' : 'warn' ?>"><?= $hostReady ? 'ALL CHECKS PASSED' : 'ACTION REQUIRED' ?></span>
+      </div>
+      <ul>
+        <?php foreach ($hostChecks as $label => $passed): ?>
+          <li class="<?= $passed ? 'passed' : 'failed' ?>"><span class="dot" aria-hidden="true"><?= $passed ? '✓' : '!' ?></span><?= h((string) $label) ?> — <?= $passed ? 'Ready' : 'Fix required' ?></li>
+        <?php endforeach; ?>
+      </ul>
+      <?php if (! $hostReady): ?><p role="alert" class="progress-help">Some requirements are missing. Check the PHP version, extensions, Composer runtime and private directory permissions before proceeding.</p><?php endif; ?>
+    </section>
+  </section>
+  <section data-step="1" aria-labelledby="step-database">
+    <h2 id="step-database" tabindex="-1">Connect your database.</h2>
+    <p class="intro">84PAD uses a separate MySQL or MariaDB database so your existing websites and data remain untouched.</p>
+    <div data-mode-fields="manual">
+      <div class="notice">Open <strong>Databases → Database Wizard / MySQL Databases</strong> in your hosting dashboard. Create a new empty database and database user, and assign privileges on that database.</div>
+      <div class="grid2">
+        <div class="field"><label for="db-name">Database name</label><input id="db-name" name="db_name" maxlength="64" placeholder="account_84pad" autocomplete="off"><small>Include the full account prefix if your host adds one.</small></div>
+        <div class="field"><label for="db-user">Database username</label><input id="db-user" name="db_user" maxlength="64" placeholder="account_paduser" autocomplete="off"></div>
+      </div>
+    </div>
+    <div data-mode-fields="cpanel">
+      <div class="notice">Open <strong>cPanel → Security → Manage API Tokens → Create</strong>. Use a short-lived token, your cPanel username and your server hostname. <a href="https://docs.cpanel.net/cpanel/security/manage-api-tokens-in-cpanel/" target="_blank" rel="noopener noreferrer">Official cPanel instructions ↗</a></div>
+      <div class="grid2">
+        <div class="field"><label for="cp-host">cPanel server hostname</label><input id="cp-host" name="cpanel_host" maxlength="253" placeholder="server.example.com" autocomplete="off"><small>Hostname only. No https:// or :2083.</small></div>
+        <div class="field"><label for="cp-user">cPanel username</label><input id="cp-user" name="cpanel_username" maxlength="16" placeholder="hostingaccount" autocomplete="off"></div>
+        <div class="field"><label for="cp-db">New database suffix</label><input id="cp-db" name="db_suffix" maxlength="12" value="padcore" autocomplete="off"><small>Your account prefix is added automatically.</small></div>
+        <div class="field"><label for="cp-dbuser">New user suffix</label><input id="cp-dbuser" name="db_user_suffix" maxlength="12" value="paduser" autocomplete="off"></div>
+      </div>
+      <div class="field"><label for="cp-token">cPanel API token</label><input id="cp-token" type="password" name="cpanel_token" autocomplete="off" maxlength="512"><small>Used for this setup only. Never saved by the bootstrap. Revoke it in cPanel afterwards.</small></div>
+    </div>
+    <div class="divider"></div>
+    <div class="grid2">
+      <div class="field"><label for="db-host">MySQL hostname</label><input id="db-host" name="db_host" value="localhost" required maxlength="253" autocomplete="off"><small>Usually localhost; check your host's database details.</small></div>
+      <div class="field"><label for="db-port">MySQL port</label><input id="db-port" name="db_port" value="3306" required inputmode="numeric" maxlength="5" autocomplete="off"></div>
+    </div>
+    <div class="field"><label for="db-pass">Database user password</label><input id="db-pass" type="password" name="db_password" autocomplete="new-password" maxlength="256" required><small>Automatic mode: choose a new 16+ character password. Manual mode: enter the existing database user's password.</small></div>
+  </section>
+  <section data-step="2" aria-labelledby="step-security">
+    <h2 id="step-security" tabindex="-1">Secure your installation.</h2>
+    <p class="intro">Everything is almost ready. Confirm ownership with your private first-run token before 84PAD generates its application key and opens Owner setup.</p>
+    <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">♢</span><span><strong>One-time owner verification.</strong> In hosting File Manager create <code>storage/app/private/first-run-token</code> outside your public web directory. Put a random 32–256 character secret inside, then enter it below.</span></div>
+    <div class="field"><label for="setup-token">Private first-run token</label><input id="setup-token" name="setup_token" type="password" autocomplete="off" required maxlength="256" aria-describedby="token-help"><small id="token-help">This is different from your cPanel API token or database password.</small></div>
+    <div class="readiness"><div class="readiness-head"><h3>What happens next</h3><span class="health">PROTECTED SETUP</span></div><ul>
+      <li class="passed"><span class="dot" aria-hidden="true">✓</span>Verify the database is empty</li>
+      <li class="passed"><span class="dot" aria-hidden="true">✓</span>Create a private APP_KEY and .env</li>
+      <li class="passed"><span class="dot" aria-hidden="true">✓</span>Redirect to Owner account creation</li>
+      <li class="passed"><span class="dot" aria-hidden="true">✓</span>Prevent rewriting an existing .env</li>
+    </ul></div>
+    <div class="notice">For SSL, email or file integrations later, use encrypted cPanel settings with per-plugin permissions. The 84PAD Core works without ongoing cPanel access.</div>
+  </section>
+  <div class="actions">
+    <button class="btn secondary" type="button" data-back>← Back</button>
+    <button class="btn primary" type="button" data-next>Continue →</button>
+    <button class="btn primary" type="submit">Initialize 84PAD →</button>
+  </div>
+  </form>
+  <p class="trust">Encrypted transport required · No credentials sent to ParmTech · Setup protected against reinstallation</p>
 </main>
-<aside><div class="panel">
-<div class="eyebrow">Installation checklist</div><h2>Everything in one place.</h2>
-<ul class="checklist">
-<li><span>✓</span><div><strong>PHP 8.3 / 8.4</strong><br>Enable PDO MySQL, OpenSSL, mbstring and required Laravel extensions.</div></li>
-<li><span>✓</span><div><strong>HTTPS & document root</strong><br>Point the domain to the <code>public/</code> directory only.</div></li>
-<li><span>✓</span><div><strong>Private setup token</strong><br>Create the one-time file outside the public directory.</div></li>
-<li><span>✓</span><div><strong>Database access</strong><br>Automatic cPanel connection or manual MySQL credentials.</div></li>
-</ul>
-<details><summary>Where do I find the cPanel API token?</summary><p>Login to cPanel → Security → Manage API Tokens → Create. Use the cPanel account username, not the email address. Some hosts disable tokens.</p></details>
-<details><summary>How do I create a database manually?</summary><p>Open MySQL Databases or MySQL Database Wizard in your hosting dashboard. Create a new database and user, assign privileges, then enter the full prefixed names above.</p></details>
-<details><summary>Is cPanel required after setup?</summary><p>No. Core and unrelated plugins work without a cPanel token. You can optionally reconnect later in encrypted Core Settings and grant individual plugin permissions.</p></details>
-<details><summary>Why does the wizard require a private token?</summary><p>It prevents visitors from claiming ownership of an uninstalled website. The setup file must be outside the publicly served directory.</p></details>
-</div></aside></div>
+<aside class="panel sidebar-panel" aria-label="Installation help">
+  <div class="sidebar-heading"><span class="sidebar-icon" aria-hidden="true">✦</span><div><h2>Setup companion</h2><p>Everything you need, right where you need it.</p></div></div>
+  <div class="eyebrow">BEFORE YOU BEGIN</div>
+  <ul class="checklist">
+    <li><span class="check" aria-hidden="true">✓</span><span><strong>Compatible PHP and extensions</strong><br>PHP 8.3+, PDO MySQL, OpenSSL and required extensions.</span></li>
+    <li><span class="check" aria-hidden="true">✓</span><span><strong>HTTPS and safe document root</strong><br>Only <code>public/</code> must be visible online.</span></li>
+    <li><span class="check" aria-hidden="true">✓</span><span><strong>A private first-run token</strong><br>Stored outside the public directory.</span></li>
+    <li><span class="check" aria-hidden="true">✓</span><span><strong>Database connection method</strong><br>Automatic cPanel or manual credentials.</span></li>
+  </ul>
+  <div class="helper">
+    <div class="helper-head">QUICK ANSWERS</div>
+    <details><summary>Where is my cPanel API token?</summary><p>Log in to cPanel, then Security → Manage API Tokens → Create. Use your account username, not your email. If the menu is unavailable, use Manual MySQL.</p></details>
+    <details><summary>How do I create a database manually?</summary><p>Open Database Wizard or MySQL Databases in your hosting panel. Create a dedicated empty database and user, then grant privileges on that database.</p></details>
+    <details><summary>Will 84PAD change my other websites?</summary><p>No. The installer requires a brand-new empty database and does not overwrite existing configuration files.</p></details>
+    <details><summary>Is cPanel required afterwards?</summary><p>No. cPanel integration stays optional. Plugins only get API access when the Owner grants it through Core Settings.</p></details>
+  </div>
+</aside>
+</div>
+<footer class="footer"><span>© ParmTech · 84PAD Control Studio</span><strong>BUILD ANYTHING. PLUG EVERYTHING.</strong></footer>
 </div>
 <script src="/js/84pad-bootstrap-wizard.js" defer></script>
 </body></html>
