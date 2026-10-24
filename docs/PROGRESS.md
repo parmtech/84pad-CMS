@@ -1,11 +1,21 @@
 # 84PAD Core — Resume Checkpoint
 
 > **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
-> Last updated: 2026-10-22 (Australia/Sydney).
+> Last updated: 2026-10-24 (Australia/Sydney); this branch tracks the C20 wizard review.
 > **Current phase:** Core 0.1 staging build — new Owner Settings, encrypted cPanel API credential, deny-by-default per-plugin grants, independent feature switches, guided first-login training, and 128 MiB signed plugin upload added. Live compatibility/release gates remain.
 > **Next issue:** [#13 C13 — Plugin migration recovery](https://github.com/manbir6-ux/84pad-core/issues/13): finish migration-failure safeguards and rollback approach; then [#14 C14 — Core updater/recovery](https://github.com/manbir6-ux/84pad-core/issues/14). Browser installer/cPanel QA remain release gates.
 > **Runnable:** New staging distribution built with Composer vendor bundled, and the latest PHP 8.3/8.4 and MySQL 8 suites pass. Not deployed to live cPanel or approved for production.
 > **Environment test status:** [Core CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) **SUCCESS** PHP 8.3/8.4 with first-login tutorial, encryption/permissions, 128 MiB ZIP and JavaScript syntax tests; [MySQL CI #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) **SUCCESS**; [Staging ZIP #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) **SUCCESS**. Live cPanel API, browser visual/accessibility and production security/recovery tests remain pending.
+
+## Latest C20 installer review (2026-10-24)
+
+- Development branch: [`core/C20-preflight-hardening`](https://github.com/manbir6-ux/84pad-core/tree/core/C20-preflight-hardening), forked from existing `core/C20-host-setup-wizard` (do not merge to production yet).
+- Existing wizard already supported **Manual MySQL** and **one-time cPanel UAPI database/user creation**, with a dedicated second Owner setup screen. These were reviewed, not rebuilt.
+- New changes: mandatory PHP/extension, Composer runtime, writable private/boot cache checks **before any provisioning or `.env` write**; visible readiness checklist, official cPanel token and manual MySQL guidance, explicit no-token fallback, step accessibility improvements, updated CI JavaScript check and tests.
+- Security boundaries: HTTPS and private token required, API token not persisted, preexisting `.env` and populated DB forbidden, no WHM/root token required. Independent Core Settings cPanel connection remains optional.
+- **Status: implemented on feature branch, NOT release accepted.** Current GitHub Actions runs on C20 base and review branch report **failure**; the inspected failed jobs provided no usable steps/logs in the connector, so the failure cause is unverified. Do not report these commits as tested, use any ZIP as production, or merge without passing CI.
+- **Remaining:** inspect failed Actions logs/runner availability, run PHP 8.3/8.4 Core tests and MySQL disposable integration, test automatic cPanel provisioning against a throwaway account, browser/mobile accessibility and HTTPS reverse proxy scenarios; verify zipped distribution and revoke setup token.
+- **Next:** obtain a green CI run and host acceptance evidence, then address any regressions, update checklist/issue, and request approval for merge.
 
 ## Work checklist
 
@@ -29,6 +39,7 @@
 | [C16](https://github.com/manbir6-ux/84pad-core/issues/18) | Secure browser installer for ordinary hosting | **No-SSH token-gated PHP bootstrap + Laravel Owner wizard CI tested; real cPanel acceptance pending** | Disposable MySQL [CI #39686927537](https://github.com/manbir6-ux/84pad-core/actions/runs/39686927537) verified `.env`/APP_KEY creation without overwrite; [docs/WEB-INSTALL.md](WEB-INSTALL.md) |
 | [C17](https://github.com/manbir6-ux/84pad-core/issues/19) | Central cPanel credentials, Core Settings, plugin API grants | **Core/UI + read-only UAPI gateway CI tested; live API/writes pending** | [PHP #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) / [MySQL #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395); token encrypted and optional |
 | [C18](https://github.com/manbir6-ux/84pad-core/issues/20) | First-login Guided Tour | **Arrow tutorial and completion/replay tested; browser accessibility QA pending** | [Core CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418): GuidedTourTest and JS syntax |
+| C20 | Secure hosting/database setup wizard | **Implemented on review branch; CI acceptance blocked** | [Review branch](https://github.com/manbir6-ux/84pad-core/tree/core/C20-preflight-hardening); PHP/MySQL/real cPanel QA pending |
 | [C19](https://github.com/manbir6-ux/84pad-core/issues/21) | Increase signed plugin ZIP upload to 128 MiB | **CI verified; issue closed** | 128 MiB compressed, 512 MiB extracted, <=5000 entries, ratio checks; [Core CI](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) / [MySQL](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) |
 
 ## Work log
