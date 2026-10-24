@@ -17,6 +17,7 @@ final class FirstRunWebInstallerTest extends TestCase
     {
         parent::setUp();
         Config::set('84pad.setup_token', str_repeat('Q', 40));
+        $this->withCookie('84pad_owner_setup', str_repeat('Q', 40));
     }
 
     public function test_migration_failure_exit_code_never_creates_first_owner(): void
@@ -29,7 +30,6 @@ final class FirstRunWebInstallerTest extends TestCase
             ])->andReturn(1);
 
         $this->post('/setup', [
-            'setup_token' => str_repeat('Q', 40),
             'name' => 'First Owner',
             'email' => 'owner@example.test',
             'password' => 'a-very-long-secret-passphrase',
@@ -49,8 +49,7 @@ final class FirstRunWebInstallerTest extends TestCase
 
         try {
             $this->post('/setup', [
-                'setup_token' => str_repeat('Q', 40),
-                'name' => 'First Owner',
+                    'name' => 'First Owner',
                 'email' => 'owner@example.test',
                 'password' => 'a-very-long-secret-passphrase',
                 'password_confirmation' => 'a-very-long-secret-passphrase',
@@ -73,7 +72,8 @@ final class FirstRunWebInstallerTest extends TestCase
             ->assertSee('Create your Owner account.')
             ->assertSee('Owner display name')
             ->assertSee('Secure Owner login')
-            ->assertDontSee(str_repeat('Q', 40));
+            ->assertDontSee(str_repeat('Q', 40))
+            ->assertDontSee('name="setup_token"', false);
     }
 
     public function test_setup_is_disabled_without_a_configured_secret(): void
@@ -82,18 +82,16 @@ final class FirstRunWebInstallerTest extends TestCase
         $this->get('/setup')->assertNotFound();
     }
 
-    public function test_owner_setup_requires_correct_secret_and_never_creates_an_owner_on_failure(): void
+    public function test_owner_setup_requires_correct_browser_proof_and_never_creates_an_owner_on_failure(): void
     {
         $this->get('/setup')->assertOk();
-
+        $this->withCookie('84pad_owner_setup', 'incorrect');
         $this->post('/setup', [
-            'setup_token' => 'incorrect',
             'name' => 'Owner',
             'email' => 'owner@example.test',
             'password' => 'a-very-long-secret-passphrase',
             'password_confirmation' => 'a-very-long-secret-passphrase',
         ])->assertForbidden();
-
         $this->assertDatabaseCount('users', 0);
         $this->assertDatabaseCount('core_installations', 0);
     }
@@ -101,7 +99,6 @@ final class FirstRunWebInstallerTest extends TestCase
     public function test_web_setup_creates_exactly_one_owner_then_disables_installer(): void
     {
         $this->post('/setup', [
-            'setup_token' => str_repeat('Q', 40),
             'name' => 'First Owner',
             'email' => 'owner@example.test',
             'password' => 'a-very-long-secret-passphrase',
@@ -115,7 +112,7 @@ final class FirstRunWebInstallerTest extends TestCase
         $this->assertDatabaseHas('core_installations', ['id'=>1,'owner_user_id'=>$owner->id]);
 
         $this->get('/setup')->assertNotFound();
-        $this->post('/setup', ['setup_token' => str_repeat('Q', 40)])->assertNotFound();
+        $this->post('/setup', [])->assertNotFound();
     }
 
     public function test_existing_users_block_first_run_without_destroying_data(): void
