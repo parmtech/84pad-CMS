@@ -103,8 +103,23 @@ if ($method === 'POST') {
                 if (! extension_loaded('pdo_mysql')) {
                     throw new RuntimeException('PDO MySQL is missing. Select a supported PHP version first.');
                 }
+                if (! preg_match('/^[a-zA-Z0-9.-]{1,253}$/D', $dbHost)
+                    || ! ctype_digit($dbPort) || (int) $dbPort < 1 || (int) $dbPort > 65535) {
+                    throw new RuntimeException('Enter a valid MySQL hostname and port before provisioning.');
+                }
                 require_once $root.'/app/Support/Installer/CpanelDatabaseBootstrap.php';
-                $created = \App\Support\Installer\CpanelDatabaseBootstrap::provision($_POST);
+                // Avoid simultaneous first-run requests creating overlapping resources.
+                $apiLock = @fopen($private.'/cpanel-provision.lock', 'c');
+                if ($apiLock === false || ! flock($apiLock, LOCK_EX | LOCK_NB)) {
+                    throw new RuntimeException('Another hosting setup is in progress.');
+                }
+                try {
+                    @chmod($private.'/cpanel-provision.lock', 0600);
+                    $created = \App\Support\Installer\CpanelDatabaseBootstrap::provision($_POST);
+                } finally {
+                    flock($apiLock, LOCK_UN);
+                    fclose($apiLock);
+                }
                 $dbHost = $created['db_host'];
                 $dbPort = $created['db_port'];
                 $dbName = $created['db_name'];
