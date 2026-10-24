@@ -22,6 +22,10 @@
 
 **Last verified baseline CI before the new C20 wizard branch:** [PHP 8.3/8.4 #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418), [MySQL 8 #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395), and [staging ZIP artifact #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) all succeeded. This is not a production security audit or a live shared-hosting deployment.
 
+## Permanent download links — central website rule
+
+The planned 84pad.com website must use permanent per-product links resolving to the **latest owner-approved stable** signed release on the separate release server. Core ZIP and independently versioned native plugin `.pad` downloads remain distinct. New releases update the server-side index pointer and versioned filename **without changing website button URLs**. This is a documented requirement, not a deployed website feature: [release download contract](docs/RELEASE-DOWNLOADS.md).
+
 ## Important gaps before Core release
 
 - **Live cPanel acceptance** of the staging no-SSH bootstrap, including PHP extensions, reverse-proxy HTTPS, web document root and permissions. A private token/file-manager step is still required.
