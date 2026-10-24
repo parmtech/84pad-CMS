@@ -37,6 +37,9 @@ final class BootstrapMySqlTest extends TestCase
             $pdo->exec("GRANT ALL PRIVILEGES ON ".$quotedDatabase.".* TO 'padtester'@'%'");
             File::ensureDirectoryExists($temporaryRoot.'/public');
             File::ensureDirectoryExists($temporaryRoot.'/storage/app/private');
+            File::ensureDirectoryExists($temporaryRoot.'/bootstrap/cache');
+            File::ensureDirectoryExists($temporaryRoot.'/vendor');
+            file_put_contents($temporaryRoot.'/vendor/autoload.php', '<?php // fixture');
             copy(
                 base_path('public/84pad-bootstrap.php'),
                 $temporaryRoot.'/public/84pad-bootstrap.php'
