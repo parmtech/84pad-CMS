@@ -290,7 +290,7 @@ button.primary:hover{filter:brightness(1.1);transform:translateY(-2px)}
 button.secondary{background:#283855;color:#e5efff;border:1px solid #607699}
 .mini{font-size:12px;color:#93aac6}
 html.js [data-step]{display:none}html.js [data-step].visible{display:block}
-html.js .actions [data-back],html.js .actions [data-next]{display:inline-block}
+html.js .actions [data-back],html.js .actions [data-next]{display:inline-block}html.js .actions [hidden]{display:none!important}
 [data-back],[data-next]{display:none}html.js button[type=submit]{display:none}html.js [data-step="2"].visible ~ .actions button[type=submit]{display:inline-block}
 html.js [data-step="2"].visible ~ .actions [data-next]{display:none}
 html.js [data-step="0"].visible ~ .actions [data-back]{display:none}
@@ -318,7 +318,7 @@ html.js [data-mode-fields].visible{display:block}
 <form method="post" autocomplete="off" data-wizard>
 <input type="hidden" name="csrf" value="<?= h($_SESSION['csrf']) ?>">
 <section data-step="0" class="visible">
-<h2>How should we connect?</h2>
+<h2 tabindex="-1">How should we connect?</h2>
 <div class="modes">
 <label><input type="radio" name="connection_mode" value="manual" checked><strong>Manual MySQL</strong><small>Any supported PHP/MySQL hosting. Create an empty database in your hosting dashboard.</small></label>
 <label><input type="radio" name="connection_mode" value="cpanel"><strong>cPanel API</strong><small>Let 84PAD create a new database, database user and required database privileges.</small></label>
@@ -326,7 +326,7 @@ html.js [data-mode-fields].visible{display:block}
 <div class="notice">Your website must serve only 84PAD's <code>public/</code> directory over HTTPS. Do not expose <code>.env</code>, <code>storage/</code> or Composer files to visitors.</div>
 </section>
 <section data-step="1">
-<h2>Database connection</h2>
+<h2 tabindex="-1">Database connection</h2>
 <div data-mode-fields="manual">
 <p>In your hosting dashboard open <strong>MySQL Databases</strong> or <strong>MySQL Database Wizard</strong>. Create a new empty database and user, then grant that user privileges on the new database.</p>
 <div class="grid2">
@@ -351,7 +351,7 @@ html.js [data-mode-fields].visible{display:block}
 <div class="field"><label for="db-pass">Database user password</label><input id="db-pass" type="password" name="db_password" autocomplete="new-password" maxlength="256" required><small>For automatic provisioning, choose a new strong password (16+ characters). For manual, enter the existing database user's password.</small></div>
 </section>
 <section data-step="2">
-<h2>Securely initialise Core</h2>
+<h2 tabindex="-1">Securely initialise Core</h2>
 <p>84PAD will check the database is <strong>empty</strong>, create a private application key and open the Owner-account setup. Existing databases and existing <code>.env</code> files are never overwritten.</p>
 <div class="field"><label for="setup-token">Private first-run token</label><input id="setup-token" name="setup_token" type="password" autocomplete="off" required maxlength="256"><small>In your hosting File Manager create <code>storage/app/private/first-run-token</code> (outside the public web root) containing at least 32 random characters, then enter its contents here.</small></div>
 <div class="notice">After this step you will create the Owner account. For ongoing SSL/email/file integrations, add a cPanel connection later in <strong>Core Settings</strong>, where it will be encrypted and individually permissioned.</div>
