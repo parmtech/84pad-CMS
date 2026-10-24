@@ -9,7 +9,7 @@
 ## What is implemented so far
 
 - Laravel 12 bootstrap, database migrations, project configuration, PHP 8.3/8.4 and MySQL CI.
-- CI-tested first-owner CLI installer plus a **staging no-SSH browser bootstrap**: cPanel user uploads the vendor-bundled staging ZIP, creates a private one-time token, connects a **new empty MySQL database**, then the bootstrap creates `.env`/APP_KEY and opens the Owner wizard ([instructions](docs/WEB-INSTALL.md)). Live cPanel compatibility remains unverified.
+- CI-tested first-owner CLI installer plus a **staging no-SSH browser bootstrap**: cPanel user uploads the vendor-bundled staging ZIP, creates a private one-time token, chooses manual MySQL or cPanel-assisted provisioning for a **new empty MySQL database**, then the **three-step private bootstrap wizard** optionally provisions a fresh database through cPanel UAPI (or accepts existing manual MySQL credentials), creates `.env`/APP_KEY and opens the redesigned Owner wizard ([instructions](docs/WEB-INSTALL.md)). Live cPanel compatibility remains unverified.
 - Guarded login/logout, session protection, Owner password rotation and trusted server-side CLI recovery.
 - Role permissions: Owner controls plugins/security; Administrator can view Control Studio, other roles remain denied by default.
 - Fully redesigned responsive futuristic Control Studio with real status and local plugin management.
@@ -20,7 +20,7 @@
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
 - Core update Ed25519 verification/dry-run plus a **private code-only snapshot** command (`84pad:core-snapshot`) with corruption checks. It does not back up databases, uploads, plugin data, vendor or `.env`; automatic updater and full rollback remain unbuilt.
 
-**Latest verified staging code CI:** [PHP 8.3/8.4 #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418), [MySQL 8 #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395), and [staging ZIP artifact #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) all succeeded. This is not a production security audit or a live shared-hosting deployment.
+**Last verified baseline CI before the new C20 wizard branch:** [PHP 8.3/8.4 #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418), [MySQL 8 #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395), and [staging ZIP artifact #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) all succeeded. This is not a production security audit or a live shared-hosting deployment.
 
 ## Important gaps before Core release
 
@@ -71,3 +71,7 @@ SSL God (certificate detection and safe renewal), domain email management, file 
 7. Build a separate signed central release service after Core architecture stabilizes.
 
 This source tree is an in-development Core preview, not a production release. Use staging only until the remaining acceptance tasks pass.
+
+## In-progress hosting wizard branch
+
+The unmerged `core/C20-host-setup-wizard` branch adds a three-step cPanel-assisted/manual database bootstrap and matching Owner onboarding. [Setup guide](docs/WEB-INSTALL.md). It is not yet accepted for public release. The cPanel token is used only for provisioning; ongoing gateway credentials remain separate and encrypted. GitHub CI for this branch must complete successfully before treating it as tested.
