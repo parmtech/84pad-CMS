@@ -58,8 +58,7 @@ final class BootstrapGateTest extends TestCase
     {
         file_put_contents($this->temporaryRoot.'/.env', 'APP_ENV=production'."\n");
 
-        $this->assertStringContainsString('allow-84pad-', $this->visit(true));
-        $this->assertStringNotContainsString('name="setup_token"', $this->visit(true));
+        $this->assertSame('', $this->visit(true));
         $this->assertSame(
             'APP_ENV=production'."\n",
             file_get_contents($this->temporaryRoot.'/.env')
@@ -72,6 +71,7 @@ final class BootstrapGateTest extends TestCase
             $this->temporaryRoot.'/storage/app/private/first-run-token',
             'short-key'
         );
-        $this->assertSame('', $this->visit(true));
+        $this->assertStringContainsString('allow-84pad-', $this->visit(true));
+        $this->assertStringNotContainsString('name="setup_token"', $this->visit(true));
     }
 }
