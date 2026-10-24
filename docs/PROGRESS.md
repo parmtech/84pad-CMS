@@ -239,3 +239,9 @@ What failed / needs validation:
 What is NOT done:
 Next smallest action:
 ```
+
+
+## 2026-10-24 — Independent Release Server password-only login and recovery (staging)
+
+- **Status: locally implemented/tested, NOT on live host or in independent Release Server GitHub repo.** Password-only login; in-admin change password; fixed `info@parmtech.au` forgot/reset with 15-minute, single-use cryptographic token and other-session invalidation. Standalone update/full staging ZIPs created; original release index/config files preserved by patch layout. See [`docs/PRODUCT-SEPARATION.md`](PRODUCT-SEPARATION.md) for security/testing notes.
+- **Next:** establish separate Release Server repository and live cPanel/PHP mail acceptance before release. Do not deploy into 84PAD Core or merge update-server PHP into Laravel CMS.
