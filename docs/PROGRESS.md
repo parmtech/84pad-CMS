@@ -7,6 +7,14 @@
 > **Runnable:** New staging distribution built with Composer vendor bundled, and the latest PHP 8.3/8.4 and MySQL 8 suites pass. Not deployed to live cPanel or approved for production.
 > **Environment test status:** [Core CI #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418) **SUCCESS** PHP 8.3/8.4 with first-login tutorial, encryption/permissions, 128 MiB ZIP and JavaScript syntax tests; [MySQL CI #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395) **SUCCESS**; [Staging ZIP #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) **SUCCESS**. Live cPanel API, browser visual/accessibility and production security/recovery tests remain pending.
 
+## 2026-10-24 — Mandatory independent Release Server vs Core CMS separation
+
+- **Owner clarification:** The 84PAD Release Server is **a separate product** whose only jobs are release uploads, product/version metadata, approval, immutable artifact storage and permanent stable download links. The Core is **an independently installable CMS product uploaded to the Release Server**, and themes/plugins each have their own `.pad` packages. Core must **never be installed on the Release Server**.
+- Architecture contract: [`docs/PRODUCT-SEPARATION.md`](PRODUCT-SEPARATION.md), plus [`docs/RELEASE-DOWNLOADS.md`](RELEASE-DOWNLOADS.md). Do not embed release-server code permanently into Laravel Core.
+- Two independent **local staging files** were prepared: `84PAD-Release-Server-STAGING.zip` (~15 KB, dedicated PHP release manager), and `84PAD-Core-CMS-cPanel-STAGING.zip` (~5.8 MB, previously built standalone Core CMS cPanel installer preview). Neither was published to the website or uploaded to a GitHub Release.
+- Release Server prototype local smoke (PHP 8.4 test copy with absent ZIP-extension preflight bypassed **only in the test copy**): private proof rejected/accepted correctly; Owner registration and signed-in dashboard; drafts inaccessible publicly; approval changed a stable selector to a versioned object; public metadata and hash verification worked; tampered object rejected. PHP syntax and ZIP integrity verified. **Actual ZIP upload, pinned publisher signatures, HTTPS/cPanel/CI and security audit remain unverified.**
+- Next: create the independent `84pad-release-server` repository, add automated PHP ZIP integration and publishing/key-rotation tests, deploy to dedicated throwaway HTTPS host, and only then publish approved release pointers. Existing 84PAD Core CI/live issues remain separate.
+
 ## 2026-10-24 — C22 browser-first cPanel public_html upload (staging)
 
 - **Owner requirement:** Upload a Core ZIP directly into a dedicated `public_html`; first visit to the domain launches installer wizard; no manually entered 32-character setup token; initial Owner name/email/password chosen in wizard.
