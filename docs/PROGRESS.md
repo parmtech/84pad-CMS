@@ -31,6 +31,13 @@
 - CI status at checkpoint: recently triggered PHP/MySQL/Stage workflows for this branch are failing or queued. The connector did not expose actionable job log steps; no verified green runs for this redesign. **Release BLOCKED** on successful CI and real cPanel + browser/mobile QA.
 - Next: investigate Actions failures in GitHub UI, run static and feature tests against PHP 8.3/8.4 + disposable MySQL, visually QA at mobile/desktop widths and keyboard/screen-reader modes, then test on a throwaway cPanel account before owner-approved merge.
 
+## 2026-10-24 — Stable website download URLs (separate release service)
+
+- **Owner-approved product requirement:** the public website's download link for each product stays the same forever while it resolves to the latest **approved stable** release server-side. Never edit landing-page links for each version bump.
+- Documented routing/publication/security/rollback contract in [`docs/RELEASE-DOWNLOADS.md`](RELEASE-DOWNLOADS.md). Planned paths include `/download/core` for a Core ZIP and `/download/plugins/{slug}` for independently signed native `.pad` plugins. Version-specific immutable objects and filenames retain exact semantic versions; draft/unverified builds do not replace stable.
+- **STATUS: Documented / Pending server implementation.** The live 84pad.com website/release server is not available in currently connected repositories; no published Core release or production server update verified. Do not claim those sample URLs are working yet.
+- **Next:** when the independent website/release server repository is connected, implement the HTTPS release-index redirect/stream controller with atomic approved pointers, signature/hash verification, cache-control, graceful no-release handling, unit/HTTP tests and staging rollout. Keep website download-button URLs permanent.
+
 ## Work checklist
 
 | ID | Task | State | Proof |
