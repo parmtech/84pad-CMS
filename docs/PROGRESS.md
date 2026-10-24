@@ -25,6 +25,9 @@
 - Improved `public/js/84pad-bootstrap-wizard.js` with completed-step states, accessible current step, required-host guard and duplicate-submit feedback; no credential storage/network polling.
 - Expanded `BootstrapWizardTest.php` and `FirstRunWebInstallerTest.php`; added `InstallerDesignTest.php` verifying English-only copy, shared local assets and accessibility CSS. Tests are committed but **not reported passed** until CI reports success.
 - Branch: [`core/C20-preflight-hardening`](https://github.com/manbir6-ux/84pad-core/tree/core/C20-preflight-hardening); [draft PR #25](https://github.com/manbir6-ux/84pad-core/pull/25). No merge or live deployment.
+- Synced latest upstream C20 safety change (prevalidating DB host/port and serializing cPanel provisioning) into review branch. Reconciled upstream commits using feature-branch merge `8f4cfda793b1d60ed8e697ddb57345395f9943e9` (not merged to production/main). Draft PR #25 was reported mergeable afterwards; acceptance CI still unstable.
+- Staging workflow now explicitly verifies `public/css/84pad-installer.css` is packaged and describes private-token bootstrap rather than incorrectly instructing all users to precreate `.env`. Reference commit: `7038c55b6df6d27f05bff7123a9b479753e729b5`.
+
 - CI status at checkpoint: recently triggered PHP/MySQL/Stage workflows for this branch are failing or queued. The connector did not expose actionable job log steps; no verified green runs for this redesign. **Release BLOCKED** on successful CI and real cPanel + browser/mobile QA.
 - Next: investigate Actions failures in GitHub UI, run static and feature tests against PHP 8.3/8.4 + disposable MySQL, visually QA at mobile/desktop widths and keyboard/screen-reader modes, then test on a throwaway cPanel account before owner-approved merge.
 
