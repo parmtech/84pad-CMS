@@ -4,8 +4,8 @@
  * Standalone PHP so cPanel File Manager users can configure a fresh site
  * before Laravel has a database connection or an application key.
  *
- * SECURITY: An unpredictable per-browser out-of-webroot proof filename
- * protects setup. No manually entered setup key is required.
+ * SECURITY: A per-browser private File Manager proof filename protects setup.
+ * No manually entered setup key is required.
  * It is disabled permanently as soon as .env is written.
  */
 declare(strict_types=1);
@@ -194,7 +194,7 @@ if ($method === 'POST' && ! $hostReady) {
                         $value
                     ).'"';
                 };
-                // Generated internally; never require a 32-character key from the Owner.
+                // The server generates and protects its own internal setup key.
                 $token = bin2hex(random_bytes(32));
                 $envLines = [
                     'APP_NAME="84PAD"',
@@ -257,8 +257,7 @@ if ($method === 'POST' && ! $hostReady) {
 
                 unset($dbPass, $envLines);
                 setcookie('84pad_owner_setup', $token, [
-                    'expires' => time() + 1800,
-                    'path' => '/setup',
+                    'expires' => time() + 1800, 'path' => '/setup',
                     'secure' => true, 'httponly' => true, 'samesite' => 'Strict',
                 ]);
                 @unlink($proofPath);
@@ -338,8 +337,51 @@ function h(string $text): string
         <small>Create a dedicated database and user automatically with a temporary API token.</small>
       </label>
     </div>
-    <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">✧</span><span><strong>One-time hosting ownership check.</strong> In cPanel File Manager open the private application folder <code>84pad-core-app/storage/app/private</code>. Create an EMPTY file with the exact filename below. This confirms you can modify hosting files without typing any 32-character key.</span></div>
-    <div class="field"><label>Private proof filename</label><code class="proof-filename"><?= h($proofFile) ?></code><small>Copy the exact filename. Keep this browser tab open. The file is removed automatically after verification.</small></div>
+    <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">✧</span><span><strong>Built for privacy.</strong> Only the Laravel <code>public/</code> directory must be web-accessible. Keep <code>.env</code>, storage and credentials outside the public web root.</span></div>
+    <section class="readiness" aria-label="Server readiness checks">
+      <div class="readiness-head">
+        <h3>Hosting readiness</h3><span class="health <?= $hostReady ? '' : 'warn' ?>"><?= $hostReady ? 'ALL CHECKS PASSED' : 'ACTION REQUIRED' ?></span>
+      </div>
+      <ul>
+        <?php foreach ($hostChecks as $label => $passed): ?>
+          <li class="<?= $passed ? 'passed' : 'failed' ?>"><span class="dot" aria-hidden="true"><?= $passed ? '✓' : '!' ?></span><?= h((string) $label) ?> — <?= $passed ? 'Ready' : 'Fix required' ?></li>
+        <?php endforeach; ?>
+      </ul>
+      <?php if (! $hostReady): ?><p role="alert" class="progress-help">Some requirements are missing. Check the PHP version, extensions, Composer runtime and private directory permissions before proceeding.</p><?php endif; ?>
+    </section>
+  </section>
+  <section data-step="1" aria-labelledby="step-database">
+    <h2 id="step-database" tabindex="-1">Connect your database.</h2>
+    <p class="intro">84PAD uses a separate MySQL or MariaDB database so your existing websites and data remain untouched.</p>
+    <div data-mode-fields="manual">
+      <div class="notice">Open <strong>Databases → Database Wizard / MySQL Databases</strong> in your hosting dashboard. Create a new empty database and database user, and assign privileges on that database.</div>
+      <div class="grid2">
+        <div class="field"><label for="db-name">Database name</label><input id="db-name" name="db_name" maxlength="64" placeholder="account_84pad" autocomplete="off"><small>Include the full account prefix if your host adds one.</small></div>
+        <div class="field"><label for="db-user">Database username</label><input id="db-user" name="db_user" maxlength="64" placeholder="account_paduser" autocomplete="off"></div>
+      </div>
+    </div>
+    <div data-mode-fields="cpanel">
+      <div class="notice">Open <strong>cPanel → Security → Manage API Tokens → Create</strong>. Use a short-lived token, your cPanel username and your server hostname. <a href="https://docs.cpanel.net/cpanel/security/manage-api-tokens-in-cpanel/" target="_blank" rel="noopener noreferrer">Official cPanel instructions ↗</a></div>
+      <div class="grid2">
+        <div class="field"><label for="cp-host">cPanel server hostname</label><input id="cp-host" name="cpanel_host" maxlength="253" placeholder="server.example.com" autocomplete="off"><small>Hostname only. No https:// or :2083.</small></div>
+        <div class="field"><label for="cp-user">cPanel username</label><input id="cp-user" name="cpanel_username" maxlength="16" placeholder="hostingaccount" autocomplete="off"></div>
+        <div class="field"><label for="cp-db">New database suffix</label><input id="cp-db" name="db_suffix" maxlength="12" value="padcore" autocomplete="off"><small>Your account prefix is added automatically.</small></div>
+        <div class="field"><label for="cp-dbuser">New user suffix</label><input id="cp-dbuser" name="db_user_suffix" maxlength="12" value="paduser" autocomplete="off"></div>
+      </div>
+      <div class="field"><label for="cp-token">cPanel API token</label><input id="cp-token" type="password" name="cpanel_token" autocomplete="off" maxlength="512"><small>Used for this setup only. Never saved by the bootstrap. Revoke it in cPanel afterwards.</small></div>
+    </div>
+    <div class="divider"></div>
+    <div class="grid2">
+      <div class="field"><label for="db-host">MySQL hostname</label><input id="db-host" name="db_host" value="localhost" required maxlength="253" autocomplete="off"><small>Usually localhost; check your host's database details.</small></div>
+      <div class="field"><label for="db-port">MySQL port</label><input id="db-port" name="db_port" value="3306" required inputmode="numeric" maxlength="5" autocomplete="off"></div>
+    </div>
+    <div class="field"><label for="db-pass">Database user password</label><input id="db-pass" type="password" name="db_password" autocomplete="new-password" maxlength="256" required><small>Automatic mode: choose a new 16+ character password. Manual mode: enter the existing database user's password.</small></div>
+  </section>
+  <section data-step="2" aria-labelledby="step-security">
+    <h2 id="step-security" tabindex="-1">Secure your installation.</h2>
+    <p class="intro">Verify hosting ownership once in File Manager; the server generates its own setup and encryption keys.</p>
+    <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">✧</span><span><strong>One-time hosting ownership check.</strong> Open cPanel File Manager and create an EMPTY file with the filename below inside the private <code>84pad-core-app/storage/app/private</code> directory outside public_html. No 32-character key entry is needed.</span></div>
+    <div class="field"><label>Private proof filename</label><code class="proof-filename"><?= h($proofFile) ?></code><small>Copy the exact name and keep this browser tab open. The file is removed after verification.</small></div>
     <div class="readiness"><div class="readiness-head"><h3>What happens next</h3><span class="health">PROTECTED SETUP</span></div><ul>
       <li class="passed"><span class="dot" aria-hidden="true">✓</span>Verify the database is empty</li>
       <li class="passed"><span class="dot" aria-hidden="true">✓</span>Create a private APP_KEY and .env</li>
@@ -378,4 +420,3 @@ function h(string $text): string
 </div>
 <script src="/js/84pad-bootstrap-wizard.js" defer></script>
 </body></html>
-
