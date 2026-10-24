@@ -26,6 +26,10 @@
 
 The planned 84pad.com website must use permanent per-product links resolving to the **latest owner-approved stable** signed release on the separate release server. Core ZIP and independently versioned native plugin `.pad` downloads remain distinct. New releases update the server-side index pointer and versioned filename **without changing website button URLs**. This is a documented requirement, not a deployed website feature: [release download contract](docs/RELEASE-DOWNLOADS.md).
 
+## cPanel first-run installer preview
+
+A dedicated empty `public_html` directory can be initialized by a staging upload bundle that installs the private Laravel runtime into a sibling `84pad-core-app` folder. The first visit to the domain launches the English hosting wizard, generates the server's own encryption/setup secrets, and asks the Owner to set a password. **There is no manually entered setup token.** The user proves server ownership by creating one randomly named empty file via cPanel File Manager, preventing first-visitor account takeover. Read [cPanel upload instructions and limitations](docs/CPANEL-UPLOAD.md). Do not confuse the full Core installer with a signed native plugin `.pad` file. This is not a production-accepted release.
+
 ## Important gaps before Core release
 
 - **Live cPanel acceptance** of the staging no-SSH bootstrap, including PHP extensions, reverse-proxy HTTPS, web document root and permissions. A private token/file-manager step is still required.
