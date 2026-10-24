@@ -4,7 +4,8 @@
  * Standalone PHP so cPanel File Manager users can configure a fresh site
  * before Laravel has a database connection or an application key.
  *
- * SECURITY: Never show this screen without a private, out-of-webroot token.
+ * SECURITY: An unpredictable per-browser out-of-webroot proof filename
+ * protects setup. No manually entered setup key is required.
  * It is disabled permanently as soon as .env is written.
  */
 declare(strict_types=1);
@@ -15,9 +16,13 @@ header('X-Frame-Options: DENY');
 header("Content-Security-Policy: default-src 'none'; style-src 'self'; script-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
 header('Referrer-Policy: no-referrer');
 
-$root = dirname(__DIR__);
+$rootConfig = __DIR__.'/.84pad-root.php';
+$root = is_file($rootConfig) && !is_link($rootConfig) ? require $rootConfig : dirname(__DIR__);
+if (!is_string($root) || !is_dir($root)) {
+    http_response_code(503);
+    exit('84PAD private application root is unavailable.');
+}
 $private = $root.'/storage/app/private';
-$tokenPath = $private.'/first-run-token';
 $envPath = $root.'/.env';
 
 $deny = static function (): never {
@@ -26,9 +31,7 @@ $deny = static function (): never {
 };
 
 if (is_file($envPath) || is_link($envPath)
-    || ! is_dir($private) || is_link($private)
-    || ! is_file($tokenPath) || is_link($tokenPath)
-    || ! is_readable($tokenPath)) {
+    || ! is_dir($private) || is_link($private)) {
     $deny();
 }
 
@@ -38,12 +41,6 @@ $https = ($_SERVER['HTTPS'] ?? '') === 'on'
 if (! $https) {
     http_response_code(403);
     exit('84PAD setup requires a direct HTTPS connection.');
-}
-
-$token = trim((string) file_get_contents($tokenPath));
-if (strlen($token) < 32 || strlen($token) > 256
-    || preg_match('/[\x00-\x20]/', $token)) {
-    $deny();
 }
 
 $host = strtolower((string) ($_SERVER['SERVER_NAME'] ?? ''));
@@ -80,6 +77,12 @@ session_start();
 if (! isset($_SESSION['csrf']) || ! is_string($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
 }
+if (!isset($_SESSION['owner_proof']) || !is_string($_SESSION['owner_proof'])
+    || !preg_match('/^[a-f0-9]{24}$/D', $_SESSION['owner_proof'])) {
+    $_SESSION['owner_proof'] = bin2hex(random_bytes(12));
+}
+$proofFile = 'allow-84pad-'.$_SESSION['owner_proof'].'.txt';
+$proofPath = $private.'/'.$proofFile;
 $problem = null;
 $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
@@ -101,12 +104,9 @@ if ($method === 'POST' && ! $hostReady) {
     $_SESSION['setup_attempts'] = $attempts + 1;
 
     $csrf = (string) ($_POST['csrf'] ?? '');
-    $submitted = (string) ($_POST['setup_token'] ?? '');
-    if (! hash_equals($_SESSION['csrf'], $csrf)
-        || strlen($submitted) > 256
-        || ! hash_equals($token, $submitted)) {
+    if (!hash_equals($_SESSION['csrf'], $csrf) || is_link($proofPath) || !is_file($proofPath)) {
         http_response_code(403);
-        $problem = 'Invalid setup token or expired form.';
+        $problem = 'Hosting ownership is not verified. Create the shown private proof file in cPanel File Manager.';
     } else {
         $dbHost = (string) ($_POST['db_host'] ?? '');
         $dbPort = (string) ($_POST['db_port'] ?? '3306');
@@ -194,6 +194,8 @@ if ($method === 'POST' && ! $hostReady) {
                         $value
                     ).'"';
                 };
+                // Generated internally; never require a 32-character key from the Owner.
+                $token = bin2hex(random_bytes(32));
                 $envLines = [
                     'APP_NAME="84PAD"',
                     'APP_ENV=production',
@@ -211,6 +213,7 @@ if ($method === 'POST' && ! $hostReady) {
                     'DB_USERNAME='.$quote($dbUser),
                     'DB_PASSWORD='.$quote($dbPass),
                     'SESSION_DRIVER=file',
+                    'SESSION_SECURE_COOKIE=true',
                     'CACHE_STORE=file',
                     'QUEUE_CONNECTION=sync',
                     'FILESYSTEM_DISK=local',
@@ -253,6 +256,12 @@ if ($method === 'POST' && ! $hostReady) {
                 }
 
                 unset($dbPass, $envLines);
+                setcookie('84pad_owner_setup', $token, [
+                    'expires' => time() + 1800,
+                    'path' => '/setup',
+                    'secure' => true, 'httponly' => true, 'samesite' => 'Strict',
+                ]);
+                @unlink($proofPath);
                 session_regenerate_id(true);
                 header('Location: /setup', true, 303);
                 exit;
@@ -329,51 +338,8 @@ function h(string $text): string
         <small>Create a dedicated database and user automatically with a temporary API token.</small>
       </label>
     </div>
-    <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">✧</span><span><strong>Built for privacy.</strong> Only the Laravel <code>public/</code> directory must be web-accessible. Keep <code>.env</code>, storage and credentials outside the public web root.</span></div>
-    <section class="readiness" aria-label="Server readiness checks">
-      <div class="readiness-head">
-        <h3>Hosting readiness</h3><span class="health <?= $hostReady ? '' : 'warn' ?>"><?= $hostReady ? 'ALL CHECKS PASSED' : 'ACTION REQUIRED' ?></span>
-      </div>
-      <ul>
-        <?php foreach ($hostChecks as $label => $passed): ?>
-          <li class="<?= $passed ? 'passed' : 'failed' ?>"><span class="dot" aria-hidden="true"><?= $passed ? '✓' : '!' ?></span><?= h((string) $label) ?> — <?= $passed ? 'Ready' : 'Fix required' ?></li>
-        <?php endforeach; ?>
-      </ul>
-      <?php if (! $hostReady): ?><p role="alert" class="progress-help">Some requirements are missing. Check the PHP version, extensions, Composer runtime and private directory permissions before proceeding.</p><?php endif; ?>
-    </section>
-  </section>
-  <section data-step="1" aria-labelledby="step-database">
-    <h2 id="step-database" tabindex="-1">Connect your database.</h2>
-    <p class="intro">84PAD uses a separate MySQL or MariaDB database so your existing websites and data remain untouched.</p>
-    <div data-mode-fields="manual">
-      <div class="notice">Open <strong>Databases → Database Wizard / MySQL Databases</strong> in your hosting dashboard. Create a new empty database and database user, and assign privileges on that database.</div>
-      <div class="grid2">
-        <div class="field"><label for="db-name">Database name</label><input id="db-name" name="db_name" maxlength="64" placeholder="account_84pad" autocomplete="off"><small>Include the full account prefix if your host adds one.</small></div>
-        <div class="field"><label for="db-user">Database username</label><input id="db-user" name="db_user" maxlength="64" placeholder="account_paduser" autocomplete="off"></div>
-      </div>
-    </div>
-    <div data-mode-fields="cpanel">
-      <div class="notice">Open <strong>cPanel → Security → Manage API Tokens → Create</strong>. Use a short-lived token, your cPanel username and your server hostname. <a href="https://docs.cpanel.net/cpanel/security/manage-api-tokens-in-cpanel/" target="_blank" rel="noopener noreferrer">Official cPanel instructions ↗</a></div>
-      <div class="grid2">
-        <div class="field"><label for="cp-host">cPanel server hostname</label><input id="cp-host" name="cpanel_host" maxlength="253" placeholder="server.example.com" autocomplete="off"><small>Hostname only. No https:// or :2083.</small></div>
-        <div class="field"><label for="cp-user">cPanel username</label><input id="cp-user" name="cpanel_username" maxlength="16" placeholder="hostingaccount" autocomplete="off"></div>
-        <div class="field"><label for="cp-db">New database suffix</label><input id="cp-db" name="db_suffix" maxlength="12" value="padcore" autocomplete="off"><small>Your account prefix is added automatically.</small></div>
-        <div class="field"><label for="cp-dbuser">New user suffix</label><input id="cp-dbuser" name="db_user_suffix" maxlength="12" value="paduser" autocomplete="off"></div>
-      </div>
-      <div class="field"><label for="cp-token">cPanel API token</label><input id="cp-token" type="password" name="cpanel_token" autocomplete="off" maxlength="512"><small>Used for this setup only. Never saved by the bootstrap. Revoke it in cPanel afterwards.</small></div>
-    </div>
-    <div class="divider"></div>
-    <div class="grid2">
-      <div class="field"><label for="db-host">MySQL hostname</label><input id="db-host" name="db_host" value="localhost" required maxlength="253" autocomplete="off"><small>Usually localhost; check your host's database details.</small></div>
-      <div class="field"><label for="db-port">MySQL port</label><input id="db-port" name="db_port" value="3306" required inputmode="numeric" maxlength="5" autocomplete="off"></div>
-    </div>
-    <div class="field"><label for="db-pass">Database user password</label><input id="db-pass" type="password" name="db_password" autocomplete="new-password" maxlength="256" required><small>Automatic mode: choose a new 16+ character password. Manual mode: enter the existing database user's password.</small></div>
-  </section>
-  <section data-step="2" aria-labelledby="step-security">
-    <h2 id="step-security" tabindex="-1">Secure your installation.</h2>
-    <p class="intro">Everything is almost ready. Confirm ownership with your private first-run token before 84PAD generates its application key and opens Owner setup.</p>
-    <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">♢</span><span><strong>One-time owner verification.</strong> In hosting File Manager create <code>storage/app/private/first-run-token</code> outside your public web directory. Put a random 32–256 character secret inside, then enter it below.</span></div>
-    <div class="field"><label for="setup-token">Private first-run token</label><input id="setup-token" name="setup_token" type="password" autocomplete="off" required maxlength="256" aria-describedby="token-help"><small id="token-help">This is different from your cPanel API token or database password.</small></div>
+    <div class="notice secret-note"><span class="secret-icon" aria-hidden="true">✧</span><span><strong>One-time hosting ownership check.</strong> In cPanel File Manager open the private application folder <code>84pad-core-app/storage/app/private</code>. Create an EMPTY file with the exact filename below. This confirms you can modify hosting files without typing any 32-character key.</span></div>
+    <div class="field"><label>Private proof filename</label><code class="proof-filename"><?= h($proofFile) ?></code><small>Copy the exact filename. Keep this browser tab open. The file is removed automatically after verification.</small></div>
     <div class="readiness"><div class="readiness-head"><h3>What happens next</h3><span class="health">PROTECTED SETUP</span></div><ul>
       <li class="passed"><span class="dot" aria-hidden="true">✓</span>Verify the database is empty</li>
       <li class="passed"><span class="dot" aria-hidden="true">✓</span>Create a private APP_KEY and .env</li>
@@ -388,7 +354,7 @@ function h(string $text): string
     <button class="btn primary" type="submit">Initialize 84PAD →</button>
   </div>
   </form>
-  <p class="trust">Encrypted transport required · No credentials sent to ParmTech · Setup protected against reinstallation</p>
+  <p class="trust">HTTPS required · No manual setup key · Private owner verification</p>
 </main>
 <aside class="panel sidebar-panel" aria-label="Installation help">
   <div class="sidebar-heading"><span class="sidebar-icon" aria-hidden="true">✦</span><div><h2>Setup companion</h2><p>Everything you need, right where you need it.</p></div></div>
@@ -396,7 +362,7 @@ function h(string $text): string
   <ul class="checklist">
     <li><span class="check" aria-hidden="true">✓</span><span><strong>Compatible PHP and extensions</strong><br>PHP 8.3+, PDO MySQL, OpenSSL and required extensions.</span></li>
     <li><span class="check" aria-hidden="true">✓</span><span><strong>HTTPS and safe document root</strong><br>Only <code>public/</code> must be visible online.</span></li>
-    <li><span class="check" aria-hidden="true">✓</span><span><strong>A private first-run token</strong><br>Stored outside the public directory.</span></li>
+    <li><span class="check" aria-hidden="true">✓</span><span><strong>Private hosting ownership proof</strong><br>One empty proof file created in cPanel File Manager.</span></li>
     <li><span class="check" aria-hidden="true">✓</span><span><strong>Database connection method</strong><br>Automatic cPanel or manual credentials.</span></li>
   </ul>
   <div class="helper">
@@ -412,3 +378,4 @@ function h(string $text): string
 </div>
 <script src="/js/84pad-bootstrap-wizard.js" defer></script>
 </body></html>
+
