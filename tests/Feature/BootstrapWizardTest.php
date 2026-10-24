@@ -27,7 +27,6 @@ final class BootstrapWizardTest extends TestCase
             base_path('app/Support/Installer/CpanelDatabaseBootstrap.php'),
             $this->root.'/app/Support/Installer/CpanelDatabaseBootstrap.php'
         );
-        file_put_contents($this->root.'/storage/app/private/first-run-token', str_repeat('A', 48));
     }
 
     protected function tearDown(): void
@@ -58,9 +57,10 @@ final class BootstrapWizardTest extends TestCase
         $this->assertStringContainsString('name="connection_mode" value="cpanel"', $output);
         $this->assertStringContainsString('name="connection_mode" value="manual"', $output);
         $this->assertStringContainsString('Manage API Tokens', $output);
-        $this->assertStringContainsString('first-run-token', $output);
+        $this->assertStringContainsString('allow-84pad-', $output);
+        $this->assertStringNotContainsString('name="setup_token"', $output);
         $this->assertStringContainsString('/js/84pad-bootstrap-wizard.js', $output);
-        $this->assertStringNotContainsString(str_repeat('A', 48), $output);
+        $this->assertStringNotContainsString('PAD_SETUP_TOKEN=', $output);
         $this->assertFileDoesNotExist($this->root.'/.env');
     }
 
