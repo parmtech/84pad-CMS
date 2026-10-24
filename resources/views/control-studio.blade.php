@@ -119,14 +119,15 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 @can('core.manage-plugins')
 @if($signedUploadsEnabled)
 <div class="plugin" id="tour-plugin-upload" style="margin-bottom:22px;border-style:dashed">
-<h3>Install signed plugin</h3>
-<p>A ZIP package must be signed by a developer public key you have explicitly trusted in your host configuration. New plugins remain disabled until activated.</p>
-<form action="{{ route('plugins.install') }}" method="post" enctype="multipart/form-data">@csrf
-<label for="package" style="display:block;font-size:12px;margin:12px 0 6px">Plugin ZIP (max 128 MB, up to 512 MB extracted)</label>
-<input id="package" type="file" name="package" accept=".zip,application/zip" required style="max-width:100%;font-size:12px">
+<h3>Install or update a signed 84PAD plugin</h3>
+<p>Upload a signed native 84PAD plugin (.pad or .zip). Core reads its plugin.json to detect the plugin name, ID and version before asking you to approve an install or update. The archive is retained as &lt;slug&gt;-v&lt;version&gt;.pad.</p>
+<div class="notice">A full <strong>84PAD Core installer ZIP is not a plugin</strong>. It must not be uploaded here. Core upgrades use a separate, approved update process.</div>
+<form action="{{ route('plugins.prepare') }}" method="post" enctype="multipart/form-data">@csrf
+<label for="package" style="display:block;font-size:12px;margin:12px 0 6px">Signed .pad or ZIP plugin package (max 128 MB, 512 MB extracted)</label>
+<input id="package" type="file" name="package" accept=".pad,.zip,application/zip,application/octet-stream" required style="max-width:100%;font-size:12px">
 <label for="signature" style="display:block;font-size:12px;margin:12px 0 6px">Ed25519 signature (base64)</label>
 <input id="signature" type="text" name="signature" maxlength="128" autocomplete="off" required style="width:100%;max-width:510px;padding:10px;border:1px solid #42668a;background:#071529;color:white;border-radius:10px">
-<div><button type="submit">Verify &amp; install disabled</button></div>
+<div><button type="submit">Verify package &amp; review version →</button></div>
 </form></div>
 @else
 <p id="tour-plugin-upload" class="notice">Signed plugin uploads are disabled in Settings.</p>
@@ -135,7 +136,7 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <div class="plugins">
 @forelse($plugins as $plugin)
 <article class="plugin">
-<h3>{{ $plugin['name'] }}</h3><p class="meta">{{ $plugin['id'] }} / v{{ $plugin['version'] }}</p>
+<h3>{{ $plugin['name'] }}</h3><p class="meta">{{ $plugin['id'] }} / Installed v{{ $plugin['version'] }}</p>
 <p>{{ $plugin['compatible'] ? 'Compatible with this Core' : 'Requires newer Core' }} · {{ $plugin['enabled'] ? 'Active' : 'Disabled' }}</p>
 @can('core.manage-plugins')
 <form method="post" action="{{ route('plugins.state', ['slug'=>$plugin['id']]) }}">@csrf
