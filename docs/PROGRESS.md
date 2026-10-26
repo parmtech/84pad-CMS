@@ -1,68 +1,56 @@
-# 84PAD Core — Resume Checkpoint
+# 84Pad CMS — Project Resume Record
 
-> **Source of truth:** GitHub issue states + this file. Do not infer completion from chat messages.
-> Last updated: 2026-10-21 (Australia/Sydney).
-> **Current phase:** Core 0.1 — foundation.
-> **Next issue:** [#1 C01 — Bootstrap Laravel 12 foundation](https://github.com/manbir6-ux/84pad-core/issues/1).
-> **Runnable:** NO. Only scope documentation and tracking issues are confirmed.
-> **Environment test status:** NOT RUN (Laravel/Composer dependencies not installed or verified in this repository).
+**Last updated:** 2026-10-26 (Australia/Sydney)  
+**Current state:** Paused at the user's request after saving the Core blueprint. Do not resume implementation until the user asks.  
+**Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)  
+**Blueprint:** [docs/CORE-BLUEPRINT.md](CORE-BLUEPRINT.md)
 
-## Work checklist
+## User's current direction
 
-| ID | Task | State | Proof |
-|---|---|---|---|
-| [C01](https://github.com/manbir6-ux/84pad-core/issues/1) | Laravel 12 scaffold | Not started | none |
-| [C02](https://github.com/manbir6-ux/84pad-core/issues/2) | Config and secret hygiene | Not started | none |
-| [C03](https://github.com/manbir6-ux/84pad-core/issues/3) | Installer preflight checks | Not started | none |
-| [C04](https://github.com/manbir6-ux/84pad-core/issues/4) | One-time owner installer | Not started | none |
-| [C05](https://github.com/manbir6-ux/84pad-core/issues/5) | Authentication | Not started | none |
-| [C06](https://github.com/manbir6-ux/84pad-core/issues/6) | Authorization | Not started | none |
-| [C07](https://github.com/manbir6-ux/84pad-core/issues/7) | Control Studio dashboard | Not started | none |
-| [C08](https://github.com/manbir6-ux/84pad-core/issues/8) | Plugin manifest | Not started | none |
-| [C09](https://github.com/manbir6-ux/84pad-core/issues/9) | Plugin discovery | Not started | none |
-| [C10](https://github.com/manbir6-ux/84pad-core/issues/10) | Plugin activation/deactivation | Not started | none |
-| [C11](https://github.com/manbir6-ux/84pad-core/issues/11) | Hooks API | Not started | none |
-| [C12](https://github.com/manbir6-ux/84pad-core/issues/12) | Demo plugin | Not started | none |
-| [C13](https://github.com/manbir6-ux/84pad-core/issues/13) | Database/plugin migration strategy | Not started | none |
-| [C14](https://github.com/manbir6-ux/84pad-core/issues/14) | Update/recovery interfaces | Not started | none |
-| [C15](https://github.com/manbir6-ux/84pad-core/issues/15) | QA and handoff | Not started | none |
+- Build the required 84Pad Core first: a modern, self-hosted CMS foundation with a clear extension model.
+- Builder, separate plugins, theme collections, and release-server work come later.
+- Keep all project work and the durable resume record in this public GitHub repository.
+- The immediate task was documentation only. The user asked to save the complete Core blueprint, then pause.
 
-## Work log
+## Verified repository state at this checkpoint
 
-### 2026-10-21
-- Verified GitHub repo `manbir6-ux/84pad-core` exists, remains **private**, and connector has push access.
-- Previous commit created initial `README.md` with agreed Core 0.1 scope.
-- Opened C01–C15 as individually testable GitHub issues.
-- Added this persistent checkpoint and companion workflow.
-- **No production-ready code, Laravel runtime or successful app tests recorded yet.**
+- The public `main` branch still contains only the README and the two project documents; no Core implementation has been merged into `main`.
+- Several Core implementation branches and draft PRs already exist. Their names and contents are not proof that their features are complete. Review their current state before choosing a base or continuing work.
+- Draft PRs observed during this checkpoint:
+  - **C01 Laravel Core Foundation** targets `main`.
+  - **C20 host preflight hardening** targets the host setup wizard branch.
+  - **84Pad Backup v0.1 and extension bridge** targets the Core foundation branch; this is later-stage work under the current direction.
+- The C22 public-HTML-upload branch contains substantial Laravel Core source, but it is not merged into `main`. Compare it with the other Core branches before choosing the implementation base.
+- No production-ready Core release or live catalog response was verified. The public catalog endpoint returned a staging first-run page, not a release catalog.
 
-## Session resume instructions
+## Research and decisions captured
 
-1. Read `docs/PROGRESS.md`, `docs/WORKFLOW.md`, and current README.
-2. Inspect current repository files, open issues and recent commits; don't assume this markdown is fully synchronized.
-3. Pick the smallest uncompleted issue whose prerequisites are met. Start at **#1** unless fresh verified progress says otherwise.
-4. Use a feature branch named `core/CXX-description` where possible; avoid overwriting user changes.
-5. Add implementation + tests. Record exact executed validation commands and outputs in issue and/or commit.
-6. Close an issue **only after** its checkboxes pass. Update this file with link to commit/PR and explicit next issue.
-7. If interrupted, leave an issue comment containing: files changed, current branch/commit, validations performed, remaining steps and blockers.
-8. Never claim background execution. Work resumes only when a user starts another authorized session.
+- Relevant saved ChatGPT project conversations reviewed: **84pad Core**, **Installer Wizard Setup**, **84pad website**, **84pad Builder**, **84pad backup**, and **Parmtech Website Current**.
+- Current public references reviewed: [84pad.com](https://84pad.com/) and [84pad.com/guides](https://84pad.com/guides/).
+- Core and the central release server are separate. Core is the customer-installed CMS; the release server distributes versioned packages and remains deferred.
+- Core setup targets PHP 8.3/8.4, MySQL/MariaDB, HTTPS, and required PHP extensions. cPanel-assisted database provisioning is optional; manual database setup is the fallback.
+- Use secure one-time owner setup and never include a hard-coded password, API token, private key, or production data.
+- Source descriptions disagree about whether Builder, tools, and themes ship inside Core or as separate extensions. Follow the user's latest Core-first direction; treat website feature counts as goals until verified in the actual release.
+- The website marks its guided installer as planned and its current PHP Core preview as not production-approved. Backup claims are limited to page/catalog snapshots, not full server or media backups.
 
-## Frozen scope decisions
+## Completed in this documentation-only pause
 
-- Core remains lightweight, with Laravel 12, install/auth/permissions, Control Studio, plugin lifecycle/hooks, basic recovery boundaries.
-- SSL God, Email, File Manager, Backup and other site functionality are **separate optional plugins** (not hard-coded Core).
-- GitHub stays private for now; plugin development and central update/release server are later stages.
-- Secrets, production backups and private keys must never go into source control.
+- Added [CORE-BLUEPRINT.md](CORE-BLUEPRINT.md), covering Core responsibilities, installation, identity, Control Studio, basic pages, extension contracts, migrations, update/recovery boundaries, security, deferred scope, and open decisions.
+- Updated this checkpoint to replace stale references to the older private repository and record the current public-repository state.
+- No source code, release package, live website, or hosting account was changed.
+- No tests were added or run; this task only wrote documentation.
 
-## Handoff template
+## Pending for a later, user-authorized session
 
-```md
-Date/time & timezone:
-Active issue:
-Branch / latest commit:
-Files actually changed:
-What was verified (exact commands):
-What failed / needs validation:
-What is NOT done:
-Next smallest action:
-```
+1. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
+2. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
+3. Select the correct Core implementation base after comparing the existing branches and their PRs.
+4. Continue Core implementation in dependency order using the blueprint. Do not resume plugin, theme, release-server, or live-site work unless the user expands scope.
+5. Record actual changes, verification, blockers, and the next action here after each future work slice.
+
+## Resume procedure for any AI or chat
+
+1. Read this file and [CORE-BLUEPRINT.md](CORE-BLUEPRINT.md).
+2. Inspect the current public repository, branch and PR states, and relevant source before editing.
+3. Treat planned features, branch contents, draft PRs, and website claims as unverified until checked.
+4. Follow the user's latest scope and update this record with what was actually changed and verified.
