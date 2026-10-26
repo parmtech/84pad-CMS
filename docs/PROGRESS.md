@@ -11,7 +11,7 @@
 
 **Current feature review:** [Core basic pages draft PR #27](https://github.com/parmtech/84pad-CMS/pull/27) targets `core/C01-laravel-foundation`; draft and not merged.
 
-**Current site settings work:** `core/C24-site-identity` is based on `core/C23-basic-pages`; PR #28 will be opened after the slice is recorded.
+**Current site settings work:** [Core site identity draft PR #28](https://github.com/parmtech/84pad-CMS/pull/28) targets `core/C23-basic-pages`; draft and not merged.
 
 ## User's current direction
 
@@ -66,8 +66,8 @@
 - Added owner-only controls for site title, canonical URL, language and time zone using the existing private Core settings store.
 - Public published-page views use these settings for the page language, site title, canonical link, and displayed publication time. Private previews remain non-indexable and uncached.
 - Canonical URLs must be HTTPS outside local/testing environments and cannot contain credentials, query parameters, or fragments.
-- A remote `core/C24-site-identity` branch exists; this slice's files have not yet been uploaded or checked by CI.
-- Next: upload the branch changes, open a focused draft PR based on C23, inspect CI, and update this record with evidence.
+- The changes are on `core/C24-site-identity` and proposed in PR #28. CI is pending; no local PHP syntax check was possible because PHP CLI is unavailable here.
+- Next: inspect CI, review canonical URL validation and settings behavior, and update this record with verified evidence.
 
 ## Pending work
 
