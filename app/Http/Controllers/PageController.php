@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Page;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -42,7 +43,7 @@ class PageController extends Controller
         return redirect()->route('pages.edit', $page)->with('notice', 'Page updated.');
     }
 
-    public function preview(Page $page)
+    public function preview(Page $page): Response
     {
         return response()
             ->view('pages.public', ['page' => $page, 'previewMode' => true])
