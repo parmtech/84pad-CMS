@@ -75,6 +75,7 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <a id="tour-overview" class="active" href="{{ route('dashboard') }}"><span>◆</span>Overview</a>
 <a href="#modules"><span>◈</span>Systems</a>
 <a href="#plugins"><span>✳</span>Plugins</a>
+@can('core.manage-content')<a href="{{ route('pages.index') }}"><span>▤</span>Pages</a>@endcan
 @can('core.manage-security')<a id="tour-security-link" href="{{ route('password.edit') }}"><span>◉</span>Security</a><a id="tour-settings-link" href="{{ route('settings.show') }}"><span>⚙</span>Settings</a>@endcan
 </nav></div>
 <div class="nav-footer"><strong>Built by ParmTech</strong><p>Built for possibility. Powered by a small, extensible Core. Extra website features live in plugins.</p></div>
@@ -183,3 +184,4 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 </div></div>
 <script defer src="{{ asset('js/84pad-tour.js') }}"></script>
 </body></html>
+
