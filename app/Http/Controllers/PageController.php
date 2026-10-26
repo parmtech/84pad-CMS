@@ -42,6 +42,14 @@ class PageController extends Controller
         return redirect()->route('pages.edit', $page)->with('notice', 'Page updated.');
     }
 
+    public function preview(Page $page)
+    {
+        return response()
+            ->view('pages.public', ['page' => $page, 'previewMode' => true])
+            ->header('X-Robots-Tag', 'noindex, nofollow')
+            ->header('Cache-Control', 'private, no-store');
+    }
+
     public function publish(Page $page): RedirectResponse
     {
         $page->update([
@@ -56,7 +64,7 @@ class PageController extends Controller
     {
         $page = Page::query()->where('slug', $slug)->where('status', 'published')->firstOrFail();
 
-        return view('pages.public', compact('page'));
+        return view('pages.public', ['page' => $page, 'previewMode' => false]);
     }
 
     private function validated(Request $request, ?Page $page = null): array
@@ -70,6 +78,7 @@ class PageController extends Controller
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::lower($data['slug'])
             : Str::slug($data['title']);
+        $data['body'] ??= '';
 
         validator($data, ['slug' => ['required', Rule::unique('pages', 'slug')->ignore($page?->id)]])->validate();
 
