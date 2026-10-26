@@ -54,8 +54,8 @@
 - Public content is rendered as escaped plain text; arbitrary HTML/scripts are not executed. Drafts are only available in the authenticated admin editor.
 - Added a Pages entry to the Control Studio navigation.
 - Aligned Composer's PHP constraint to `^8.3`, matching the PHP 8.3/8.4 CI and the stated Core hosting baseline.
-- The owner selected GPL-3.0-or-later; applying the official license text, SPDX metadata, and README notice in the current PR.
-- The first PR revision passed PHP 8.3 and 8.4 CI on GitHub (run 40261565088). The added private-preview and empty-body handling are newer changes and still need CI. No local PHP syntax checks could run because PHP CLI is unavailable here. No maintainer review has been recorded.
+- The owner selected GPL-3.0-or-later; the official license text, SPDX metadata, and README notice are now on the feature branch, not yet merged to `main`.
+- An earlier PR revision passed PHP 8.3 and 8.4 CI on GitHub (run 40261565088). Private preview, empty-body handling, PHP baseline, and license changes are on a newer revision whose CI is pending. No local PHP syntax checks could run because PHP CLI is unavailable here. No maintainer review has been recorded.
 - Outstanding for this slice: verify the latest changes through repository CI, review migration/controller behavior, and address review findings.
 
 ## Pending work
