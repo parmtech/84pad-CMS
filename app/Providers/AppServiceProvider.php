@@ -25,5 +25,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('core.manage-security', fn (User $user): bool =>
             $user->role === 'owner'
         );
+        Gate::define('core.manage-content', fn (User $user): bool =>
+            in_array($user->role, ['owner', 'admin'], true)
+        );
     }
 }
+
