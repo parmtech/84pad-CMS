@@ -1,6 +1,6 @@
 # 84Pad CMS — Project Resume Record
 
-**Last updated:** 2026-10-26 (Australia/Sydney)
+**Last updated:** 2026-10-27 (Australia/Sydney)
 
 **Current state:** Core implementation resumed at the user's request. The first slice is basic page drafting and publishing on `core/C23-basic-pages`; unmerged and unverified.
 
@@ -50,11 +50,11 @@
 ## Current implementation slice — basic pages
 
 - Started from the existing `core/C01-laravel-foundation` draft after checking its current state; did not create a second competing Core foundation.
-- Added a Core pages table, page model, owner/admin-only Control Studio routes, draft create/edit, publish/unpublish, and a public page route at `/p/{slug}`.
+- Added a Core pages table, page model, owner/admin-only Control Studio routes, draft create/edit, private draft preview, publish/unpublish, and a public page route at `/p/{slug}`.
 - Public content is rendered as escaped plain text; arbitrary HTML/scripts are not executed. Drafts are only available in the authenticated admin editor.
 - Added a Pages entry to the Control Studio navigation.
-- The slice is present on `core/C23-basic-pages` and proposed in draft PR #27. The `stage-package` CI job was still running at handoff; no local PHP syntax checks could run because PHP CLI is unavailable here. Do not claim the feature is verified until CI finishes and the code receives review.
-- Outstanding for this slice: review migration/controller behavior, verify it through repository CI, update this checkpoint with the PR and CI result, and address review findings.
+- The first PR revision passed PHP 8.3 and 8.4 CI on GitHub (run 40261565088). The added private-preview and empty-body handling are newer changes and still need CI. No local PHP syntax checks could run because PHP CLI is unavailable here. No maintainer review has been recorded.
+- Outstanding for this slice: verify the latest changes through repository CI, review migration/controller behavior, and address review findings.
 
 ## Pending work
 
