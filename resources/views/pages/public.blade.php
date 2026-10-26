@@ -1,4 +1,4 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ $page->title }}</title>
-<style>body{margin:0;background:#f6f8fb;color:#182334;font:18px/1.7 system-ui,sans-serif}.page{max-width:760px;margin:10vh auto;padding:0 24px}h1{font-size:clamp(2rem,6vw,3.5rem);line-height:1.1}.body{white-space:pre-wrap;overflow-wrap:anywhere}</style></head><body><main class="page"><h1>{{ $page->title }}</h1><div class="body">{{ $page->body }}</div></main></body></html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">@if($previewMode)<meta name="robots" content="noindex,nofollow">@endif<title>{{ $page->title }}</title>
+<style>body{margin:0;background:#f6f8fb;color:#182334;font:18px/1.7 system-ui,sans-serif}.page{max-width:760px;margin:10vh auto;padding:0 24px}h1{font-size:clamp(2rem,6vw,3.5rem);line-height:1.1}.body{white-space:pre-wrap;overflow-wrap:anywhere}.preview{padding:12px 16px;background:#fff2ce;border:1px solid #cc9b22;border-radius:8px;font-size:14px}</style></head><body><main class="page">@if($previewMode)<p class="preview">Private draft preview · only signed-in site managers can access this link.</p>@endif<h1>{{ $page->title }}</h1><div class="body">{{ $page->body }}</div></main></body></html>
 
