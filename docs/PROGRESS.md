@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active. Basic page drafting and publishing is implemented on `core/C23-basic-pages`; current code passes the PHP 8.3/8.4, MySQL, and staging-package workflows. PR #27 remains a draft, unreviewed, and unmerged.
+**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass the PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity is the next slice on `core/C24-site-identity`; its CI is pending. PRs #27 and #28 remain drafts and unmerged.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -10,6 +10,8 @@
 **Documentation review:** PR #26 was closed unmerged as superseded; its blueprint and resume record are included and updated in PR #27.
 
 **Current feature review:** [Core basic pages draft PR #27](https://github.com/parmtech/84pad-CMS/pull/27) targets `core/C01-laravel-foundation`; draft and not merged.
+
+**Current site settings work:** `core/C24-site-identity` is based on `core/C23-basic-pages`; PR #28 will be opened after the slice is recorded.
 
 ## User's current direction
 
@@ -59,13 +61,22 @@
 - CI ran the existing test suite and syntax/bootstrap/migration checks; no page-specific tests were added, so the new page routes and publishing flow still need focused verification. Browser/accessibility QA and maintainer review are also outstanding. PHP CLI is unavailable locally.
 - Outstanding for this slice: focused page-feature verification, maintainer review, and later browser/shared-host acceptance.
 
+## Current implementation slice — site identity
+
+- Added owner-only controls for site title, canonical URL, language and time zone using the existing private Core settings store.
+- Public published-page views use these settings for the page language, site title, canonical link, and displayed publication time. Private previews remain non-indexable and uncached.
+- Canonical URLs must be HTTPS outside local/testing environments and cannot contain credentials, query parameters, or fragments.
+- A remote `core/C24-site-identity` branch exists; this slice's files have not yet been uploaded or checked by CI.
+- Next: upload the branch changes, open a focused draft PR based on C23, inspect CI, and update this record with evidence.
+
 ## Pending work
 
-1. Complete focused verification and review of the basic pages slice on `core/C23-basic-pages` before merging it into C01.
-2. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
-3. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
-4. Continue Core implementation in dependency order using the blueprint. Do not resume plugin, theme, release-server, or live-site work unless the user expands scope.
-5. Record actual changes, verification, blockers, and the next action here after each work slice.
+1. Verify and review owner-managed site identity on `core/C24-site-identity`.
+2. Complete focused verification and maintainer review of Pages PR #27 before merging it into C01.
+3. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
+4. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
+5. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
+6. Record actual changes, verification, blockers, and the next action here after each work slice.
 
 ## Resume procedure for any AI or chat
 
