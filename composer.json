@@ -3,7 +3,7 @@
   "name": "parmtech/84pad-core",
   "type": "project",
   "description": "84PAD plugin-first Laravel 12 CMS foundation",
-  "license": "proprietary",
+  "license": "GPL-3.0-or-later",
   "require": {
     "php": "^8.3",
     "laravel/framework": "^12.0"
