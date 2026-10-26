@@ -3,7 +3,8 @@
 **Last updated:** 2026-10-26 (Australia/Sydney)  
 **Current state:** Paused at the user's request after saving the Core blueprint. Do not resume implementation until the user asks.  
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)  
-**Blueprint:** [docs/CORE-BLUEPRINT.md](CORE-BLUEPRINT.md)
+**Blueprint:** [docs/CORE-BLUEPRINT.md](CORE-BLUEPRINT.md)  
+**Documentation review:** [Core blueprint and resume record pull request](https://github.com/parmtech/84pad-CMS/pull/26) (open draft; not merged)
 
 ## User's current direction
 
@@ -14,7 +15,7 @@
 
 ## Verified repository state at this checkpoint
 
-- The public `main` branch still contains only the README and the two project documents; no Core implementation has been merged into `main`.
+- The public `main` branch still contains only the README and the two original project documents; no Core implementation has been merged into `main`.
 - Several Core implementation branches and draft PRs already exist. Their names and contents are not proof that their features are complete. Review their current state before choosing a base or continuing work.
 - Draft PRs observed during this checkpoint:
   - **C01 Laravel Core Foundation** targets `main`.
@@ -37,6 +38,7 @@
 
 - Added [CORE-BLUEPRINT.md](CORE-BLUEPRINT.md), covering Core responsibilities, installation, identity, Control Studio, basic pages, extension contracts, migrations, update/recovery boundaries, security, deferred scope, and open decisions.
 - Updated this checkpoint to replace stale references to the older private repository and record the current public-repository state.
+- Saved the docs-only change on a review branch and opened the draft PR linked above; it has not been merged.
 - No source code, release package, live website, or hosting account was changed.
 - No tests were added or run; this task only wrote documentation.
 
