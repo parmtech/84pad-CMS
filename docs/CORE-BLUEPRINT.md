@@ -166,7 +166,7 @@ A feature is **planned** until code exists; **implemented, unverified** until th
 
 - Confirm the final Core-versus-bundled-product boundary and update the website accordingly.
 - Verify Laravel 12 and PHP 8.3/8.4 support against dependencies and target hosting.
-- Select the open-source license and make `composer.json` and the repository license file agree. The existing Core branch says `proprietary`, despite the public-repository/open-source direction.
+- Preserve the selected GPL-3.0-or-later licensing in `composer.json`, the repository license file, and source notices as the codebase grows.
 - Decide the exact public-directory/private-storage layout for shared hosting.
 - Finalize cPanel credential scope and whether credentials are ever retained.
 - Finalize mail transport and password reset setup.
