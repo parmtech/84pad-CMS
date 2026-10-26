@@ -28,6 +28,7 @@ Route::middleware(['auth','auth.session'])->group(function (): void {
         Route::get('/create', [PageController::class, 'create'])->name('create');
         Route::post('/', [PageController::class, 'store'])->name('store');
         Route::get('/{page}/edit', [PageController::class, 'edit'])->name('edit');
+        Route::get('/{page}/preview', [PageController::class, 'preview'])->name('preview');
         Route::put('/{page}', [PageController::class, 'update'])->name('update');
         Route::patch('/{page}/publish', [PageController::class, 'publish'])->name('publish');
     });
