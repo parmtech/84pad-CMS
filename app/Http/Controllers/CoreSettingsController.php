@@ -28,6 +28,7 @@ final class CoreSettingsController extends Controller
         }
 
         return view('core-settings', [
+            'site' => $settings->siteSettings(),
             'cpanel' => $settings->cpanelStatus(),
             'switches' => $switches,
             'capabilities' => CpanelPermissions::CAPABILITIES,
@@ -36,6 +37,38 @@ final class CoreSettingsController extends Controller
             'tourCompleted' => (bool) DB::table('core_user_preferences')
                 ->where('user_id', $request->user()->id)->value('tour_completed'),
         ]);
+    }
+
+    public function saveSite(Request $request, CoreSettings $settings): RedirectResponse
+    {
+        abort_unless($request->user()?->isOwner(), 403);
+
+        $data = $request->validate([
+            'site_title' => ['required', 'string', 'max:120'],
+            'canonical_url' => ['required', 'string', 'url', 'max:2048'],
+            'locale' => ['required', 'string', 'regex:/^[a-z]{2,3}(?:-[A-Z]{2})?$/D'],
+            'timezone' => ['required', 'string', 'timezone'],
+        ]);
+        $parts = parse_url($data['canonical_url']);
+        $allowedSchemes = app()->environment(['local', 'testing']) ? ['https', 'http'] : ['https'];
+        if (! is_array($parts)
+            || ! in_array(strtolower((string) ($parts['scheme'] ?? '')), $allowedSchemes, true)
+            || empty($parts['host'])
+            || isset($parts['user'])
+            || isset($parts['pass'])
+            || isset($parts['query'])
+            || isset($parts['fragment'])) {
+            return back()->withErrors(['canonical_url' => 'Enter an HTTPS site URL without credentials, query parameters, or a fragment.'])->withInput();
+        }
+
+        $settings->saveSiteSettings(
+            trim($data['site_title']),
+            rtrim($data['canonical_url'], '/'),
+            $data['locale'],
+            $data['timezone']
+        );
+
+        return redirect()->route('settings.show')->with('notice', 'Site identity settings saved.');
     }
 
     public function saveCpanel(Request $request, CoreSettings $settings): RedirectResponse
@@ -108,3 +141,4 @@ final class CoreSettingsController extends Controller
         return redirect()->route('settings.show')->with('notice', 'cPanel disconnected and plugin grants disabled.');
     }
 }
+
