@@ -9,6 +9,8 @@
 **Blueprint:** [docs/CORE-BLUEPRINT.md](CORE-BLUEPRINT.md)
 **Documentation review:** [Core blueprint and resume record pull request](https://github.com/parmtech/84pad-CMS/pull/26) (open draft; not merged; blueprint checkpoint will be updated with this implementation slice)
 
+**Current feature review:** [Core basic pages draft PR #27](https://github.com/parmtech/84pad-CMS/pull/27) targets `core/C01-laravel-foundation`; draft and not merged.
+
 ## User's current direction
 
 - Build the required 84Pad Core first: a modern, self-hosted CMS foundation with a clear extension model.
@@ -51,7 +53,7 @@
 - Added a Core pages table, page model, owner/admin-only Control Studio routes, draft create/edit, publish/unpublish, and a public page route at `/p/{slug}`.
 - Public content is rendered as escaped plain text; arbitrary HTML/scripts are not executed. Drafts are only available in the authenticated admin editor.
 - Added a Pages entry to the Control Studio navigation.
-- The slice is committed and present on `core/C23-basic-pages`, but CI and review have not yet verified it. PHP CLI is not installed in the current environment, so local PHP syntax checks could not run. Do not claim the feature is verified until CI and review evidence exist.
+- The slice is present on `core/C23-basic-pages` and proposed in draft PR #27. The `stage-package` CI job was still running at handoff; no local PHP syntax checks could run because PHP CLI is unavailable here. Do not claim the feature is verified until CI finishes and the code receives review.
 - Outstanding for this slice: review migration/controller behavior, verify it through repository CI, update this checkpoint with the PR and CI result, and address review findings.
 
 ## Pending work
