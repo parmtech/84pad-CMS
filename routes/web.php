@@ -33,6 +33,7 @@ Route::middleware(['auth','auth.session'])->group(function (): void {
         Route::patch('/{page}/publish', [PageController::class, 'publish'])->name('publish');
     });
     Route::get('/dashboard/settings', [CoreSettingsController::class, 'show'])->middleware('can:core.manage-security')->name('settings.show');
+    Route::post('/dashboard/settings/site', [CoreSettingsController::class, 'saveSite'])->middleware(['can:core.manage-security','throttle:10,1'])->name('settings.site');
     Route::post('/dashboard/settings/cpanel', [CoreSettingsController::class, 'saveCpanel'])->middleware(['can:core.manage-security','throttle:5,1'])->name('settings.cpanel');
     Route::post('/dashboard/settings/switch', [CoreSettingsController::class, 'switch'])->middleware(['can:core.manage-security','throttle:20,1'])->name('settings.switch');
     Route::post('/dashboard/settings/permission', [CoreSettingsController::class, 'permission'])->middleware(['can:core.manage-security','throttle:20,1'])->name('settings.permission');
