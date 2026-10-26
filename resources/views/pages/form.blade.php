@@ -7,6 +7,6 @@
 <label for="title">Title</label><input id="title" name="title" maxlength="160" required value="{{ old('title', $page->title) }}">
 <label for="slug">URL name (optional)</label><input id="slug" name="slug" maxlength="180" pattern="[a-z0-9]+(-[a-z0-9]+)*" value="{{ old('slug', $page->slug) }}" placeholder="about-us"><p class="muted">Use lowercase letters, numbers and hyphens.</p>
 <label for="body">Page text</label><textarea id="body" name="body">{{ old('body', $page->body) }}</textarea><button type="submit">Save draft</button></form>
-@if($page->exists)<form method="post" action="{{ route('pages.publish', $page) }}">@csrf @method('patch')<button type="submit">{{ $page->status === 'published' ? 'Unpublish' : 'Publish' }}</button></form>@endif
+@if($page->exists)<p><a href="{{ $page->status === 'published' ? route('page.show', $page->slug) : route('pages.preview', $page) }}" target="_blank" rel="noopener">{{ $page->status === 'published' ? 'View published page' : 'Preview draft privately' }}</a></p><form method="post" action="{{ route('pages.publish', $page) }}">@csrf @method('patch')<button type="submit">{{ $page->status === 'published' ? 'Unpublish' : 'Publish' }}</button></form>@endif
 </main></body></html>
 
