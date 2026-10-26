@@ -51,8 +51,8 @@
 - Added a Core pages table, page model, owner/admin-only Control Studio routes, draft create/edit, publish/unpublish, and a public page route at `/p/{slug}`.
 - Public content is rendered as escaped plain text; arbitrary HTML/scripts are not executed. Drafts are only available in the authenticated admin editor.
 - Added a Pages entry to the Control Studio navigation.
-- This slice has not been committed, pushed, tested, or reviewed yet. PHP CLI is not installed in the current environment, so local PHP syntax checks cannot run. Do not claim the feature is verified until CI and review evidence exist.
-- Outstanding for this slice: review migration/controller behavior, add/execute the appropriate repository checks in CI when available, update the README's Core scope to include the basic pages path, and open a focused PR against the selected Core foundation branch.
+- The slice is committed and present on `core/C23-basic-pages`, but CI and review have not yet verified it. PHP CLI is not installed in the current environment, so local PHP syntax checks could not run. Do not claim the feature is verified until CI and review evidence exist.
+- Outstanding for this slice: review migration/controller behavior, verify it through repository CI, update this checkpoint with the PR and CI result, and address review findings.
 
 ## Pending work
 
