@@ -53,6 +53,8 @@
 - Added a Core pages table, page model, owner/admin-only Control Studio routes, draft create/edit, private draft preview, publish/unpublish, and a public page route at `/p/{slug}`.
 - Public content is rendered as escaped plain text; arbitrary HTML/scripts are not executed. Drafts are only available in the authenticated admin editor.
 - Added a Pages entry to the Control Studio navigation.
+- Aligned Composer's PHP constraint to `^8.3`, matching the PHP 8.3/8.4 CI and the stated Core hosting baseline.
+- The Composer license still says `proprietary` and no `LICENSE` file is present on the implementation branch. Waiting for the owner's choice between GPL-3.0-or-later and MIT before changing legal terms.
 - The first PR revision passed PHP 8.3 and 8.4 CI on GitHub (run 40261565088). The added private-preview and empty-body handling are newer changes and still need CI. No local PHP syntax checks could run because PHP CLI is unavailable here. No maintainer review has been recorded.
 - Outstanding for this slice: verify the latest changes through repository CI, review migration/controller behavior, and address review findings.
 
