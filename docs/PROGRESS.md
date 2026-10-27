@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI. No staging-package result is recorded for that slice. PRs #27–#29 remain drafts, unreviewed and unmerged.
+**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI with no staging-package result recorded. Manifest-declared cPanel capabilities are in draft PR #30; implementation revision `f6ec3cc` passes PHP 8.3/8.4 CI, with no staging-package result recorded. PRs #27–#30 remain drafts, unreviewed and unmerged.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -14,6 +14,8 @@
 **Current site settings work:** [Core site identity draft PR #28](https://github.com/parmtech/84pad-CMS/pull/28) targets `core/C23-basic-pages`; draft and not merged.
 
 **Current homepage work:** [Core homepage draft PR #29](https://github.com/parmtech/84pad-CMS/pull/29) targets `core/C24-site-identity`; draft and not merged.
+
+**Current plugin contract work:** [Draft PR #30](https://github.com/parmtech/84pad-CMS/pull/30) targets `core/C25-homepage`. It adds declared cPanel gateway capabilities, grant invalidation when declarations change, a manifest size limit, and owner-visible capability requests. PHP 8.3/8.4 CI passes on implementation revision `f6ec3cc`; no staging-package result is recorded.
 
 ## User's current direction
 
@@ -89,6 +91,15 @@
 6. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
 7. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
 8. Record actual changes, verification, blockers, and the next action here after each work slice.
+
+## Current implementation slice — manifest-declared cPanel capabilities
+
+- In progress on `core/C26-manifest-capabilities`, based on homepage branch `core/C25-homepage`.
+- Adds optional `cpanel_capabilities` to plugin manifests. Missing means no cPanel access; malformed, duplicate, or unknown capability declarations are rejected.
+- Owner settings can grant only requested capabilities. Grants are bound to a stable hash of the plugin ID and declared capability set; changing that set invalidates old grants until the Owner reviews and grants again.
+- Control Studio shows the plugin's requested capabilities and compatibility before activation. Settings explains that these grants govern only Core's fixed cPanel gateway; PHP plugins retain full host privileges.
+- A migration stores the grant scope hash. Existing grants without that hash are ineffective until explicitly granted again.
+- Implementation revision [f6ec3cc](https://github.com/parmtech/84pad-CMS/commit/f6ec3cc7eab55bb32b8d7a0520c8934869816520) passed [PHP 8.3/8.4 CI #40424902320](https://github.com/parmtech/84pad-CMS/actions/runs/40424902320). PHP 8.3 ran the existing suite: 83 passed, 1 skipped (344 assertions). No new manifest-scope tests were added, and no staging-package result is recorded. Browser and maintainer review remain outstanding.
 
 ## Resume procedure for any AI or chat
 

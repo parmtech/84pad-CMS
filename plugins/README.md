@@ -1,6 +1,14 @@
 # 84PAD Plugin contract — Core 0.1 development preview
 
-84PAD Core keeps website capabilities in separate, optional plugins. Plugins under `plugins/<slug>/` use `plugin.json` with `id`, `name`, `version`, `requires_core`. Valid slugs use lowercase letters, digits and dashes.
+84PAD Core keeps website capabilities in separate, optional plugins. Plugins under `plugins/<slug>/` use `plugin.json` with `id`, `name`, `version`, `requires_core`, and an optional `cpanel_capabilities` list. Valid slugs use lowercase letters, digits and dashes.
+
+```json
+{"id":"example-plugin","name":"Example Plugin","version":"0.1.0","requires_core":"0.1.0","cpanel_capabilities":["email.read"]}
+```
+
+Only capabilities from Core's fixed cPanel gateway allowlist are accepted. Missing declarations mean no cPanel capabilities. The Owner can grant only capabilities listed in the manifest. Core binds each grant to the canonical capability list: if that list changes, old grants stop working and must be reviewed and granted again. The dashboard shows declared requests and compatibility before activation. This grant model protects calls made through Core's cPanel gateway; arbitrary PHP plugins still run with the hosting account's full privileges.
+
+The root `plugin.json` manifest is limited to 16 KiB. A package with an absent, oversized, or invalid manifest is rejected before installation.
 
 ## Trusted local plugin lifecycle
 

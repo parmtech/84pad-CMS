@@ -86,8 +86,10 @@ button.primary{color:#061c2b;background:linear-gradient(90deg,#78ede0,#ab9afb);b
 <p>Everything is <strong>denied by default</strong>. Installed plugins get access to individual capabilities only when you explicitly allow them. Global cPanel switch, saved token and plugin activation must also be enabled.</p>
 @forelse($installedPlugins as $slug => $plugin)
 <h3>{{ $plugin['name'] }} <span class="caption">({{ $slug }})</span></h3>
+@if(empty($plugin['cpanel_capabilities']))<p>This plugin does not request cPanel access.</p>@else
 <div class="scopes">
-@foreach($capabilities as $capability => $title)
+@foreach($plugin['cpanel_capabilities'] as $capability)
+@php($title = $capabilities[$capability])
 @php($active = $grants[$slug][$capability] ?? false)
 <div class="scope"><strong>{{ $title }}</strong>
 <p>{{ $capability }} · {{ $active ? 'Allowed' : 'Blocked' }}</p>
@@ -99,10 +101,11 @@ button.primary{color:#061c2b;background:linear-gradient(90deg,#78ede0,#ab9afb);b
 </form></div>
 @endforeach
 </div>
+@endif
 @empty
 <p>Install a plugin first; its cPanel permissions will appear here.</p>
 @endforelse
-<p class="caption">Permissions are a Core-level contract for compatible plugins. PHP plugins themselves are trusted server-side code, not an operating-system sandbox.</p>
+<p class="caption">These grants control access through Core's fixed cPanel gateway only. PHP plugins themselves are trusted server-side code, not an operating-system sandbox.</p>
 </section>
 <section class="panel" id="settings-tutorial">
 <h2>Training & guided tour</h2>

@@ -80,19 +80,15 @@ final class PluginPackageInstaller
                 }
             }
 
+            $manifestStat = $zip->statName('plugin.json');
+            if (! is_array($manifestStat) || (int) ($manifestStat['size'] ?? PHP_INT_MAX) > 16384) {
+                throw new RuntimeException('Missing or oversized plugin manifest.');
+            }
             $raw = $zip->getFromName('plugin.json');
-            $manifest = is_string($raw) ? json_decode($raw, true) : null;
+            $rawManifest = is_string($raw) ? json_decode($raw, true) : null;
+            $manifest = $this->catalog->normalizeManifest($rawManifest);
             $slug = $manifest['id'] ?? null;
-            if (! is_array($manifest)
-                || ! is_string($slug)
-                || ! preg_match('/^[a-z][a-z0-9-]{1,63}$/D', $slug)
-                || ! is_string($manifest['name'] ?? null)
-                || strlen($manifest['name']) > 100
-                || ! is_string($manifest['version'] ?? null)
-                || ! preg_match('/^\d+\.\d+\.\d+$/D', $manifest['version'])
-                || ! is_string($manifest['requires_core'] ?? null)
-                || ! preg_match('/^\d+\.\d+\.\d+$/D', $manifest['requires_core'])
-                || ! $this->catalog->compatible($manifest)) {
+            if ($manifest === null || ! $this->catalog->compatible($manifest)) {
                 throw new RuntimeException('Invalid or incompatible plugin manifest.');
             }
 

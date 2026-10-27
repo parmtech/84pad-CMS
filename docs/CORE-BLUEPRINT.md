@@ -97,6 +97,8 @@ A plugin contract should define a manifest, package identity, version, supported
 5. Activate/deactivate through a recorded lifecycle, with a recoverable state if a migration or activation fails.
 6. Retain a safe uninstall boundary that does not silently delete user content or unrelated data.
 
+For the current cPanel gateway, a plugin declares its requested capabilities in `cpanel_capabilities`. Core rejects unknown or duplicate capability names, displays requests and Core compatibility before activation, and limits owner grants to the declared set. Grants are bound to a canonical hash of that set; changing a plugin's requested capabilities invalidates existing grants so the owner must review them again. This limits calls through Core's gateway only. PHP plugin code remains full-trust server code and is not sandboxed by these grants.
+
 Hooks/events and documented service interfaces let extensions integrate without patching Core files. Extension code is not trusted merely because it is present in the plugins folder. Permissions, integrity checks, version compatibility, and clear failure reporting are required.
 
 Themes need a stable rendering and design-token interface, but theme packs and a theme marketplace are deferred. Core should provide a minimal default presentation and a contract for later themes.
