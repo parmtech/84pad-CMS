@@ -76,8 +76,8 @@
 
 - In progress on `core/C25-homepage`, based on the site identity branch.
 - Adds an owner setting to select a published page as the public `/` page. The configured homepage remains the ordinary page at `/p/{slug}` as well, with its canonical URL pointing to `/` when rendered at the root.
-- If no page is selected, or the selected page is unpublished, `/` returns to the default Core welcome page. The setting is stored in Core settings and does not require a schema migration.
-- Changes are committed on GitHub in draft PR #29. PHP 8.3, PHP 8.4, and staging-package checks were queued at the last check; no test results are available yet. Browser and accessibility acceptance remain outstanding.
+- If no page is selected, or the selected page is unpublished, `/` returns to the default Core welcome page. The same fallback remains available before installation and if the database is unavailable. The setting is stored in Core settings and does not require a schema migration.
+- Changes are committed on GitHub in draft PR #29. PHP 8.3 and PHP 8.4 checks were queued at the last check; no results are available yet. Browser and accessibility acceptance remain outstanding.
 
 ## Pending work
 
@@ -96,5 +96,4 @@
 2. Inspect the current public repository, branch and PR states, and relevant source before editing.
 3. Treat planned features, branch contents, draft PRs, and website claims as unverified until checked.
 4. Follow the user's latest scope and update this record with what was actually changed and verified.
-
 
