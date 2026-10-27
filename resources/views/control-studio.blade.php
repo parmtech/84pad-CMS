@@ -138,6 +138,7 @@ footer{margin-top:45px;text-align:center;font-size:11px;color:#697f9b}
 <article class="plugin">
 <h3>{{ $plugin['name'] }}</h3><p class="meta">{{ $plugin['id'] }} / v{{ $plugin['version'] }}</p>
 <p>{{ $plugin['compatible'] ? 'Compatible with this Core' : 'Requires newer Core' }} · {{ $plugin['enabled'] ? 'Active' : 'Disabled' }}</p>
+<p>{{ empty($plugin['cpanel_capabilities']) ? 'Requests no cPanel capabilities' : 'Requests cPanel capabilities: '.implode(', ', $plugin['cpanel_capabilities']) }}</p>
 @can('core.manage-plugins')
 <form method="post" action="{{ route('plugins.state', ['slug'=>$plugin['id']]) }}">@csrf
 <input type="hidden" name="action" value="{{ $plugin['enabled'] ? 'deactivate' : 'activate' }}">
