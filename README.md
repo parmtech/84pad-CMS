@@ -17,6 +17,7 @@
 - **First-login Guided Tour:** arrows/spotlight explain dashboard features and navigate into Settings, with Next/Back/Skip/Finish and per-Owner completion/replay.
 - **128 MiB signed plugin ZIP upload:** 512 MiB extraction ceiling, 5000-member maximum and compression-ratio protections; underlying hosting PHP upload limits must allow it.
 - JSON plugin manifest discovery, owner-controlled activation/deactivation, HookBus integration and first-party executable demo widget.
+- Plugin manifests can declare cPanel gateway capabilities; Owners can grant only the declared set, and grants become invalid when the declaration changes.
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
 - Core update Ed25519 verification/dry-run plus a **private code-only snapshot** command (`84pad:core-snapshot`) with corruption checks. It does not back up databases, uploads, plugin data, vendor or `.env`; automatic updater and full rollback remain unbuilt.
 - Basic page drafting and publish/unpublish is on [`core/C23-basic-pages`](https://github.com/parmtech/84pad-CMS/tree/core/C23-basic-pages); CI passes, but it is not merged or manually reviewed yet.
@@ -44,6 +45,7 @@ The Core is intentionally small and contains only:
 - Plugin discovery, installation, activation, deactivation and safe uninstall lifecycle.
 - Basic pages: draft, edit, preview/public render, publish and unpublish.
 - Site identity settings: title, canonical URL, language, display time zone, and published homepage selection.
+- Plugin manifest capability requests and scope-bound owner grants for the fixed cPanel gateway.
 - Versioned hook/event APIs and plugin compatibility metadata.
 - Database migration mechanism.
 - Core/plugin update integration points and emergency recovery foundation.
