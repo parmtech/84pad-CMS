@@ -80,6 +80,10 @@ final class PluginPackageInstaller
                 }
             }
 
+            $manifestStat = $zip->statName('plugin.json');
+            if (! is_array($manifestStat) || (int) ($manifestStat['size'] ?? PHP_INT_MAX) > 16384) {
+                throw new RuntimeException('Missing or oversized plugin manifest.');
+            }
             $raw = $zip->getFromName('plugin.json');
             $rawManifest = is_string($raw) ? json_decode($raw, true) : null;
             $manifest = $this->catalog->normalizeManifest($rawManifest);
