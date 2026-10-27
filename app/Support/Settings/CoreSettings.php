@@ -2,6 +2,7 @@
 
 namespace App\Support\Settings;
 
+use App\Models\Page;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
@@ -51,16 +52,37 @@ final class CoreSettings
             'canonical_url' => rtrim($this->read('site.canonical_url') ?? (string) config('app.url', 'http://localhost'), '/'),
             'locale' => $this->read('site.locale') ?? (string) config('app.locale', 'en'),
             'timezone' => $this->read('site.timezone') ?? (string) config('app.timezone', 'UTC'),
+            'homepage_page_id' => $this->read('site.homepage_page_id'),
         ];
     }
 
-    public function saveSiteSettings(string $title, string $canonicalUrl, string $locale, string $timezone): void
+    public function homepagePage(): ?Page
     {
-        DB::transaction(function () use ($title, $canonicalUrl, $locale, $timezone): void {
+        $id = $this->read('site.homepage_page_id');
+        if (! is_string($id) || ! ctype_digit($id)) {
+            return null;
+        }
+
+        return Page::query()->whereKey((int) $id)->where('status', 'published')->first();
+    }
+
+    public function saveSiteSettings(
+        string $title,
+        string $canonicalUrl,
+        string $locale,
+        string $timezone,
+        ?int $homepagePageId = null
+    ): void {
+        DB::transaction(function () use ($title, $canonicalUrl, $locale, $timezone, $homepagePageId): void {
             $this->put('site.title', $title);
             $this->put('site.canonical_url', rtrim($canonicalUrl, '/'));
             $this->put('site.locale', $locale);
             $this->put('site.timezone', $timezone);
+            if ($homepagePageId === null) {
+                DB::table('core_settings')->where('key', 'site.homepage_page_id')->delete();
+            } else {
+                $this->put('site.homepage_page_id', (string) $homepagePageId);
+            }
         });
     }
 
