@@ -77,6 +77,7 @@ A usable CMS Core needs a small content path before a visual Builder exists:
 - Create and edit a page with a title, stable URL slug, and body.
 - Save as draft, preview privately, publish, unpublish, and update.
 - Render published pages through a safe public template.
+- Let the owner select one published page for `/`; fall back to the default Core welcome screen when no homepage is selected or the selected page is no longer published.
 - Keep drafts and administrative details private.
 - Validate slugs and prevent unsafe HTML/script execution in ordinary content.
 - Provide a minimal default presentation so a fresh installation can publish a working site.
