@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI with no staging-package result recorded. Manifest-declared cPanel capabilities are in draft PR #30; implementation revision `f6ec3cc` passes PHP 8.3/8.4 CI, with no staging-package result recorded. C27 source-only restore is in draft PR #31; CI is pending. PRs #27–#31 remain drafts, unreviewed and unmerged.
+**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI with no staging-package result recorded. Manifest-declared cPanel capabilities are in draft PR #30; implementation revision `f6ec3cc` passes PHP 8.3/8.4 CI, with no staging-package result recorded. C27 source-only restore is in draft PR #31; PHP 8.3/8.4 checks passed on revision `8bbadc3`, while focused restore review and maintainer review remain outstanding. PRs #27–#31 remain drafts, unreviewed and unmerged.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -108,7 +108,7 @@
 - Extends the private Core source snapshot command with an operator-confirmed `--restore` operation requiring an independently recorded SHA-256 digest. It creates and verifies a pre-restore source snapshot, enters Laravel maintenance mode, stages and verifies the selected files, then replaces them. Failed replacement triggers automatic source recovery; if recovery is incomplete, the command leaves the application in maintenance mode and reports the recovery snapshot location and digest.
 - Restore is explicitly limited: it replaces only files listed in the selected source snapshot; later-added files remain. It does not restore databases, installed plugins, uploads, dependencies, hosting settings, or `.env`. This is not the signed Core updater or a full-site rollback.
 - Tightened snapshot path validation and updated `CORE-UPDATES.md`, `CORE-BLUEPRINT.md`, and the README to document the behavior and limitations. GPL-3.0-or-later was selected by the owner and is already recorded in `LICENSE` and Composer metadata on the base branch.
-- **GitHub CI is pending.** No tests were added or run locally. Focused restore acceptance and maintainer review remain outstanding; record CI and review results here.
+- PHP 8.3/8.4 CI passed on revision [8bbadc3](https://github.com/parmtech/84pad-CMS/commit/8bbadc3e282bedcece6d3c287820d83c7ae96d1d): [workflow run #40426164963](https://github.com/parmtech/84pad-CMS/actions/runs/40426164963). GitHub reported only Node 20 and Ubuntu runner deprecation notices. No tests were added or run locally. No staging-package result is recorded. Focused restore acceptance and maintainer review remain outstanding.
 
 ## Resume procedure for any AI or chat
 
