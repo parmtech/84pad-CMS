@@ -23,7 +23,7 @@
 - Owner-managed site title, canonical URL, locale, and time zone are on [`core/C24-site-identity`](https://github.com/parmtech/84pad-CMS/tree/core/C24-site-identity); CI passes, but it is not merged or manually reviewed yet.
 - Selecting a published page as the public homepage is being developed on [`core/C25-homepage`](https://github.com/parmtech/84pad-CMS/tree/core/C25-homepage); it is not yet verified or merged.
 
-**Recent verified code CI:** Pages [PHP 8.3/8.4 #40422758337](https://github.com/parmtech/84pad-CMS/actions/runs/40422758337), [MySQL #40422758481](https://github.com/parmtech/84pad-CMS/actions/runs/40422758481), and [staging package #40422758272](https://github.com/parmtech/84pad-CMS/actions/runs/40422758272) succeeded. Site identity [PHP 8.3/8.4 #40423368199](https://github.com/parmtech/84pad-CMS/actions/runs/40423368199) and [staging package #40423368180](https://github.com/parmtech/84pad-CMS/actions/runs/40423368180) succeeded. C25 homepage work has no CI result yet. These checks are not a production security audit or live shared-hosting acceptance.
+**Recent verified code CI:** Pages [PHP 8.3/8.4 #40422758337](https://github.com/parmtech/84pad-CMS/actions/runs/40422758337), [MySQL #40422758481](https://github.com/parmtech/84pad-CMS/actions/runs/40422758481), and [staging package #40422758272](https://github.com/parmtech/84pad-CMS/actions/runs/40422758272) succeeded. Site identity [PHP 8.3/8.4 #40423368199](https://github.com/parmtech/84pad-CMS/actions/runs/40423368199) and [staging package #40423368180](https://github.com/parmtech/84pad-CMS/actions/runs/40423368180) succeeded. C25 homepage checks are queued. These checks are not a production security audit or live shared-hosting acceptance.
 
 ## Important gaps before Core release
 
@@ -80,4 +80,5 @@ This source tree is an in-development Core preview, not a production release. Us
 ## License
 
 84PAD Core is licensed under the GNU General Public License, version 3 or (at your option) any later version. See [LICENSE](LICENSE).
+
 
