@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI. Plugin manifest capability declarations and scoped grants are in progress on `core/C26-manifest-capabilities`; not pushed or verified. PRs #27–#29 remain drafts, unreviewed and unmerged.
+**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI with no staging-package result recorded. Manifest-declared cPanel capabilities are in draft PR #30; implementation revision `f6ec3cc` passes PHP 8.3/8.4 CI, with no staging-package result recorded. PRs #27–#30 remain drafts, unreviewed and unmerged.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -15,7 +15,7 @@
 
 **Current homepage work:** [Core homepage draft PR #29](https://github.com/parmtech/84pad-CMS/pull/29) targets `core/C24-site-identity`; draft and not merged.
 
-**Current plugin contract work:** `core/C26-manifest-capabilities` is being prepared from the homepage branch. It adds declared cPanel gateway capabilities, grant invalidation when declarations change, and owner-visible capability requests. No PR or CI result exists yet.
+**Current plugin contract work:** [Draft PR #30](https://github.com/parmtech/84pad-CMS/pull/30) targets `core/C25-homepage`. It adds declared cPanel gateway capabilities, grant invalidation when declarations change, a manifest size limit, and owner-visible capability requests. PHP 8.3/8.4 CI passes on implementation revision `f6ec3cc`; no staging-package result is recorded.
 
 ## User's current direction
 
@@ -99,7 +99,7 @@
 - Owner settings can grant only requested capabilities. Grants are bound to a stable hash of the plugin ID and declared capability set; changing that set invalidates old grants until the Owner reviews and grants again.
 - Control Studio shows the plugin's requested capabilities and compatibility before activation. Settings explains that these grants govern only Core's fixed cPanel gateway; PHP plugins retain full host privileges.
 - A migration stores the grant scope hash. Existing grants without that hash are ineffective until explicitly granted again.
-- Changes are local. No tests or CI have run for this slice.
+- Implementation revision [f6ec3cc](https://github.com/parmtech/84pad-CMS/commit/f6ec3cc7eab55bb32b8d7a0520c8934869816520) passed [PHP 8.3/8.4 CI #40424902320](https://github.com/parmtech/84pad-CMS/actions/runs/40424902320). PHP 8.3 ran the existing suite: 83 passed, 1 skipped (344 assertions). No new manifest-scope tests were added, and no staging-package result is recorded. Browser and maintainer review remain outstanding.
 
 ## Resume procedure for any AI or chat
 
@@ -107,5 +107,6 @@
 2. Inspect the current public repository, branch and PR states, and relevant source before editing.
 3. Treat planned features, branch contents, draft PRs, and website claims as unverified until checked.
 4. Follow the user's latest scope and update this record with what was actually changed and verified.
+
 
 
