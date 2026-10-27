@@ -85,4 +85,3 @@ This source tree is an in-development Core preview, not a production release. Us
 84PAD Core is licensed under the GNU General Public License, version 3 or (at your option) any later version. See [LICENSE](LICENSE).
 
 
-
