@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI with no staging-package result recorded. Manifest-declared cPanel capabilities are in draft PR #30; implementation revision `f6ec3cc` passes PHP 8.3/8.4 CI, with no staging-package result recorded. PRs #27–#30 remain drafts, unreviewed and unmerged.
+**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI with no staging-package result recorded. Manifest-declared cPanel capabilities are in draft PR #30; implementation revision `f6ec3cc` passes PHP 8.3/8.4 CI, with no staging-package result recorded. C27 source-only restore is being prepared on `core/C27-source-restore`; it has not yet been published or checked by CI. PRs #27–#30 remain drafts, unreviewed and unmerged.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -87,10 +87,11 @@
 2. Complete focused verification and maintainer review of Pages PR #27 before merging it into C01.
 3. Review the homepage PR and arrange staging-package, focused, and browser verification before merging; obtain maintainer review.
 4. Complete focused verification and maintainer review of pages, site settings, and homepage behavior before merging their dependent changes.
-5. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
-6. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
-7. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
-8. Record actual changes, verification, blockers, and the next action here after each work slice.
+5. Review and publish the in-progress C27 source-only restore slice; inspect its GitHub CI results and update this record.
+6. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
+7. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
+8. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
+9. Record actual changes, verification, blockers, and the next action here after each work slice.
 
 ## Current implementation slice — manifest-declared cPanel capabilities
 
@@ -101,11 +102,20 @@
 - A migration stores the grant scope hash. Existing grants without that hash are ineffective until explicitly granted again.
 - Implementation revision [f6ec3cc](https://github.com/parmtech/84pad-CMS/commit/f6ec3cc7eab55bb32b8d7a0520c8934869816520) passed [PHP 8.3/8.4 CI #40424902320](https://github.com/parmtech/84pad-CMS/actions/runs/40424902320). PHP 8.3 ran the existing suite: 83 passed, 1 skipped (344 assertions). No new manifest-scope tests were added, and no staging-package result is recorded. Browser and maintainer review remain outstanding.
 
+## Current implementation slice — source-only Core restore
+
+- In progress on `core/C27-source-restore`, based on `core/C26-manifest-capabilities` (PR #30).
+- Extends the private Core source snapshot command with an operator-confirmed `--restore` operation requiring an independently recorded SHA-256 digest. It creates and verifies a pre-restore source snapshot, enters Laravel maintenance mode, stages and verifies the selected files, then replaces them. Failed replacement triggers automatic source recovery; if recovery is incomplete, the command leaves the application in maintenance mode and reports the recovery snapshot location and digest.
+- Restore is explicitly limited: it replaces only files listed in the selected source snapshot; later-added files remain. It does not restore databases, installed plugins, uploads, dependencies, hosting settings, or `.env`. This is not the signed Core updater or a full-site rollback.
+- Tightened snapshot path validation and updated `CORE-UPDATES.md`, `CORE-BLUEPRINT.md`, and the README to document the behavior and limitations. GPL-3.0-or-later was selected by the owner and is already recorded in `LICENSE` and Composer metadata on the base branch.
+- **Not yet published or verified by GitHub CI.** No tests were added or run locally. Review implementation and generated diff, then publish as a draft PR based on PR #30; record the resulting CI and review state here.
+
 ## Resume procedure for any AI or chat
 
 1. Read this file and [CORE-BLUEPRINT.md](CORE-BLUEPRINT.md).
 2. Inspect the current public repository, branch and PR states, and relevant source before editing.
 3. Treat planned features, branch contents, draft PRs, and website claims as unverified until checked.
 4. Follow the user's latest scope and update this record with what was actually changed and verified.
+
 
 
