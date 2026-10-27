@@ -23,8 +23,9 @@
 - Basic page drafting and publish/unpublish is on [`core/C23-basic-pages`](https://github.com/parmtech/84pad-CMS/tree/core/C23-basic-pages); CI passes, but it is not merged or manually reviewed yet.
 - Owner-managed site title, canonical URL, locale, and time zone are on [`core/C24-site-identity`](https://github.com/parmtech/84pad-CMS/tree/core/C24-site-identity); CI passes, but it is not merged or manually reviewed yet.
 - Selecting a published page as the public homepage is on [`core/C25-homepage`](https://github.com/parmtech/84pad-CMS/tree/core/C25-homepage); PHP 8.3/8.4 CI passes, but it is not merged or manually reviewed yet.
+- Manifest-declared cPanel capabilities and owner grants are on [`core/C26-manifest-capabilities`](https://github.com/parmtech/84pad-CMS/tree/core/C26-manifest-capabilities); PHP 8.3/8.4 CI passes, but no staging-package result or maintainer review is recorded.
 
-**Recent verified code CI:** Pages [PHP 8.3/8.4 #40422758337](https://github.com/parmtech/84pad-CMS/actions/runs/40422758337), [MySQL #40422758481](https://github.com/parmtech/84pad-CMS/actions/runs/40422758481), and [staging package #40422758272](https://github.com/parmtech/84pad-CMS/actions/runs/40422758272) succeeded. Site identity [PHP 8.3/8.4 #40423368199](https://github.com/parmtech/84pad-CMS/actions/runs/40423368199) and [staging package #40423368180](https://github.com/parmtech/84pad-CMS/actions/runs/40423368180) succeeded. Homepage implementation revision [90cf068](https://github.com/parmtech/84pad-CMS/commit/90cf068ecd98e9fe80af6f67b93cb65fbeee6453) passed [PHP 8.3/8.4 CI #40424115625](https://github.com/parmtech/84pad-CMS/actions/runs/40424115625). No staging-package result is recorded for that slice. These checks are not a production security audit or live shared-hosting acceptance.
+**Recent verified code CI:** Pages [PHP 8.3/8.4 #40422758337](https://github.com/parmtech/84pad-CMS/actions/runs/40422758337), [MySQL #40422758481](https://github.com/parmtech/84pad-CMS/actions/runs/40422758481), and [staging package #40422758272](https://github.com/parmtech/84pad-CMS/actions/runs/40422758272) succeeded. Site identity [PHP 8.3/8.4 #40423368199](https://github.com/parmtech/84pad-CMS/actions/runs/40423368199) and [staging package #40423368180](https://github.com/parmtech/84pad-CMS/actions/runs/40423368180) succeeded. Homepage revision [90cf068](https://github.com/parmtech/84pad-CMS/commit/90cf068ecd98e9fe80af6f67b93cb65fbeee6453) passed [PHP 8.3/8.4 CI #40424115625](https://github.com/parmtech/84pad-CMS/actions/runs/40424115625). Plugin manifest revision [f6ec3cc](https://github.com/parmtech/84pad-CMS/commit/f6ec3cc7eab55bb32b8d7a0520c8934869816520) passed [PHP 8.3/8.4 CI #40424902320](https://github.com/parmtech/84pad-CMS/actions/runs/40424902320). No staging-package result is recorded for either slice. These checks are not a production security audit or live shared-hosting acceptance.
 
 ## Important gaps before Core release
 
@@ -82,5 +83,6 @@ This source tree is an in-development Core preview, not a production release. Us
 ## License
 
 84PAD Core is licensed under the GNU General Public License, version 3 or (at your option) any later version. See [LICENSE](LICENSE).
+
 
 
