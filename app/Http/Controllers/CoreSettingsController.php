@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Support\Settings\CoreSettings;
 use App\Support\Settings\CpanelPermissions;
 use App\Support\Plugins\PluginCatalog;
+use App\Models\Page;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,7 @@ final class CoreSettingsController extends Controller
 
         return view('core-settings', [
             'site' => $settings->siteSettings(),
+            'publishedPages' => Page::query()->where('status', 'published')->orderBy('title')->get(['id', 'title', 'slug']),
             'cpanel' => $settings->cpanelStatus(),
             'switches' => $switches,
             'capabilities' => CpanelPermissions::CAPABILITIES,
@@ -48,7 +50,12 @@ final class CoreSettingsController extends Controller
             'canonical_url' => ['required', 'string', 'url', 'max:2048'],
             'locale' => ['required', 'string', 'regex:/^[a-z]{2,3}(?:-[A-Z]{2})?$/D'],
             'timezone' => ['required', 'string', 'timezone'],
+            'homepage_page_id' => ['nullable', 'integer', 'exists:pages,id'],
         ]);
+        $homepagePageId = isset($data['homepage_page_id']) ? (int) $data['homepage_page_id'] : null;
+        if ($homepagePageId !== null && ! Page::query()->whereKey($homepagePageId)->where('status', 'published')->exists()) {
+            return back()->withErrors(['homepage_page_id' => 'Choose a page that is already published.'])->withInput();
+        }
         $parts = parse_url($data['canonical_url']);
         $allowedSchemes = app()->environment(['local', 'testing']) ? ['https', 'http'] : ['https'];
         if (! is_array($parts)
@@ -65,7 +72,8 @@ final class CoreSettingsController extends Controller
             trim($data['site_title']),
             rtrim($data['canonical_url'], '/'),
             $data['locale'],
-            $data['timezone']
+            $data['timezone'],
+            $homepagePageId
         );
 
         return redirect()->route('settings.show')->with('notice', 'Site identity settings saved.');

@@ -12,7 +12,7 @@ use App\Http\Controllers\GuidedTourController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/p/{slug}', [PageController::class, 'show'])->name('page.show');
 // First-run installer is unavailable until a 32+ character secret is set in .env.
 Route::get('/setup', [FirstRunController::class, 'show'])->middleware('throttle:10,1')->name('setup.show');

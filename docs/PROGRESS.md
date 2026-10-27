@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. PRs #27 and #28 remain drafts, unreviewed and unmerged.
+**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI. No staging-package result is recorded for that slice. PRs #27–#29 remain drafts, unreviewed and unmerged.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -12,6 +12,8 @@
 **Current feature review:** [Core basic pages draft PR #27](https://github.com/parmtech/84pad-CMS/pull/27) targets `core/C01-laravel-foundation`; draft and not merged.
 
 **Current site settings work:** [Core site identity draft PR #28](https://github.com/parmtech/84pad-CMS/pull/28) targets `core/C23-basic-pages`; draft and not merged.
+
+**Current homepage work:** [Core homepage draft PR #29](https://github.com/parmtech/84pad-CMS/pull/29) targets `core/C24-site-identity`; draft and not merged.
 
 ## User's current direction
 
@@ -70,14 +72,23 @@
 - CI covered the existing suite, migration/bootstrap checks and PHP syntax; no site-settings-specific tests were added. Browser/accessibility review and maintainer review remain outstanding. PHP CLI is unavailable locally.
 - Next: review canonical URL validation, add focused verification when authorized, and complete browser acceptance.
 
+## Current implementation slice — published homepage selection
+
+- In progress on `core/C25-homepage`, based on the site identity branch.
+- Adds an owner setting to select a published page as the public `/` page. The configured homepage remains the ordinary page at `/p/{slug}` as well, with its canonical URL pointing to `/` when rendered at the root.
+- If no page is selected, or the selected page is unpublished, `/` returns to the default Core welcome page. The same fallback remains available before installation and if the database is unavailable. The setting is stored in Core settings and does not require a schema migration.
+- Implementation revision [90cf068](https://github.com/parmtech/84pad-CMS/commit/90cf068ecd98e9fe80af6f67b93cb65fbeee6453) passed [PHP 8.3/8.4 CI #40424115625](https://github.com/parmtech/84pad-CMS/actions/runs/40424115625). No homepage-specific tests were added, and no staging-package workflow result is recorded. Browser and accessibility acceptance remain outstanding.
+
 ## Pending work
 
 1. Verify and review owner-managed site identity on `core/C24-site-identity`.
 2. Complete focused verification and maintainer review of Pages PR #27 before merging it into C01.
-3. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
-4. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
-5. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
-6. Record actual changes, verification, blockers, and the next action here after each work slice.
+3. Review the homepage PR and arrange staging-package, focused, and browser verification before merging; obtain maintainer review.
+4. Complete focused verification and maintainer review of pages, site settings, and homepage behavior before merging their dependent changes.
+5. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
+6. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
+7. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
+8. Record actual changes, verification, blockers, and the next action here after each work slice.
 
 ## Resume procedure for any AI or chat
 
@@ -85,4 +96,5 @@
 2. Inspect the current public repository, branch and PR states, and relevant source before editing.
 3. Treat planned features, branch contents, draft PRs, and website claims as unverified until checked.
 4. Follow the user's latest scope and update this record with what was actually changed and verified.
+
 
