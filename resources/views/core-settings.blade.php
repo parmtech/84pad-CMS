@@ -14,7 +14,7 @@ h1{font-size:clamp(34px,5vw,58px);letter-spacing:-.05em;margin:32px 0 6px}h2{mar
 .panel{background:#141f39ed;border:1px solid var(--line);border-radius:22px;padding:clamp(18px,3vw,26px);min-width:0}
 .full{grid-column:1/-1}.state{font-size:12px;font-weight:750;padding:8px 12px;border-radius:18px;background:#123b40;color:#81f8e5;display:inline-block}
 label{font-size:12px;font-weight:700;display:block;margin:14px 0 7px}
-input[type=text],input[type=password]{width:100%;min-width:0;padding:12px;border:1px solid #47617e;border-radius:10px;background:#0a1529;color:#f0f5ff}
+input[type=text],input[type=password],input[type=url]{width:100%;min-width:0;padding:12px;border:1px solid #47617e;border-radius:10px;background:#0a1529;color:#f0f5ff}
 button,.button{font:inherit;cursor:pointer;border:1px solid #5f86a2;border-radius:10px;background:#253754;color:white;padding:10px 14px;font-size:12px;font-weight:850}
 button.primary{color:#061c2b;background:linear-gradient(90deg,#78ede0,#ab9afb);border:0}button:hover,.button:hover{filter:brightness(1.1)}
 .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -40,6 +40,16 @@ button.primary{color:#061c2b;background:linear-gradient(90deg,#78ede0,#ab9afb);b
 @if(session('notice'))<div class="notice" role="status">{{ session('notice') }}</div>@endif
 @if($errors->any())<div class="notice error" role="alert">{{ $errors->first() }}</div>@endif
 <div class="layout">
+<section class="panel full" id="settings-site">
+<h2>Site identity</h2>
+<p>Set the name and public address used by published pages. The canonical address is metadata only; Core does not fetch it or use it to make outbound requests.</p>
+<form method="post" action="{{ route('settings.site') }}">@csrf
+<label for="site-title">Site title</label><input id="site-title" name="site_title" type="text" maxlength="120" value="{{ old('site_title', $site['title']) }}" required>
+<label for="canonical-url">Canonical site URL</label><input id="canonical-url" name="canonical_url" type="url" maxlength="2048" value="{{ old('canonical_url', $site['canonical_url']) }}" required><p class="caption">HTTPS is required outside local development. Do not include credentials, query parameters, or a fragment.</p>
+<div class="scopes"><div><label for="site-locale">Site language</label><input id="site-locale" name="locale" type="text" maxlength="8" pattern="[a-z]{2,3}(-[A-Z]{2})?" value="{{ old('locale', $site['locale']) }}" required></div><div><label for="site-timezone">Site time zone</label><input id="site-timezone" name="timezone" type="text" maxlength="64" value="{{ old('timezone', $site['timezone']) }}" placeholder="Australia/Sydney" required></div></div>
+<button class="primary" type="submit" style="margin-top:16px">Save site identity</button>
+</form>
+</section>
 <section class="panel" id="settings-cpanel">
 <h2>cPanel connection</h2>
 <p>One central, encrypted API token. Kept private from views, plugin manifests and client-side JavaScript. Use a dedicated token with the least permissions your hosting provider supports.</p>
@@ -110,3 +120,4 @@ button.primary{color:#061c2b;background:linear-gradient(90deg,#78ede0,#ab9afb);b
 </main>
 <script defer src="{{ asset('js/84pad-tour.js') }}"></script>
 </body></html>
+

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Page;
+use App\Support\Settings\CoreSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
@@ -43,10 +44,10 @@ class PageController extends Controller
         return redirect()->route('pages.edit', $page)->with('notice', 'Page updated.');
     }
 
-    public function preview(Page $page): Response
+    public function preview(Page $page, CoreSettings $settings): Response
     {
         return response()
-            ->view('pages.public', ['page' => $page, 'previewMode' => true])
+            ->view('pages.public', ['page' => $page, 'previewMode' => true, 'siteSettings' => $settings->siteSettings()])
             ->header('X-Robots-Tag', 'noindex, nofollow')
             ->header('Cache-Control', 'private, no-store');
     }
@@ -61,11 +62,11 @@ class PageController extends Controller
         return redirect()->route('pages.edit', $page)->with('notice', $page->status === 'published' ? 'Page published.' : 'Page returned to draft.');
     }
 
-    public function show(string $slug): View
+    public function show(string $slug, CoreSettings $settings): View
     {
         $page = Page::query()->where('slug', $slug)->where('status', 'published')->firstOrFail();
 
-        return view('pages.public', ['page' => $page, 'previewMode' => false]);
+        return view('pages.public', ['page' => $page, 'previewMode' => false, 'siteSettings' => $settings->siteSettings()]);
     }
 
     private function validated(Request $request, ?Page $page = null): array

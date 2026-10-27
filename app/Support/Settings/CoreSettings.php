@@ -44,6 +44,26 @@ final class CoreSettings
         $this->put($key, $enabled ? '1' : '0');
     }
 
+    public function siteSettings(): array
+    {
+        return [
+            'title' => $this->read('site.title') ?? (string) config('app.name', '84PAD'),
+            'canonical_url' => rtrim($this->read('site.canonical_url') ?? (string) config('app.url', 'http://localhost'), '/'),
+            'locale' => $this->read('site.locale') ?? (string) config('app.locale', 'en'),
+            'timezone' => $this->read('site.timezone') ?? (string) config('app.timezone', 'UTC'),
+        ];
+    }
+
+    public function saveSiteSettings(string $title, string $canonicalUrl, string $locale, string $timezone): void
+    {
+        DB::transaction(function () use ($title, $canonicalUrl, $locale, $timezone): void {
+            $this->put('site.title', $title);
+            $this->put('site.canonical_url', rtrim($canonicalUrl, '/'));
+            $this->put('site.locale', $locale);
+            $this->put('site.timezone', $timezone);
+        });
+    }
+
     /** A status view never returns the encrypted or plaintext API token. */
     public function cpanelStatus(): array
     {
@@ -109,3 +129,4 @@ final class CoreSettings
         });
     }
 }
+

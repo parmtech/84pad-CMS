@@ -26,13 +26,14 @@ Route::middleware(['auth','auth.session'])->group(function (): void {
     Route::middleware('can:core.manage-content')->prefix('/dashboard/pages')->name('pages.')->group(function (): void {
         Route::get('/', [PageController::class, 'index'])->name('index');
         Route::get('/create', [PageController::class, 'create'])->name('create');
-        Route::post('/', [PageController::class, 'store'])->name('store');
+        Route::post('/', [PageController::class, 'store'])->middleware('throttle:20,1')->name('store');
         Route::get('/{page}/edit', [PageController::class, 'edit'])->name('edit');
         Route::get('/{page}/preview', [PageController::class, 'preview'])->name('preview');
-        Route::put('/{page}', [PageController::class, 'update'])->name('update');
-        Route::patch('/{page}/publish', [PageController::class, 'publish'])->name('publish');
+        Route::put('/{page}', [PageController::class, 'update'])->middleware('throttle:30,1')->name('update');
+        Route::patch('/{page}/publish', [PageController::class, 'publish'])->middleware('throttle:20,1')->name('publish');
     });
     Route::get('/dashboard/settings', [CoreSettingsController::class, 'show'])->middleware('can:core.manage-security')->name('settings.show');
+    Route::post('/dashboard/settings/site', [CoreSettingsController::class, 'saveSite'])->middleware(['can:core.manage-security','throttle:10,1'])->name('settings.site');
     Route::post('/dashboard/settings/cpanel', [CoreSettingsController::class, 'saveCpanel'])->middleware(['can:core.manage-security','throttle:5,1'])->name('settings.cpanel');
     Route::post('/dashboard/settings/switch', [CoreSettingsController::class, 'switch'])->middleware(['can:core.manage-security','throttle:20,1'])->name('settings.switch');
     Route::post('/dashboard/settings/permission', [CoreSettingsController::class, 'permission'])->middleware(['can:core.manage-security','throttle:20,1'])->name('settings.permission');

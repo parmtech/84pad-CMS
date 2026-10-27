@@ -19,7 +19,8 @@
 - JSON plugin manifest discovery, owner-controlled activation/deactivation, HookBus integration and first-party executable demo widget.
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
 - Core update Ed25519 verification/dry-run plus a **private code-only snapshot** command (`84pad:core-snapshot`) with corruption checks. It does not back up databases, uploads, plugin data, vendor or `.env`; automatic updater and full rollback remain unbuilt.
-- Basic page drafting and publish/unpublish is being developed on [`core/C23-basic-pages`](https://github.com/parmtech/84pad-CMS/tree/core/C23-basic-pages); it is not merged or verified yet.
+- Basic page drafting and publish/unpublish is on [`core/C23-basic-pages`](https://github.com/parmtech/84pad-CMS/tree/core/C23-basic-pages); CI passes, but it is not merged or manually reviewed yet.
+- Owner-managed site title, canonical URL, locale, and time zone are on [`core/C24-site-identity`](https://github.com/parmtech/84pad-CMS/tree/core/C24-site-identity); CI passes, but it is not merged or manually reviewed yet.
 
 **Latest verified staging code CI:** [PHP 8.3/8.4 #39692517418](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517418), [MySQL 8 #39692517395](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517395), and [staging ZIP artifact #39692517544](https://github.com/manbir6-ux/84pad-core/actions/runs/39692517544) all succeeded. This is not a production security audit or a live shared-hosting deployment.
 
@@ -41,6 +42,7 @@ The Core is intentionally small and contains only:
 - Control Studio: responsive futuristic dashboard with accessible navigation.
 - Plugin discovery, installation, activation, deactivation and safe uninstall lifecycle.
 - Basic pages: draft, edit, preview/public render, publish and unpublish.
+- Site identity settings: title, canonical URL, language and display time zone.
 - Versioned hook/event APIs and plugin compatibility metadata.
 - Database migration mechanism.
 - Core/plugin update integration points and emergency recovery foundation.
