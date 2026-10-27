@@ -28,9 +28,15 @@ final class CpanelPermissions
     public function grants(): array
     {
         $result = [];
+        $plugins = $this->catalog->all();
         foreach (DB::table('core_cpanel_grants')->get() as $row) {
-            if (isset(self::CAPABILITIES[$row->capability])) {
-                $result[$row->plugin_slug][$row->capability] = (bool) $row->enabled;
+            $plugin = $plugins[$row->plugin_slug] ?? null;
+            if (isset(self::CAPABILITIES[$row->capability]) && $plugin !== null
+                && $this->catalog->compatible($plugin)
+                && in_array($row->capability, $plugin['cpanel_capabilities'], true)) {
+                $result[$row->plugin_slug][$row->capability] = (bool) $row->enabled
+                    && is_string($row->manifest_hash)
+                    && hash_equals($row->manifest_hash, self::manifestScopeHash($plugin));
             }
         }
         return $result;
@@ -38,15 +44,18 @@ final class CpanelPermissions
 
     public function grant(string $slug, string $capability, bool $enabled): void
     {
+        $plugin = $this->catalog->all()[$slug] ?? null;
         if (! isset(self::CAPABILITIES[$capability])
             || ! preg_match('/^[a-z][a-z0-9-]{1,63}$/D', $slug)
-            || ! isset($this->catalog->all()[$slug])) {
+            || $plugin === null
+            || ! $this->catalog->compatible($plugin)
+            || ! in_array($capability, $plugin['cpanel_capabilities'], true)) {
             throw new InvalidArgumentException('Unknown plugin or cPanel capability.');
         }
 
         DB::table('core_cpanel_grants')->updateOrInsert(
             ['plugin_slug' => $slug, 'capability' => $capability],
-            ['enabled' => $enabled, 'updated_at' => now()]
+            ['enabled' => $enabled, 'manifest_hash' => self::manifestScopeHash($plugin), 'updated_at' => now()]
         );
     }
 
@@ -58,15 +67,29 @@ final class CpanelPermissions
             return false;
         }
         $installed = $this->catalog->all();
-        if (! isset($installed[$slug])) {
+        $plugin = $installed[$slug] ?? null;
+        if ($plugin === null || ! $this->catalog->compatible($plugin)
+            || ! in_array($capability, $plugin['cpanel_capabilities'], true)) {
             return false;
         }
         if (! DB::table('core_plugins')->where('slug', $slug)->where('enabled', true)->exists()) {
             return false;
         }
-        return DB::table('core_cpanel_grants')
+        $grant = DB::table('core_cpanel_grants')
             ->where('plugin_slug', $slug)
             ->where('capability', $capability)
-            ->where('enabled', true)->exists();
+            ->where('enabled', true)->first();
+
+        return $grant !== null && is_string($grant->manifest_hash)
+            && hash_equals($grant->manifest_hash, self::manifestScopeHash($plugin));
+    }
+
+    /** @param array{id:string,cpanel_capabilities:list<string>} $plugin */
+    public static function manifestScopeHash(array $plugin): string
+    {
+        $capabilities = $plugin['cpanel_capabilities'];
+        sort($capabilities, SORT_STRING);
+
+        return hash('sha256', $plugin['id']."\n".implode("\n", $capabilities));
     }
 }
