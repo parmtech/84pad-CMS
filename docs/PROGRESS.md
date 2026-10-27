@@ -109,4 +109,3 @@
 4. Follow the user's latest scope and update this record with what was actually changed and verified.
 
 
-
