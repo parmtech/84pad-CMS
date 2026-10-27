@@ -19,7 +19,7 @@
 - JSON plugin manifest discovery, owner-controlled activation/deactivation, HookBus integration and first-party executable demo widget.
 - Plugin manifests can declare cPanel gateway capabilities; Owners can grant only the declared set, and grants become invalid when the declaration changes.
 - Signed ZIP plugin upload checks publisher public keys, archive size/path/symlink restrictions and leaves new plugins disabled. PHP plugins execute with server privileges **only after Owner activates them** ([security contract](plugins/README.md)).
-- Core update Ed25519 verification/dry-run plus a **private code-only snapshot** command (`84pad:core-snapshot`) with corruption checks. It does not back up databases, uploads, plugin data, vendor or `.env`; automatic updater and full rollback remain unbuilt.
+- Core update Ed25519 inspection plus private code-only snapshots. `84pad:core-snapshot --restore=... --sha256=...` can restore only snapshot-listed source files after confirmation and a pre-restore snapshot. It does not restore databases, installed plugins, uploads, dependencies, hosting settings or `.env`; signed update application and full rollback remain unbuilt.
 - Basic page drafting and publish/unpublish is on [`core/C23-basic-pages`](https://github.com/parmtech/84pad-CMS/tree/core/C23-basic-pages); CI passes, but it is not merged or manually reviewed yet.
 - Owner-managed site title, canonical URL, locale, and time zone are on [`core/C24-site-identity`](https://github.com/parmtech/84pad-CMS/tree/core/C24-site-identity); CI passes, but it is not merged or manually reviewed yet.
 - Selecting a published page as the public homepage is on [`core/C25-homepage`](https://github.com/parmtech/84pad-CMS/tree/core/C25-homepage); PHP 8.3/8.4 CI passes, but it is not merged or manually reviewed yet.
@@ -31,7 +31,7 @@
 
 - **Live cPanel acceptance** of the staging no-SSH bootstrap, including PHP extensions, reverse-proxy HTTPS, web document root and permissions. A private token/file-manager step is still required.
 - Automatic signed plugin updates, dependency resolution, arbitrary plugin data transformations and automated database rollback. Signed-uploaded plugins can be quarantined and restored disabled; safe explicit plugin-owned **create-only schema** is available from CLI ([contract](docs/PLUGIN-SCHEMA.md)).
-- Full unattended signed Core updater, maintenance mode, integrated database backup and rollback, **reproducible committed composer.lock**, signed release packaging, and security audit.
+- Signed Core update application, integrated database backup and rollback, **reproducible committed composer.lock**, signed release packaging, and security audit.
 - Clean cPanel shared-host installation and browser/mobile visual acceptance testing.
 - Review/merge the [draft development PR](https://github.com/manbir6-ux/84pad-core/pull/17) only after all acceptance checks pass. **No production release is claimed.**
 
@@ -83,5 +83,6 @@ This source tree is an in-development Core preview, not a production release. Us
 ## License
 
 84PAD Core is licensed under the GNU General Public License, version 3 or (at your option) any later version. See [LICENSE](LICENSE).
+
 
 

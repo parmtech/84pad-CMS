@@ -122,6 +122,8 @@ Core should expose a safe update interface that can:
 - Apply updates in a staged operation and report success/failure.
 - Restore the previous version or provide a documented recovery procedure after a failed update.
 
+The current development preview has a verified source-only snapshot and an operator-confirmed restore for files recorded in that snapshot. Restore creates a pre-restore source snapshot and uses maintenance mode, but does not restore database state, installed plugins, uploads, dependencies, hosting settings, or `.env`; files added after the selected snapshot also remain. This is a limited source recovery aid, not the signed updater or a full rollback. Full site backup, signed release application, migration coordination, and integrated database recovery remain future work.
+
 The release server itself remains separate and is deferred. The public catalog URL currently returns a staging first-run page rather than a release catalog response; do not treat that endpoint as a working production update service.
 
 ## 5. Security and data rules
@@ -184,4 +186,5 @@ A feature is **planned** until code exists; **implemented, unverified** until th
 - [84pad-CMS README](https://github.com/parmtech/84pad-CMS/blob/main/README.md)
 - [84pad-CMS progress checkpoint](https://github.com/parmtech/84pad-CMS/blob/main/docs/PROGRESS.md)
 - [84pad-CMS development workflow](https://github.com/parmtech/84pad-CMS/blob/main/docs/WORKFLOW.md)
+
 
