@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. Homepage selection is in draft PR #29; implementation revision `90cf068` passes PHP 8.3/8.4 CI with no staging-package result recorded. Manifest-declared cPanel capabilities are in draft PR #30; implementation revision `f6ec3cc` passes PHP 8.3/8.4 CI, with no staging-package result recorded. C27 source-only restore is in draft PR #31; PHP 8.3/8.4 checks passed on revision `8bbadc3`, while focused restore review and maintainer review remain outstanding. PRs #27–#31 remain drafts, unreviewed and unmerged.
+**Current state:** Core implementation is active on review branches. PRs #27–#31 are open drafts with no submitted reviews and are not merged. Pages PR #27 passes PHP 8.3/8.4, MySQL, and staging-package workflows; site identity PR #28 passes PHP 8.3/8.4 and staging-package CI; homepage PR #29 passes PHP 8.3/8.4 with no staging-package result recorded; plugin capability PR #30 passes PHP 8.3/8.4 with no staging-package result recorded; source-only restore PR #31 passes PHP 8.3/8.4 on head `8495f11` ([run #40426343362](https://github.com/parmtech/84pad-CMS/actions/runs/40426343362)). Focused restore acceptance and maintainer review remain outstanding.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -27,6 +27,8 @@
 ## Verified repository state at this checkpoint
 
 - The public `main` branch still contains only the README and the two original project documents; no Core implementation has been merged into `main`.
+- On the latest check, `main` README still says the Laravel scaffold is not verified runnable; `LICENSE` and `composer.json` are absent there. The selected GPL-3.0-or-later notice, license file and Composer metadata exist on the open Core development branches, but are not yet part of `main`.
+- Open draft PRs #27–#31 were checked for submitted reviews; none had a review at this checkpoint. Their green CI checks do not constitute maintainer approval or a merge.
 - Several Core implementation branches and draft PRs already exist. Their names and contents are not proof that their features are complete. Review their current state before choosing a base or continuing work.
 - Draft PRs observed during this checkpoint:
   - **C01 Laravel Core Foundation** targets `main`.
