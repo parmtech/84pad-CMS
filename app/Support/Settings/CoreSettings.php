@@ -5,6 +5,8 @@ namespace App\Support\Settings;
 use App\Models\Page;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 final class CoreSettings
 {
@@ -58,12 +60,22 @@ final class CoreSettings
 
     public function homepagePage(): ?Page
     {
-        $id = $this->read('site.homepage_page_id');
-        if (! is_string($id) || ! ctype_digit($id)) {
+        try {
+            if (! Schema::hasTable('core_settings') || ! Schema::hasTable('pages')) {
+                return null;
+            }
+
+            $id = $this->read('site.homepage_page_id');
+            if (! is_string($id) || ! ctype_digit($id)) {
+                return null;
+            }
+
+            return Page::query()->whereKey((int) $id)->where('status', 'published')->first();
+        } catch (Throwable) {
+            // The public welcome page remains available before installation
+            // and while the site database is unavailable.
             return null;
         }
-
-        return Page::query()->whereKey((int) $id)->where('status', 'published')->first();
     }
 
     public function saveSiteSettings(
