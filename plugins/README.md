@@ -8,6 +8,8 @@
 
 Only capabilities from Core's fixed cPanel gateway allowlist are accepted. Missing declarations mean no cPanel capabilities. The Owner can grant only capabilities listed in the manifest. Core binds each grant to the canonical capability list: if that list changes, old grants stop working and must be reviewed and granted again. The dashboard shows declared requests and compatibility before activation. This grant model protects calls made through Core's cPanel gateway; arbitrary PHP plugins still run with the hosting account's full privileges.
 
+The root `plugin.json` manifest is limited to 16 KiB. A package with an absent, oversized, or invalid manifest is rejected before installation.
+
 ## Trusted local plugin lifecycle
 
 1. Owner installs a signed ZIP through Control Studio, or a trusted administrator stages a reviewed plugin directly under `plugins/`.
