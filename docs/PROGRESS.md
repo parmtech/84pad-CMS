@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass the PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity is the next slice on `core/C24-site-identity`; its CI is pending. PRs #27 and #28 remain drafts and unmerged.
+**Current state:** Core implementation is active. Pages on `core/C23-basic-pages` pass PHP 8.3/8.4, MySQL, and staging-package workflows. Owner-managed site identity on `core/C24-site-identity` passes PHP 8.3/8.4 and staging-package CI. PRs #27 and #28 remain drafts, unreviewed and unmerged.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -66,8 +66,9 @@
 - Added owner-only controls for site title, canonical URL, language and time zone using the existing private Core settings store.
 - Public published-page views use these settings for the page language, site title, canonical link, and displayed publication time. Private previews remain non-indexable and uncached.
 - Canonical URLs must be HTTPS outside local/testing environments and cannot contain credentials, query parameters, or fragments.
-- The changes are on `core/C24-site-identity` and proposed in PR #28. CI is pending; no local PHP syntax check was possible because PHP CLI is unavailable here.
-- Next: inspect CI, review canonical URL validation and settings behavior, and update this record with verified evidence.
+- The implementation revision [f05910a](https://github.com/parmtech/84pad-CMS/commit/f05910a8fa7d940734b7e3758eec30dd4f8ce578) passed [Core CI #40423368199](https://github.com/parmtech/84pad-CMS/actions/runs/40423368199) on PHP 8.3 and 8.4 and [Stage Distribution #40423368180](https://github.com/parmtech/84pad-CMS/actions/runs/40423368180).
+- CI covered the existing suite, migration/bootstrap checks and PHP syntax; no site-settings-specific tests were added. Browser/accessibility review and maintainer review remain outstanding. PHP CLI is unavailable locally.
+- Next: review canonical URL validation, add focused verification when authorized, and complete browser acceptance.
 
 ## Pending work
 
