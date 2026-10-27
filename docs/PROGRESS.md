@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-27 (Australia/Sydney)
 
-**Current state:** Core implementation is active on review branches. PRs #27–#31 are open drafts with no submitted reviews and are not merged. Pages PR #27 passes PHP 8.3/8.4, MySQL, and staging-package workflows; site identity PR #28 passes PHP 8.3/8.4 and staging-package CI; homepage PR #29 passes PHP 8.3/8.4 with no staging-package result recorded; plugin capability PR #30 passes PHP 8.3/8.4 with no staging-package result recorded; source-only restore PR #31 passes PHP 8.3/8.4 on head `8495f11` ([run #40426343362](https://github.com/parmtech/84pad-CMS/actions/runs/40426343362)). Focused restore acceptance and maintainer review remain outstanding.
+**Current state:** Core implementation is active on review branches. PRs #27–#31 are open drafts with no submitted reviews and are not merged. Pages PR #27 passes PHP 8.3/8.4, MySQL, and staging-package workflows; site identity PR #28 passes PHP 8.3/8.4 and staging-package CI; homepage PR #29 passes PHP 8.3/8.4 with no staging-package result recorded; plugin capability PR #30 passes PHP 8.3/8.4 with no staging-package result recorded; source-only restore PR #31 passes PHP 8.3/8.4 on head `8495f11` ([run #40426343362](https://github.com/parmtech/84pad-CMS/actions/runs/40426343362)). Focused restore acceptance and maintainer review remain outstanding. Separate installer-hardening PR #25 is open, but its latest PHP checks did not start because GitHub reported an account billing/spending-limit restriction.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -89,11 +89,13 @@
 2. Complete focused verification and maintainer review of Pages PR #27 before merging it into C01.
 3. Review the homepage PR and arrange staging-package, focused, and browser verification before merging; obtain maintainer review.
 4. Complete focused verification and maintainer review of pages, site settings, and homepage behavior before merging their dependent changes.
-5. Inspect GitHub CI and focused recovery review for C27 PR #31, then update this record.
-6. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
-7. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
-8. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
-9. Record actual changes, verification, blockers, and the next action here after each work slice.
+5. Obtain focused restore acceptance and maintainer review for C27 PR #31 before merging.
+6. Resolve the owner's pending first-release plugin schema policy decision (new tables only vs adding columns) before extending the schema manager.
+7. Re-run installer-hardening PR #25 checks only after GitHub Actions account billing/spending-limit restriction is resolved; the last checks were not started, so they do not indicate a source failure.
+8. Recheck the latest state of `main`, all Core branches, open PRs, and CI; do not rely on this snapshot after it becomes stale.
+9. Resolve Core-versus-bundled-product claims against the blueprint and update public copy only when the user asks.
+10. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
+11. Record actual changes, verification, blockers, and the next action here after each work slice.
 
 ## Current implementation slice — manifest-declared cPanel capabilities
 
@@ -111,6 +113,16 @@
 - Restore is explicitly limited: it replaces only files listed in the selected source snapshot; later-added files remain. It does not restore databases, installed plugins, uploads, dependencies, hosting settings, or `.env`. This is not the signed Core updater or a full-site rollback.
 - Tightened snapshot path validation and updated `CORE-UPDATES.md`, `CORE-BLUEPRINT.md`, and the README to document the behavior and limitations. GPL-3.0-or-later was selected by the owner and is already recorded in `LICENSE` and Composer metadata on the base branch.
 - PHP 8.3/8.4 CI passed on revision [8bbadc3](https://github.com/parmtech/84pad-CMS/commit/8bbadc3e282bedcece6d3c287820d83c7ae96d1d): [workflow run #40426164963](https://github.com/parmtech/84pad-CMS/actions/runs/40426164963). GitHub reported only Node 20 and Ubuntu runner deprecation notices. No tests were added or run locally. No staging-package result is recorded. Focused restore acceptance and maintainer review remain outstanding.
+
+## Separate Core installer-hardening work — C20
+
+- Draft PR #25 (`core/C20-preflight-hardening`) targets `core/C20-host-setup-wizard`; it is outside the C23–C27 feature stack and remains unmerged.
+- Latest recorded PHP 8.3/8.4 run [#40071555055](https://github.com/parmtech/84pad-CMS/actions/runs/40071555055) failed before either job started. GitHub's job annotations report an account payment/spending-limit restriction; this is an execution blocker, not evidence of a code failure. Retry after the account restriction is resolved and review actual job output.
+
+## Pending owner decision — plugin schema contract
+
+- The current implementation and [PLUGIN-SCHEMA.md](PLUGIN-SCHEMA.md) support explicit create-only table additions and reject changes to previously applied definitions. They do not alter columns, delete schema, or roll back MySQL DDL.
+- The owner was asked to choose whether first-release plugins may create only new tables or may also add columns to existing plugin tables. Do not extend this contract until the owner replies; this decision affects plugin upgrade compatibility and recovery behavior.
 
 ## Resume procedure for any AI or chat
 
