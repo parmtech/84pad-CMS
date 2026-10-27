@@ -13,6 +13,21 @@ use Illuminate\View\View;
 
 class PageController extends Controller
 {
+    public function home(CoreSettings $settings): View
+    {
+        $page = $settings->homepagePage();
+        if ($page === null) {
+            return view('welcome');
+        }
+
+        return view('pages.public', [
+            'page' => $page,
+            'previewMode' => false,
+            'isHomePage' => true,
+            'siteSettings' => $settings->siteSettings(),
+        ]);
+    }
+
     public function index(): View
     {
         return view('pages.index', ['pages' => Page::query()->latest('updated_at')->paginate(20)]);
