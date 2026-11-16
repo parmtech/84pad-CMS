@@ -36,7 +36,7 @@ jobs:
       - name: Run PagesTest and publish output as an annotation
         run: |
           set +e
-          vendor/bin/phpunit --filter PagesTest --no-ansi > /tmp/pages.txt 2>&1
+          vendor/bin/phpunit --filter PagesTest > /tmp/pages.txt 2>&1
           echo "exit=$?" >> /tmp/pages.txt
           body=$(head -c 8000 /tmp/pages.txt | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
           echo "::error title=PagesTest output::${body}"
