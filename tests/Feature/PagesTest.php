@@ -159,6 +159,10 @@ class PagesTest extends TestCase
         $this->get(route('pages.preview', $page))->assertRedirect('/login');
         $this->actingAs($viewer)->get(route('pages.preview', $page))->assertForbidden();
 
+        // The viewer request stored its password hash in the session; switching user
+        // inside one test would make auth.session log the admin out, so start clean.
+        $this->flushSession();
+
         $response = $this->actingAs($admin)->get(route('pages.preview', $page));
         $response->assertOk()
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
