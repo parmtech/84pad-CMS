@@ -1,0 +1,43 @@
+name: Debug PagesTest (temporary)
+
+on:
+  push:
+    branches:
+      - 'core/C28-pages-tests'
+
+permissions:
+  contents: read
+
+jobs:
+  debug:
+    name: PagesTest output
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: sodium, zip, mbstring, pdo_sqlite, sqlite3, dom, xml, curl, fileinfo, openssl, tokenizer
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Configure application for tests
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate --no-interaction
+
+      - name: Run PagesTest and publish output as an annotation
+        run: |
+          set +e
+          vendor/bin/phpunit --filter PagesTest --no-ansi > /tmp/pages.txt 2>&1
+          echo "exit=$?" >> /tmp/pages.txt
+          body=$(head -c 8000 /tmp/pages.txt | sed -e 's/%/%25/g' -e 's/\r/%0D/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=PagesTest output::${body}"
+          exit 0
