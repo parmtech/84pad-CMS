@@ -121,4 +121,21 @@ final class EncryptedSiteBackupTest extends TestCase
             $this->assertEmpty(glob($dir.'/*.padbackup') ?: []);
         }
     }
+
+    public function test_production_backup_requires_maintenance_mode(): void
+    {
+        if (file_exists(storage_path('framework/down')) || is_link(storage_path('framework/down'))) {
+            $this->markTestSkipped('Maintenance mode is already active.');
+        }
+        [$backup] = $this->fixture();
+        $previous = $this->app['env'];
+        $this->app['env'] = 'production';
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('requires maintenance mode');
+            $backup->create();
+        } finally {
+            $this->app['env'] = $previous;
+        }
+    }
 }
