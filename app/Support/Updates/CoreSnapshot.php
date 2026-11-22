@@ -4,6 +4,7 @@ namespace App\Support\Updates;
 
 use Illuminate\Support\Facades\File;
 use RuntimeException;
+use Throwable;
 use ZipArchive;
 
 final class CoreSnapshot
