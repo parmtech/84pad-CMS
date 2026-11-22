@@ -28,7 +28,12 @@ class InstallCore extends Command
         }
 
         try {
-            $this->call('migrate', ['--force' => true]);
+            // Console commands can fail with a non-zero status without throwing.
+            // Never prompt for credentials or create an Owner after failed DDL.
+            if ($this->call('migrate', ['--force' => true]) !== self::SUCCESS) {
+                $this->error('Migrations failed. Check server-side logs.');
+                return self::FAILURE;
+            }
         } catch (Throwable $e) {
             $this->error('Migrations failed. Check server-side logs.');
             return self::FAILURE;
