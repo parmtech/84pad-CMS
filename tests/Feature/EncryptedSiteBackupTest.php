@@ -4,11 +4,14 @@ namespace Tests\Feature;
 
 use App\Support\Backup\EncryptedSiteBackup;
 use Illuminate\Support\Facades\File;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
 
 final class EncryptedSiteBackupTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @var array<int, string> */
     private array $temporaryDirectories = [];
     private ?string $previousKey = null;
