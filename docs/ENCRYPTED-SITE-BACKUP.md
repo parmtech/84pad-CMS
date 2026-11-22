@@ -16,7 +16,7 @@ The command exports installed Core source files, Composer dependencies, plugin c
 
 1. Generate 32 unpredictable bytes locally with PHP (example command: php -r 'echo base64_encode(random_bytes(32)), PHP_EOL;'). Keep the base64 value off-host in a secure password vault. Losing it makes exports unreadable. Never share the key in Git, logs, command arguments or chat.
 2. Add PAD_BACKUP_KEY to the *private untracked* .env. Clear an old cached configuration with php artisan config:clear if necessary.
-3. For a consistent backup, first enter maintenance mode (php artisan down) and pause external writers or scheduled processes.
+3. **Required in production:** enter maintenance mode (php artisan down) and pause external writers or scheduled processes before export. Production exports fail closed without the maintenance-mode marker.
 4. Run php artisan 84pad:site-backup on the installed host. The CLI creates a private encrypted .padbackup file in storage/app/private/site-backups, verifies it and prints its SHA-256 and path.
 5. Run php artisan 84pad:site-backup --verify=/absolute/path/to/file.padbackup for read-only authentication. Copy the encrypted export off-host using the owner's secure method. Keep an independent SHA-256 record and the decryption key separately.
 6. Resume normal operation only after operator review (php artisan up).
