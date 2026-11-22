@@ -27,6 +27,20 @@ class InstallCore extends Command
             return self::FAILURE;
         }
 
+        // Refuse installation before migrations touch a previously claimed Core.
+        // Keep the post-migration check below as a second line of defence.
+        try {
+            if ((Schema::hasTable('core_installations')
+                    && DB::table('core_installations')->exists())
+                || (Schema::hasTable('users') && User::query()->exists())) {
+                $this->warn('Already installed or owner exists; no changes made.');
+                return self::FAILURE;
+            }
+        } catch (Throwable $e) {
+            $this->error('Could not verify existing installation. No migrations were attempted.');
+            return self::FAILURE;
+        }
+
         try {
             // Console commands can fail with a non-zero status without throwing.
             // Never prompt for credentials or create an Owner after failed DDL.
