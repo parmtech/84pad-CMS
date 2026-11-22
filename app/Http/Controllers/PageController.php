@@ -125,9 +125,10 @@ class PageController extends Controller
             'body' => ['nullable', 'string', 'max:1000000'],
         ]);
 
+        // Editing a page without an explicit slug must not silently break its public URL.
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::lower($data['slug'])
-            : Str::slug($data['title']);
+            : ($page?->slug ?? Str::slug($data['title']));
         $data['body'] ??= '';
 
         validator($data, ['slug' => ['required', Rule::unique('pages', 'slug')->ignore($page?->id)]])->validate();
