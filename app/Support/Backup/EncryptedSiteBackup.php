@@ -64,6 +64,22 @@ final class EncryptedSiteBackup
             throw new RuntimeException('Backup destination is not private.');
         }
 
+        // A custom destination in an exported directory would cause the backup to
+        // read its own growing .partial file, risking unbounded disk consumption.
+        // The default private site-backups folder is deliberately excluded.
+        if ($actual === $root) {
+            throw new RuntimeException('Backup destination overlaps exported site files.');
+        }
+        if (str_starts_with($actual, $root.DIRECTORY_SEPARATOR)) {
+            $relative = str_replace(DIRECTORY_SEPARATOR, '/', substr($actual, strlen($root) + 1));
+            foreach (self::DIRECTORIES as $included) {
+                if (($relative === $included || str_starts_with($relative, $included.'/'))
+                    && ! $this->excluded($relative)) {
+                    throw new RuntimeException('Backup destination overlaps exported site files.');
+                }
+            }
+        }
+
         $path = $dir.'/site-'.gmdate('YmdHis').'-'.bin2hex(random_bytes(8)).'.padbackup';
         $partial = $path.'.partial';
         $fp = @fopen($partial, 'xb');
