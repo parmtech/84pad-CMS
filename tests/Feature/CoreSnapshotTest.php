@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\Updates\CoreSnapshot;
+use App\Support\Updates\CoreSnapshotRestoreException;
 use Tests\TestCase;
 use ZipArchive;
 
@@ -79,5 +80,47 @@ final class CoreSnapshotTest extends TestCase
         $this->assertCount(1, $created);
         $this->snapshots[] = $created[0];
         $this->assertTrue(app(CoreSnapshot::class)->verify($created[0]));
+    }
+
+    public function test_restore_reports_failed_recovery_when_private_staging_is_unsafe(): void
+    {
+        if (! class_exists(ZipArchive::class) || ! function_exists('symlink')) {
+            $this->markTestSkipped('ZIP and symlink support are required');
+        }
+
+        $staging = storage_path('app/private/core-restore-staging');
+        if (file_exists($staging) || is_link($staging)) {
+            $this->markTestSkipped('The restore staging directory must be unused');
+        }
+
+        $snapshot = app(CoreSnapshot::class);
+        $result = $snapshot->create();
+        $root = storage_path('app/private/core-snapshots');
+        $before = glob($root.'/core-*.zip') ?: [];
+        $outside = storage_path('app/private/restore-staging-probe-'.bin2hex(random_bytes(6)));
+        $this->assertTrue(mkdir($outside, 0700));
+
+        try {
+            if (! @symlink($outside, $staging)) {
+                $this->markTestSkipped('Cannot create the symlink safety fixture');
+            }
+
+            try {
+                $snapshot->restore($result['path'], $result['sha256']);
+                $this->fail('Unsafe staging must prevent restore.');
+            } catch (CoreSnapshotRestoreException $e) {
+                $this->assertFalse($e->automaticRecoveryCompleted);
+                $this->assertStringContainsString('automatic recovery was incomplete', $e->getMessage());
+            }
+        } finally {
+            if (is_link($staging)) {
+                @unlink($staging);
+            }
+            @rmdir($outside);
+            foreach (array_diff(glob($root.'/core-*.zip') ?: [], $before) as $archive) {
+                @unlink($archive);
+            }
+            @unlink($result['path']);
+        }
     }
 }
