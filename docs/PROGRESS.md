@@ -1,3 +1,10 @@
+## 2026-11-22 - C29 backup destination safety and read-only recovery inventory
+
+- Rejected custom backup output folders that overlap directories selected for export (plugins, vendor, public/media etc.), preventing the encrypted exporter from reading its own growing temporary file. Preserved support for the deliberately excluded private site-backups folder. Added positive and negative regression tests.
+- Added authenticated, read-only backup inspection (artisan `84pad:site-backup --inspect=/absolute/path/file.padbackup`) reporting file/byte and table/row counts, UTC creation time and source database driver, with a wrong-key rejection test. Inspection does not extract files, execute SQL or modify the live site.
+- **Integration boundary:** source-only Core snapshots and encrypted site exports are not a full-site restore. Restoring database views/triggers/indexes and media on a disposable cPanel host, signing updates and end-to-end acceptance remain release blockers. Neither `main` nor production hosting is modified.
+- Latest PHP/MySQL CI results must be checked on the *final C29 commit*, not inferred from an earlier green run.
+
 ## 2026-11-22 - C29 encrypted site export foundation and reproducible dependencies
 
 - **Development-only encrypted export:** added a CLI site backup command and streaming PHP Sodium authenticated encryption for selected Core source, dependencies, plugins, site uploads/private application files and a logical MySQL/SQLite base-table export, including private .env. Added read-only authenticated verification, SHA-256 reporting, fail-closed key validation, corruption/key tampering coverage, source symlink refusal and production maintenance-mode safeguard. See ENCRYPTED-SITE-BACKUP.md. It does not extract or restore anything.
