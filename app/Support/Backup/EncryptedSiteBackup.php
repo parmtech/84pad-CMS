@@ -36,6 +36,12 @@ final class EncryptedSiteBackup
     public function create(): array
     {
         $key = $this->key();
+        if (app()->environment('production')) {
+            $maintenance = storage_path('framework/down');
+            if (! is_file($maintenance) || is_link($maintenance)) {
+                throw new RuntimeException('Production site backup requires maintenance mode and paused external writers.');
+            }
+        }
         $root = realpath($this->sourceRoot ?? base_path());
         if ($root === false) {
             throw new RuntimeException('Application root is missing.');
