@@ -138,4 +138,18 @@ final class EncryptedSiteBackupTest extends TestCase
             $this->app['env'] = $previous;
         }
     }
+
+    public function test_malformed_encryption_key_never_creates_backup_file(): void
+    {
+        [$backup, , $dir] = $this->fixture();
+        config()->set('84pad.backup_key', 'not-base64-!');
+
+        try {
+            $backup->create();
+            $this->fail('Malformed encryption keys must fail closed.');
+        } catch (RuntimeException $e) {
+            $this->assertStringContainsString('PAD_BACKUP_KEY', $e->getMessage());
+        }
+        $this->assertFalse(is_dir($dir));
+    }
 }
