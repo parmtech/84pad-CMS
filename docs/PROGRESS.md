@@ -1,6 +1,6 @@
 # 84Pad CMS — Project Resume Record
 
-**Last updated:** 2026-10-27 (Australia/Sydney)
+**Last updated:** 2026-11-22 (Australia/Sydney)
 
 **Current state:** Core implementation is active on review branches. PRs #27–#31 are open drafts with no submitted reviews and are not merged. Pages PR #27 passes PHP 8.3/8.4, MySQL, and staging-package workflows; site identity PR #28 passes PHP 8.3/8.4 and staging-package CI; homepage PR #29 passes PHP 8.3/8.4 with no staging-package result recorded; plugin capability PR #30 passes PHP 8.3/8.4 with no staging-package result recorded; source-only restore PR #31's code passed PHP 8.3/8.4 on revision `8495f11` ([run #40426343362](https://github.com/parmtech/84pad-CMS/actions/runs/40426343362)), and its latest progress-record head `8db5076` also passed PHP 8.3/8.4 ([run #40427370093](https://github.com/parmtech/84pad-CMS/actions/runs/40427370093)). Focused restore acceptance and maintainer review remain outstanding. Separate installer-hardening PR #25 is open, but its latest PHP checks did not start because GitHub reported an account billing/spending-limit restriction.
 
@@ -16,6 +16,18 @@
 **Current homepage work:** [Core homepage draft PR #29](https://github.com/parmtech/84pad-CMS/pull/29) targets `core/C24-site-identity`; draft and not merged.
 
 **Current plugin contract work:** [Draft PR #30](https://github.com/parmtech/84pad-CMS/pull/30) targets `core/C25-homepage`. It adds declared cPanel gateway capabilities, grant invalidation when declarations change, a manifest size limit, and owner-visible capability requests. PHP 8.3/8.4 CI passes on implementation revision `f6ec3cc`; no staging-package result is recorded.
+
+## 2026-11-22 — Core integration and Basic Pages safety
+
+- Owner confirmed **Core first**, with Basic Pages (including publishing and homepage selection) bundled in Core; advanced visual Builder and hosting/SEO/AI plugins remain separate.
+- Current development integration branch: `core/C29-core-integration`, based on `core/C28-pages-tests` at `f13bb37`. This is **development code only**, not a production deployment.
+- Added focused homepage/site identity tests for owner permissions, published-page selection, draft rejection, unpublish/clear fallback, canonical URLs, and safe public rendering.
+- Added recoverable Basic Pages deletion: Laravel soft-delete migration, authorized trash and restore routes, simple Control Studio UI, homepage setting cleanup, and tests verifying private draft restoration. Trashed slugs remain reserved. This feature has not been manually browser-tested.
+- Latest previously verified base: `core/C28-pages-tests` PHP 8.3/8.4 Core CI and MySQL checks passed on 2026-11-16. **New C29 tests must pass on the final C29 commit** before claiming that this work is verified.
+- Keep original stacked reviews in order: C01 (#17) -> Pages (#27) -> site identity (#28) -> homepage (#29) -> plugin capabilities (#30) -> source restore (#31) -> focused page tests (#32) -> this integration. Installer-hardening (#25) needs a separate compatibility review, not a blind merge.
+- No changes were made to the live 84pad.com hosting or any production database as part of this slice. `main` remains unchanged.
+- Production acceptance remains blocked on a committed/audited `composer.lock`, disposable host installation and browser QA, independent security review, full-site backup and restore proof, signed update application, plugin migration policy, and a reviewed release candidate. See `docs/RELEASE-ACCEPTANCE.md`.
+- Do **not** automatically merge stacked draft PRs just because CI passes. Review their combined diff and release gates, then merge in dependency order.
 
 ## User's current direction
 
