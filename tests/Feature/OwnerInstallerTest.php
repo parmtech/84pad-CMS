@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Console\Commands\InstallCore;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
+use Mockery;
 use Tests\TestCase;
 
 class OwnerInstallerTest extends TestCase
@@ -34,6 +36,24 @@ class OwnerInstallerTest extends TestCase
 
         $this->assertDatabaseCount('users', 1);
         $this->assertDatabaseCount('core_installations', 1);
+    }
+
+    public function test_failed_migration_exit_status_does_not_start_owner_creation(): void
+    {
+        // A migration may return failure without throwing a PHP exception.
+        // It must stop before any Owner prompts or installation marker writes.
+        Config::set('app.key', 'base64:'.base64_encode(str_repeat('K', 32)));
+        $command = Mockery::mock(InstallCore::class)->makePartial();
+        $command->shouldReceive('call')->once()
+            ->with('84pad:doctor')->andReturn(0);
+        $command->shouldReceive('call')->once()
+            ->with('migrate', ['--force' => true])->andReturn(1);
+        $command->shouldReceive('error')->once()
+            ->with('Migrations failed. Check server-side logs.');
+
+        $this->assertSame(1, $command->handle());
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('core_installations', 0);
     }
 
     public function test_short_password_does_not_create_an_owner_or_installation_marker(): void
