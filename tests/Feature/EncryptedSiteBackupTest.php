@@ -70,6 +70,39 @@ final class EncryptedSiteBackupTest extends TestCase
         $this->artisan('84pad:site-backup', ['--verify' => $result['path']])->assertExitCode(0);
     }
 
+    public function test_read_only_recovery_inspection_reports_authenticated_scope(): void
+    {
+        [$backup] = $this->fixture();
+        $result = $backup->create();
+
+        $summary = $backup->inspect($result['path']);
+
+        $this->assertNotNull($summary);
+        $this->assertSame($result['files'], $summary['files']);
+        $this->assertSame($result['bytes'], $summary['bytes']);
+        $this->assertSame($result['tables'], $summary['tables']);
+        $this->assertSame($result['rows'], $summary['rows']);
+        $this->assertSame(\Illuminate\Support\Facades\DB::connection()->getDriverName(), $summary['database_driver']);
+        $this->assertNotEmpty($summary['created_utc']);
+
+        $this->artisan('84pad:site-backup', ['--inspect' => $result['path']])->assertExitCode(0);
+        $this->artisan('84pad:site-backup', [
+            '--verify' => $result['path'],
+            '--inspect' => $result['path'],
+        ])->assertExitCode(1);
+    }
+
+    public function test_recovery_inspection_rejects_wrong_keys(): void
+    {
+        [$backup] = $this->fixture();
+        $result = $backup->create();
+
+        config()->set('84pad.backup_key', base64_encode(random_bytes(32)));
+
+        $this->assertNull($backup->inspect($result['path']));
+        $this->artisan('84pad:site-backup', ['--inspect' => $result['path']])->assertExitCode(1);
+    }
+
     public function test_tampering_and_wrong_encryption_key_are_rejected(): void
     {
         [$backup] = $this->fixture();
