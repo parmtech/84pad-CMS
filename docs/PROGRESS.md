@@ -17,6 +17,14 @@
 
 **Current plugin contract work:** [Draft PR #30](https://github.com/parmtech/84pad-CMS/pull/30) targets `core/C25-homepage`. It adds declared cPanel gateway capabilities, grant invalidation when declarations change, a manifest size limit, and owner-visible capability requests. PHP 8.3/8.4 CI passes on implementation revision `f6ec3cc`; no staging-package result is recorded.
 
+## 2026-11-22 — Installer failure guard and packaging workflow
+
+- User clarified: **retain the existing code; do not reset or rewrite the Core from scratch**. Continue completing and repairing Core features in the existing development flow. Do not produce intermediate release archives; comprehensive integrated acceptance and a single final distribution package come at the end. Incremental tests and review remain required for code safety.
+- **C29 code fix** [5cc553b](https://github.com/parmtech/84pad-CMS/commit/5cc553b02b96bd29f373b414f2d5963f6c7bacae): the CLI `84pad:install` command now treats a nonzero `migrate` exit code as a failed installation, even if no exception is thrown, before asking for Owner credentials or creating an installation marker.
+- **Regression test** [e98fb14](https://github.com/parmtech/84pad-CMS/commit/e98fb1448edba8e2a5b3a3c6585e4dd8f0020673): simulate migration returning failure and verify no owner/installation marker is created. Its [Core CI (PHP 8.3 and 8.4)](https://github.com/parmtech/84pad-CMS/actions/runs/45019847237) and [MySQL Compatibility](https://github.com/parmtech/84pad-CMS/actions/runs/45019847307) completed successfully. This is automated coverage, not live cPanel acceptance.
+- **No intermediate staging bundles on pushes:** [5f0c01c](https://github.com/parmtech/84pad-CMS/commit/5f0c01c6d839bb1c4f968bc43f31305cefcb1843) changed `Stage Distribution` to manual `workflow_dispatch`; existing earlier CI artifacts are not a final release.
+- **Next release blockers:** audit browser/CLI installer end-to-end on a disposable cPanel host; keep security checks and Core API/plugin boundaries tight; implement and verify full-site recovery plus signed Core update application, reproducible dependency lock and final release acceptance. Plugins remain separate. No change to `main`, production hosting or customer data.
+
 ## 2026-11-22 — Core integration and Basic Pages safety
 
 - Owner confirmed **Core first**, with Basic Pages (including publishing and homepage selection) bundled in Core; advanced visual Builder and hosting/SEO/AI plugins remain separate.
