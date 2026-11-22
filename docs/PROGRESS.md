@@ -1,16 +1,16 @@
 ## 2026-11-22 - C29 encrypted site export foundation and reproducible dependencies
 
 - **Development-only encrypted export:** added a CLI site backup command and streaming PHP Sodium authenticated encryption for selected Core source, dependencies, plugins, site uploads/private application files and a logical MySQL/SQLite base-table export, including private .env. Added read-only authenticated verification, SHA-256 reporting, fail-closed key validation, corruption/key tampering coverage, source symlink refusal and production maintenance-mode safeguard. See ENCRYPTED-SITE-BACKUP.md. It does not extract or restore anything.
-- **CI evidence:** initial export suite and older installer/source restore tests passed Core CI PHP 8.3/8.4 run #45023165532 and MySQL Compatibility run #45023165515 on commit 095b78c. The later maintenance-mode guard must pass its own latest CI before being called verified.
-- **Dependency consistency:** generated composer.lock on the C29 development branch using a one-time GitHub-hosted PHP/Composer job with successful Composer audit (run #45023384233, commit d011720). The temporary write-enabled job workflow was then deleted. Core and MySQL CI paths now include dependency changes. Production release still requires final review and acceptance on the actual proposed release revision.
+- **CI evidence:** after adding the production maintenance guard and malformed-key test, [PHP 8.3/8.4 Core CI run #45023862758](https://github.com/parmtech/84pad-CMS/actions/runs/45023862758) succeeded on final code revision 463aa0f. [MySQL Compatibility run #45023851411](https://github.com/parmtech/84pad-CMS/actions/runs/45023851411) succeeded on source revision 31edb62, before the subsequent deletion of the temporary lock workflow (no application code changed afterward). This is automated coverage, **not** a live restore or cPanel acceptance.
+- **Dependency consistency:** first lock attempt used PHP 8.4 and failed CI on PHP 8.3 because of Symfony v8 requirements. Added Composer platform override PHP 8.3.0, regenerated a compatible lock (Symfony 7.4) and passed [Composer audit/job #45023749203](https://github.com/parmtech/84pad-CMS/actions/runs/45023749203). Locked graph was committed at 88981cb, validated in the Core/MySQL runs above, and its temporary write-enabled workflow was removed. Production acceptance and signed distribution are still separate gates.
 - **Release packaging rule:** No interim ZIP distribution, no merge to main, no live production, customer data or hosting mutations. Preserve review chain and create one final versioned distribution only after the integrated acceptance gate.
 - **Outstanding:** This is **not full-site backup/recovery acceptance**. Export omits database views/triggers/routines and does not restore SQL/files; safe off-host encrypted restore rehearsal, shared-host testing, signed updater/rollback, browser/security review and release approval are still open.
 
-# 84Pad CMS â Project Resume Record
+# 84Pad CMS Ã¢ÂÂ Project Resume Record
 
 **Last updated:** 2026-11-22 (Australia/Sydney)
 
-**Current state:** Core implementation is active on review branches. PRs #27â#31 are open drafts with no submitted reviews and are not merged. Pages PR #27 passes PHP 8.3/8.4, MySQL, and staging-package workflows; site identity PR #28 passes PHP 8.3/8.4 and staging-package CI; homepage PR #29 passes PHP 8.3/8.4 with no staging-package result recorded; plugin capability PR #30 passes PHP 8.3/8.4 with no staging-package result recorded; source-only restore PR #31's code passed PHP 8.3/8.4 on revision `8495f11` ([run #40426343362](https://github.com/parmtech/84pad-CMS/actions/runs/40426343362)), and its latest progress-record head `8db5076` also passed PHP 8.3/8.4 ([run #40427370093](https://github.com/parmtech/84pad-CMS/actions/runs/40427370093)). Focused restore acceptance and maintainer review remain outstanding. Separate installer-hardening PR #25 is open, but its latest PHP checks did not start because GitHub reported an account billing/spending-limit restriction.
+**Current state:** Core implementation is active on review branches. PRs #27Ã¢ÂÂ#31 are open drafts with no submitted reviews and are not merged. Pages PR #27 passes PHP 8.3/8.4, MySQL, and staging-package workflows; site identity PR #28 passes PHP 8.3/8.4 and staging-package CI; homepage PR #29 passes PHP 8.3/8.4 with no staging-package result recorded; plugin capability PR #30 passes PHP 8.3/8.4 with no staging-package result recorded; source-only restore PR #31's code passed PHP 8.3/8.4 on revision `8495f11` ([run #40426343362](https://github.com/parmtech/84pad-CMS/actions/runs/40426343362)), and its latest progress-record head `8db5076` also passed PHP 8.3/8.4 ([run #40427370093](https://github.com/parmtech/84pad-CMS/actions/runs/40427370093)). Focused restore acceptance and maintainer review remain outstanding. Separate installer-hardening PR #25 is open, but its latest PHP checks did not start because GitHub reported an account billing/spending-limit restriction.
 
 **Target repository:** [parmtech/84pad-CMS](https://github.com/parmtech/84pad-CMS) (public)
 
@@ -25,7 +25,7 @@
 
 **Current plugin contract work:** [Draft PR #30](https://github.com/parmtech/84pad-CMS/pull/30) targets `core/C25-homepage`. It adds declared cPanel gateway capabilities, grant invalidation when declarations change, a manifest size limit, and owner-visible capability requests. PHP 8.3/8.4 CI passes on implementation revision `f6ec3cc`; no staging-package result is recorded.
 
-## 2026-11-22 â Installer failure guard and packaging workflow
+## 2026-11-22 Ã¢ÂÂ Installer failure guard and packaging workflow
 
 - User clarified: **retain the existing code; do not reset or rewrite the Core from scratch**. Continue completing and repairing Core features in the existing development flow. Do not produce intermediate release archives; comprehensive integrated acceptance and a single final distribution package come at the end. Incremental tests and review remain required for code safety.
 - **C29 code fix** [5cc553b](https://github.com/parmtech/84pad-CMS/commit/5cc553b02b96bd29f373b414f2d5963f6c7bacae): the CLI `84pad:install` command now treats a nonzero `migrate` exit code as a failed installation, even if no exception is thrown, before asking for Owner credentials or creating an installation marker.
@@ -33,7 +33,7 @@
 - **No intermediate staging bundles on pushes:** [5f0c01c](https://github.com/parmtech/84pad-CMS/commit/5f0c01c6d839bb1c4f968bc43f31305cefcb1843) changed `Stage Distribution` to manual `workflow_dispatch`; existing earlier CI artifacts are not a final release.
 - **Next release blockers:** audit browser/CLI installer end-to-end on a disposable cPanel host; keep security checks and Core API/plugin boundaries tight; implement and verify full-site recovery plus signed Core update application, reproducible dependency lock and final release acceptance. Plugins remain separate. No change to `main`, production hosting or customer data.
 
-## 2026-11-22 â Core integration and Basic Pages safety
+## 2026-11-22 Ã¢ÂÂ Core integration and Basic Pages safety
 
 - Owner confirmed **Core first**, with Basic Pages (including publishing and homepage selection) bundled in Core; advanced visual Builder and hosting/SEO/AI plugins remain separate.
 - Current development integration branch: `core/C29-core-integration`, based on `core/C28-pages-tests` at `f13bb37`. This is **development code only**, not a production deployment.
@@ -56,7 +56,7 @@
 
 - The public `main` branch still contains only the README and the two original project documents; no Core implementation has been merged into `main`.
 - On the latest check, `main` README still says the Laravel scaffold is not verified runnable; `LICENSE` and `composer.json` are absent there. The selected GPL-3.0-or-later notice, license file and Composer metadata exist on the open Core development branches, but are not yet part of `main`.
-- Open draft PRs #27â#31 were checked for submitted reviews; none had a review at this checkpoint. Their green CI checks do not constitute maintainer approval or a merge.
+- Open draft PRs #27Ã¢ÂÂ#31 were checked for submitted reviews; none had a review at this checkpoint. Their green CI checks do not constitute maintainer approval or a merge.
 - C01 foundation PR #17 is also still open. Its current head `4ffa18f` has latest PHP 8.3/8.4 checks in [run #40061896708](https://github.com/parmtech/84pad-CMS/actions/runs/40061896708) and the MySQL/staging checks in [runs #39692925982](https://github.com/parmtech/84pad-CMS/actions/runs/39692925982) and [#39692925987](https://github.com/parmtech/84pad-CMS/actions/runs/39692925987) marked failed because GitHub did not start the jobs under an account payment/spending-limit restriction. Earlier green C01 runs in the acceptance document are on older revisions; do not treat them as verification of this current head. PR #31's later checks did start and pass, but no new C01 checks have been run.
 - Several Core implementation branches and draft PRs already exist. Their names and contents are not proof that their features are complete. Review their current state before choosing a base or continuing work.
 - Draft PRs observed during this checkpoint:
@@ -84,7 +84,7 @@
 - At the blueprint-only checkpoint, no source code, release package, live website, or hosting account was changed.
 - No tests were added or run; this task only wrote documentation.
 
-## Current implementation slice â basic pages
+## Current implementation slice Ã¢ÂÂ basic pages
 
 - Started from the existing `core/C01-laravel-foundation` draft after checking its current state; did not create a second competing Core foundation.
 - Added a Core pages table, page model, owner/admin-only Control Studio routes, draft create/edit, private draft preview, publish/unpublish, and a public page route at `/p/{slug}`.
@@ -96,7 +96,7 @@
 - CI ran the existing test suite and syntax/bootstrap/migration checks; no page-specific tests were added, so the new page routes and publishing flow still need focused verification. Browser/accessibility QA and maintainer review are also outstanding. PHP CLI is unavailable locally.
 - Outstanding for this slice: focused page-feature verification, maintainer review, and later browser/shared-host acceptance.
 
-## Current implementation slice â site identity
+## Current implementation slice Ã¢ÂÂ site identity
 
 - Added owner-only controls for site title, canonical URL, language and time zone using the existing private Core settings store.
 - Public published-page views use these settings for the page language, site title, canonical link, and displayed publication time. Private previews remain non-indexable and uncached.
@@ -105,7 +105,7 @@
 - CI covered the existing suite, migration/bootstrap checks and PHP syntax; no site-settings-specific tests were added. Browser/accessibility review and maintainer review remain outstanding. PHP CLI is unavailable locally.
 - Next: review canonical URL validation, add focused verification when authorized, and complete browser acceptance.
 
-## Current implementation slice â published homepage selection
+## Current implementation slice Ã¢ÂÂ published homepage selection
 
 - In progress on `core/C25-homepage`, based on the site identity branch.
 - Adds an owner setting to select a published page as the public `/` page. The configured homepage remains the ordinary page at `/p/{slug}` as well, with its canonical URL pointing to `/` when rendered at the root.
@@ -126,7 +126,7 @@
 10. Continue Core implementation in dependency order using the blueprint. Do not resume separate plugins, theme collections, release-server, or live-site work unless the user expands scope.
 11. Record actual changes, verification, blockers, and the next action here after each work slice.
 
-## Current implementation slice â manifest-declared cPanel capabilities
+## Current implementation slice Ã¢ÂÂ manifest-declared cPanel capabilities
 
 - In progress on `core/C26-manifest-capabilities`, based on homepage branch `core/C25-homepage`.
 - Adds optional `cpanel_capabilities` to plugin manifests. Missing means no cPanel access; malformed, duplicate, or unknown capability declarations are rejected.
@@ -135,7 +135,7 @@
 - A migration stores the grant scope hash. Existing grants without that hash are ineffective until explicitly granted again.
 - Implementation revision [f6ec3cc](https://github.com/parmtech/84pad-CMS/commit/f6ec3cc7eab55bb32b8d7a0520c8934869816520) passed [PHP 8.3/8.4 CI #40424902320](https://github.com/parmtech/84pad-CMS/actions/runs/40424902320). PHP 8.3 ran the existing suite: 83 passed, 1 skipped (344 assertions). No new manifest-scope tests were added, and no staging-package result is recorded. Browser and maintainer review remain outstanding.
 
-## Current implementation slice â source-only Core restore
+## Current implementation slice Ã¢ÂÂ source-only Core restore
 
 - In draft PR #31 on `core/C27-source-restore`, based on `core/C26-manifest-capabilities` (PR #30).
 - Extends the private Core source snapshot command with an operator-confirmed `--restore` operation requiring an independently recorded SHA-256 digest. It creates and verifies a pre-restore source snapshot, enters Laravel maintenance mode, stages and verifies the selected files, then replaces them. Failed replacement triggers automatic source recovery; if recovery is incomplete, the command leaves the application in maintenance mode and reports the recovery snapshot location and digest.
@@ -143,12 +143,12 @@
 - Tightened snapshot path validation and updated `CORE-UPDATES.md`, `CORE-BLUEPRINT.md`, and the README to document the behavior and limitations. GPL-3.0-or-later was selected by the owner and is already recorded in `LICENSE` and Composer metadata on the base branch.
 - PHP 8.3/8.4 CI passed on revision [8bbadc3](https://github.com/parmtech/84pad-CMS/commit/8bbadc3e282bedcece6d3c287820d83c7ae96d1d): [workflow run #40426164963](https://github.com/parmtech/84pad-CMS/actions/runs/40426164963). GitHub reported only Node 20 and Ubuntu runner deprecation notices. No tests were added or run locally. No staging-package result is recorded. Focused restore acceptance and maintainer review remain outstanding.
 
-## Separate Core installer-hardening work â C20
+## Separate Core installer-hardening work Ã¢ÂÂ C20
 
-- Draft PR #25 (`core/C20-preflight-hardening`) targets `core/C20-host-setup-wizard`; it is outside the C23âC27 feature stack and remains unmerged.
+- Draft PR #25 (`core/C20-preflight-hardening`) targets `core/C20-host-setup-wizard`; it is outside the C23Ã¢ÂÂC27 feature stack and remains unmerged.
 - Latest recorded PHP 8.3/8.4 run [#40071555055](https://github.com/parmtech/84pad-CMS/actions/runs/40071555055) failed before either job started. GitHub's job annotations report an account payment/spending-limit restriction; this is an execution blocker, not evidence of a code failure. Retry after the account restriction is resolved and review actual job output.
 
-## Pending owner decision â plugin schema contract
+## Pending owner decision Ã¢ÂÂ plugin schema contract
 
 - The current implementation and [PLUGIN-SCHEMA.md](PLUGIN-SCHEMA.md) support explicit create-only table additions and reject changes to previously applied definitions. They do not alter columns, delete schema, or roll back MySQL DDL.
 - The owner was asked to choose whether first-release plugins may create only new tables or may also add columns to existing plugin tables. Do not extend this contract until the owner replies; this decision affects plugin upgrade compatibility and recovery behavior.
