@@ -92,6 +92,7 @@ final class EncryptedSiteBackup
             $this->writeAll($fp, self::MAGIC.$header);
             $this->push($fp, $state, 'H'.json_encode([
                 'format' => '84pad-site-backup-v1', 'created_utc' => gmdate('c'),
+                'database_driver' => DB::connection()->getDriverName(),
             ], JSON_THROW_ON_ERROR));
             $stats = ['files' => 0, 'bytes' => 0, 'tables' => 0, 'rows' => 0];
             $this->exportDatabase($fp, $state, $stats);
@@ -117,25 +118,25 @@ final class EncryptedSiteBackup
         }
     }
 
-    /** Authenticated, read-only verification, without SQL execution or file extraction. */
-    public function verify(string $path): bool
+    /** @return array{files:int,bytes:int,tables:int,rows:int,created_utc:?string,database_driver:?string}|null */
+    public function inspect(string $path): ?array
     {
         if (! is_file($path) || is_link($path) || ! is_readable($path)) {
-            return false;
+            return null;
         }
         try {
             $key = $this->key();
             $fp = @fopen($path, 'rb');
             if ($fp === false) {
-                return false;
+                return null;
             }
             try {
                 if ($this->readExact($fp, strlen(self::MAGIC)) !== self::MAGIC) {
-                    return false;
+                    return null;
                 }
                 $header = $this->readExact($fp, SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES);
                 if ($header === false) {
-                    return false;
+                    return null;
                 }
                 $state = sodium_crypto_secretstream_xchacha20poly1305_init_pull($header, $key);
                 $stats = ['files' => 0, 'bytes' => 0, 'tables' => 0, 'rows' => 0];
@@ -143,26 +144,27 @@ final class EncryptedSiteBackup
                 $tableOpen = false;
                 $file = null;
                 $seen = [];
+                $metadata = [];
                 while (true) {
                     $len = $this->readExact($fp, 4);
                     if ($len === false) {
-                        return false;
+                        return null;
                     }
                     $size = unpack('Nsize', $len)['size'];
                     if ($size < 18 || $size > self::MAX_RECORD + 32) {
-                        return false;
+                        return null;
                     }
                     $cipher = $this->readExact($fp, $size);
                     if ($cipher === false) {
-                        return false;
+                        return null;
                     }
                     $decrypted = sodium_crypto_secretstream_xchacha20poly1305_pull($state, $cipher);
                     if ($decrypted === false) {
-                        return false;
+                        return null;
                     }
                     [$record, $tag] = $decrypted;
                     if ($record === '') {
-                        return false;
+                        return null;
                     }
                     $type = $record[0];
                     $payload = substr($record, 1);
@@ -170,8 +172,16 @@ final class EncryptedSiteBackup
                         $meta = $type === 'H' ? json_decode($payload, true) : null;
                         if (! is_array($meta) || ($meta['format'] ?? null) !== '84pad-site-backup-v1'
                             || $tag !== SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE) {
-                            return false;
+                            return null;
                         }
+                        $driver = $meta['database_driver'] ?? null;
+                        if ($driver !== null && ! in_array($driver, ['sqlite', 'mysql'], true)) {
+                            return null;
+                        }
+                        $metadata = [
+                            'created_utc' => is_string($meta['created_utc'] ?? null) ? $meta['created_utc'] : null,
+                            'database_driver' => $driver,
+                        ];
                         $started = true;
                         continue;
                     }
@@ -180,19 +190,19 @@ final class EncryptedSiteBackup
                         if (! is_array($data) || ! is_string($data['name'] ?? null)
                             || ! preg_match('/^[A-Za-z0-9_]+$/D', $data['name'])
                             || ! is_string($data['create'] ?? null) || $data['create'] === '') {
-                            return false;
+                            return null;
                         }
                         $tableOpen = true;
                         $stats['tables']++;
                     } elseif ($type === 'R' && $tableOpen) {
                         $data = json_decode($payload, true);
                         if (! is_array($data) || $data === []) {
-                            return false;
+                            return null;
                         }
                         foreach ($data as $column => $value) {
                             if (! is_string($column)
                                 || ($value !== null && (! is_string($value) || base64_decode($value, true) === false))) {
-                                return false;
+                                return null;
                             }
                         }
                         $stats['rows']++;
@@ -203,7 +213,7 @@ final class EncryptedSiteBackup
                         if (! is_array($data) || ! is_string($data['path'] ?? null)
                             || ! $this->safePath($data['path']) || isset($seen[$data['path']])
                             || ! is_int($data['size'] ?? null) || $data['size'] < 0) {
-                            return false;
+                            return null;
                         }
                         $seen[$data['path']] = true;
                         $file = ['size' => $data['size'], 'received' => 0, 'hash' => hash_init('sha256')];
@@ -211,38 +221,47 @@ final class EncryptedSiteBackup
                         $file['received'] += strlen($payload);
                         $stats['bytes'] += strlen($payload);
                         if ($file['received'] > $file['size'] || $stats['bytes'] > self::MAX_BYTES) {
-                            return false;
+                            return null;
                         }
                         hash_update($file['hash'], $payload);
                     } elseif ($type === 'X' && $file !== null) {
                         if ($file['received'] !== $file['size']
                             || ! preg_match('/^[a-f0-9]{64}$/D', $payload)
                             || ! hash_equals($payload, hash_final($file['hash']))) {
-                            return false;
+                            return null;
                         }
                         $file = null;
                         $stats['files']++;
                         if ($stats['files'] > self::MAX_FILES) {
-                            return false;
+                            return null;
                         }
                     } elseif ($type === 'Z' && ! $tableOpen && $file === null) {
-                        return json_decode($payload, true) === $stats
-                            && $stats['files'] > 0
-                            && $tag === SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL
-                            && fgetc($fp) === false;
+                        if (json_decode($payload, true) !== $stats
+                            || $stats['files'] === 0
+                            || $tag !== SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL
+                            || fgetc($fp) !== false) {
+                            return null;
+                        }
+                        return $stats + $metadata;
                     } else {
-                        return false;
+                        return null;
                     }
                     if ($tag !== SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE) {
-                        return false;
+                        return null;
                     }
                 }
             } finally {
                 fclose($fp);
             }
         } catch (Throwable) {
-            return false;
+            return null;
         }
+    }
+
+    /** Authenticated read-only verification, without SQL execution or file extraction. */
+    public function verify(string $path): bool
+    {
+        return $this->inspect($path) !== null;
     }
 
     private function exportDatabase($fp, string &$state, array &$stats): void
