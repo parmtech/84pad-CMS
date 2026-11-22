@@ -27,7 +27,7 @@ Route::middleware(['auth','auth.session'])->group(function (): void {
         Route::get('/', [PageController::class, 'index'])->name('index');
         Route::get('/create', [PageController::class, 'create'])->name('create');
         Route::get('/trash', [PageController::class, 'trash'])->name('trash');
-        Route::post('/trash/{page}/restore', [PageController::class, 'restore'])->middleware('throttle:20,1')->name('restore');
+        Route::post('/trash/{page}/restore', [PageController::class, 'restore'])->middleware('throttle:20,1')->whereNumber('page')->name('restore');
         Route::post('/', [PageController::class, 'store'])->middleware('throttle:20,1')->name('store');
         Route::get('/{page}/edit', [PageController::class, 'edit'])->name('edit');
         Route::get('/{page}/preview', [PageController::class, 'preview'])->name('preview');
