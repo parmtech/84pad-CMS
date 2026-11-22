@@ -2,6 +2,9 @@
 
 return [
     'core_version' => '0.1.0',
+    // Offline-recoverable 32-byte Sodium secretstream key, base64-encoded.
+    // Never put it on the command line, in Git, or inside a log.
+    'backup_key' => env('PAD_BACKUP_KEY', ''),
     // 128 MiB ZIP, 512 MiB extracted; shared hosting PHP upload settings must match.
     'plugin_zip_max_bytes' => 134217728,
     'plugin_extracted_max_bytes' => 536870912,

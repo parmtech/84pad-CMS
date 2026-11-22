@@ -61,7 +61,22 @@ jobs:
         run: php artisan migrate --force --no-interaction
 
       - name: Run PHPUnit feature and unit tests
-        run: php artisan test --no-ansi
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          php artisan test --no-ansi 2>&1 | tee /tmp/84pad-phpunit.log
+          result=$?
+          set -e
+          if [ "$result" -ne 0 ]; then
+            python3 - <<'PY'
+          from pathlib import Path
+          tail = '\n'.join(Path('/tmp/84pad-phpunit.log').read_text(errors='replace').splitlines()[-70:])
+          message = tail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+          print('::error title=PHPUnit regression failure::' + message)
+          PY
+          fi
+          exit "$result"
 
       - name: Check guided tour JavaScript syntax
         run: node --check public/js/84pad-tour.js

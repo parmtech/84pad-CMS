@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Page extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['title', 'slug', 'body', 'status', 'published_at', 'created_by'];
 
     protected function casts(): array

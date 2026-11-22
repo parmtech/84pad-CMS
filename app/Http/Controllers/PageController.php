@@ -7,6 +7,7 @@ use App\Support\Settings\CoreSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -31,6 +32,13 @@ class PageController extends Controller
     public function index(): View
     {
         return view('pages.index', ['pages' => Page::query()->latest('updated_at')->paginate(20)]);
+    }
+
+    public function trash(): View
+    {
+        return view('pages.trash', [
+            'pages' => Page::onlyTrashed()->orderByDesc('deleted_at')->paginate(20),
+        ]);
     }
 
     public function create(): View
@@ -77,6 +85,31 @@ class PageController extends Controller
         return redirect()->route('pages.edit', $page)->with('notice', $page->status === 'published' ? 'Page published.' : 'Page returned to draft.');
     }
 
+    public function destroy(Page $page): RedirectResponse
+    {
+        DB::transaction(function () use ($page): void {
+            DB::table('core_settings')
+                ->where('key', 'site.homepage_page_id')
+                ->where('value', (string) $page->id)
+                ->delete();
+
+            $page->delete();
+        });
+
+        return redirect()->route('pages.index')->with('notice', 'Page moved to trash.');
+    }
+
+    public function restore(int $page): RedirectResponse
+    {
+        $trashed = Page::onlyTrashed()->findOrFail($page);
+        // Recovery never makes a previously published page public automatically.
+        $trashed->status = 'draft';
+        $trashed->published_at = null;
+        $trashed->restore();
+
+        return redirect()->route('pages.edit', $trashed)->with('notice', 'Page restored as a draft.');
+    }
+
     public function show(string $slug, CoreSettings $settings): View
     {
         $page = Page::query()->where('slug', $slug)->where('status', 'published')->firstOrFail();
@@ -92,9 +125,10 @@ class PageController extends Controller
             'body' => ['nullable', 'string', 'max:1000000'],
         ]);
 
+        // Editing a page without an explicit slug must not silently break its public URL.
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::lower($data['slug'])
-            : Str::slug($data['title']);
+            : ($page?->slug ?? Str::slug($data['title']));
         $data['body'] ??= '';
 
         validator($data, ['slug' => ['required', Rule::unique('pages', 'slug')->ignore($page?->id)]])->validate();

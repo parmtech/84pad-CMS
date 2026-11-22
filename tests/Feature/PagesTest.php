@@ -96,6 +96,39 @@ class PagesTest extends TestCase
         $this->assertDatabaseHas('pages', ['id' => $page->id, 'title' => 'About v2', 'slug' => 'about']);
     }
 
+    public function test_blank_slug_on_edit_preserves_the_existing_published_url(): void
+    {
+        $admin = $this->userWithRole('admin');
+        $page = $this->makePage($admin, [
+            'title' => 'Original title',
+            'slug' => 'stable-url',
+            'body' => 'Original content',
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('pages.update', $page), [
+                'title' => 'Updated title',
+                'slug' => '',
+                'body' => 'Updated content',
+            ])
+            ->assertRedirect(route('pages.edit', $page))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('pages', [
+            'id' => $page->id,
+            'title' => 'Updated title',
+            'slug' => 'stable-url',
+            'status' => 'published',
+        ]);
+        $this->get('/p/stable-url')
+            ->assertOk()
+            ->assertSee('Updated title')
+            ->assertSee('Updated content');
+        $this->get('/p/updated-title')->assertNotFound();
+    }
+
     public function test_update_cannot_publish_through_the_status_field(): void
     {
         $admin = $this->userWithRole('admin');

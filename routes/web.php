@@ -26,11 +26,14 @@ Route::middleware(['auth','auth.session'])->group(function (): void {
     Route::middleware('can:core.manage-content')->prefix('/dashboard/pages')->name('pages.')->group(function (): void {
         Route::get('/', [PageController::class, 'index'])->name('index');
         Route::get('/create', [PageController::class, 'create'])->name('create');
+        Route::get('/trash', [PageController::class, 'trash'])->name('trash');
+        Route::post('/trash/{page}/restore', [PageController::class, 'restore'])->middleware('throttle:20,1')->whereNumber('page')->name('restore');
         Route::post('/', [PageController::class, 'store'])->middleware('throttle:20,1')->name('store');
         Route::get('/{page}/edit', [PageController::class, 'edit'])->name('edit');
         Route::get('/{page}/preview', [PageController::class, 'preview'])->name('preview');
         Route::put('/{page}', [PageController::class, 'update'])->middleware('throttle:30,1')->name('update');
         Route::patch('/{page}/publish', [PageController::class, 'publish'])->middleware('throttle:20,1')->name('publish');
+        Route::delete('/{page}', [PageController::class, 'destroy'])->middleware('throttle:20,1')->name('destroy');
     });
     Route::get('/dashboard/settings', [CoreSettingsController::class, 'show'])->middleware('can:core.manage-security')->name('settings.show');
     Route::post('/dashboard/settings/site', [CoreSettingsController::class, 'saveSite'])->middleware(['can:core.manage-security','throttle:10,1'])->name('settings.site');
