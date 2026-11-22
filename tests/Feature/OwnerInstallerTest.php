@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Console\Commands\InstallCore;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
 
@@ -36,6 +37,28 @@ class OwnerInstallerTest extends TestCase
 
         $this->assertDatabaseCount('users', 1);
         $this->assertDatabaseCount('core_installations', 1);
+    }
+
+    public function test_existing_installation_is_rejected_before_migrations(): void
+    {
+        DB::table('core_installations')->insert([
+            'id' => 1,
+            'owner_user_id' => null,
+            'created_at' => now(),
+        ]);
+
+        Config::set('app.key', 'base64:'.base64_encode(str_repeat('K', 32)));
+
+        $command = Mockery::mock(InstallCore::class)->makePartial();
+        $command->shouldReceive('call')->once()
+            ->with('84pad:doctor')->andReturn(0);
+        $command->shouldReceive('warn')->once()
+            ->with('Already installed or owner exists; no changes made.');
+
+        // Only the doctor call is expected: a migrate call fails this mock.
+        $this->assertSame(1, $command->handle());
+        $this->assertDatabaseCount('core_installations', 1);
+        $this->assertDatabaseCount('users', 0);
     }
 
     public function test_failed_migration_exit_status_does_not_start_owner_creation(): void
