@@ -122,6 +122,35 @@ final class EncryptedSiteBackupTest extends TestCase
         }
     }
 
+    public function test_custom_destination_inside_exported_site_files_is_refused(): void
+    {
+        [, $root] = $this->fixture();
+
+        foreach (['plugins/site-backups', 'vendor/site-backups', 'storage/app/public/site-backups'] as $relative) {
+            $destination = $root.'/'.$relative;
+            $backup = new EncryptedSiteBackup($root, $destination);
+
+            try {
+                $backup->create();
+                $this->fail('A backup must not include its own growing output: '.$relative);
+            } catch (RuntimeException $e) {
+                $this->assertStringContainsString('overlaps exported site files', $e->getMessage());
+            }
+            $this->assertSame([], glob($destination.'/*.padbackup*') ?: []);
+        }
+    }
+
+    public function test_excluded_private_backup_folder_is_a_safe_destination(): void
+    {
+        [, $root] = $this->fixture();
+        $backup = new EncryptedSiteBackup($root, $root.'/storage/app/private/site-backups');
+
+        $result = $backup->create();
+
+        $this->assertTrue($backup->verify($result['path']));
+        $this->assertGreaterThan(0, $result['files']);
+    }
+
     public function test_production_backup_requires_maintenance_mode(): void
     {
         if (file_exists(storage_path('framework/down')) || is_link(storage_path('framework/down'))) {
